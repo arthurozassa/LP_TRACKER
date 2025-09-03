@@ -1,12 +1,20 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Network, Search, Wallet, Loader2 } from 'lucide-react';
+import { Network, Search, Wallet, Loader2, BarChart3, TrendingUp } from 'lucide-react';
 import MetricsCards from '../components/dashboard/MetricsCards';
 import ProtocolCard from '../components/dashboard/ProtocolCard';
 import PositionCard from '../components/dashboard/PositionCard';
+import { 
+  PerformanceChart, 
+  HodlComparison, 
+  RiskMetrics, 
+  YieldOptimizer, 
+  SmartAlerts 
+} from '../components/analytics';
 import { ScanResults, ChainType, LoadingState, DashboardMetrics, ProtocolDistribution } from '../types';
 import { getMockDataByAddress } from '../mock-data';
+import { historicalDataService } from '../services/historicalData';
 import { detectChainType, isEthereumAddress, isSolanaAddress } from '../types';
 
 // Demo addresses
@@ -170,11 +178,18 @@ export default function Home() {
     failedProtocols: [],
     progress: 0
   });
+  
+  // Advanced analytics data
+  const [portfolioHistory, setPortfolioHistory] = useState<any[]>([]);
+  const [hodlHistory, setHodlHistory] = useState<any[]>([]);
+  const [marketBenchmarks, setMarketBenchmarks] = useState<any[]>([]);
+  const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
 
   const calculateMetrics = (results: ScanResults): DashboardMetrics => {
     const positions = Object.values(results.protocols).flatMap(p => p.positions || []);
     const inRangePositions = positions.filter(p => p.inRange).length;
     const activeProtocols = Object.keys(results.protocols).length;
+    const profitablePositions = positions.filter(p => (p.feesEarned || 0) > 0).length;
 
     return {
       totalValue: results.totalValue,
@@ -186,7 +201,28 @@ export default function Home() {
       totalYield24h: 0,
       totalYield7d: 0,
       totalYield30d: 0,
-      totalImpermanentLoss: 0
+      totalImpermanentLoss: 0,
+      
+      // Advanced Performance Metrics (mock values for now)
+      totalROI: 15.2, // Mock 15.2% ROI
+      hodlROI: 12.8, // Mock 12.8% HODL ROI
+      outperformance: 2.4, // LP outperforming HODL by 2.4%
+      sharpeRatio: 1.35, // Mock Sharpe ratio
+      maxDrawdown: -8.5, // Mock max drawdown
+      winRate: profitablePositions / positions.length * 100 || 0,
+      volatility: 25.6, // Mock annualized volatility
+      
+      // Time-based metrics (mock values)
+      valueChange1h: 0.5,
+      valueChange24h: -1.2,
+      valueChange7d: 3.8,
+      valueChange30d: 15.2,
+      
+      // Additional risk metrics
+      riskLevel: 'medium' as 'low' | 'medium' | 'high',
+      correlationETH: 0.75, // Mock correlation with ETH
+      correlationBTC: 0.45, // Mock correlation with BTC
+      beta: 1.2 // Mock beta (market sensitivity)
     };
   };
 
@@ -199,6 +235,82 @@ export default function Home() {
       color: `hsl(${Math.random() * 360}, 70%, 50%)`
     }));
   };
+
+  // Generate mock historical data for development
+  const generateMockPortfolioHistory = useCallback(() => {
+    const days = 30;
+    const history = [];
+    const baseValue = scanResults?.totalValue || 100000;
+    
+    for (let i = 0; i < days; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - i));
+      
+      const volatility = 0.03; // 3% daily volatility
+      const trend = i * 0.001; // Small upward trend
+      const randomChange = (Math.random() - 0.5) * 2 * volatility;
+      const value = baseValue * (1 + trend + randomChange);
+      
+      history.push({
+        timestamp: date.toISOString(),
+        value: value,
+        fees: (scanResults?.totalFeesEarned || 0) * (i / days),
+        apr: 15 + Math.sin(i * 0.1) * 5, // Varying APR
+        impermanentLoss: Math.random() * 2 - 1
+      });
+    }
+    
+    return history;
+  }, [scanResults?.totalValue, scanResults?.totalFeesEarned]);
+
+  const generateMockHodlHistory = useCallback(() => {
+    const days = 30;
+    const history = [];
+    const baseValue = scanResults?.totalValue || 100000;
+    
+    for (let i = 0; i < days; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - i));
+      
+      // HODL follows market more closely
+      const marketChange = Math.sin(i * 0.15) * 0.02 + i * 0.0005;
+      const value = baseValue * (1 + marketChange);
+      
+      history.push({
+        timestamp: date.toISOString(),
+        value: value,
+        hodlValue: value
+      });
+    }
+    
+    return history;
+  }, [scanResults?.totalValue]);
+
+  // Load advanced analytics data
+  const loadAdvancedAnalytics = useCallback(async (results: ScanResults) => {
+    try {
+      const positions = Object.values(results.protocols).flatMap(p => p.positions || []);
+      
+      // Calculate portfolio history (30 days)
+      const portfolioData = await historicalDataService.calculatePortfolioHistory(positions, 30);
+      setPortfolioHistory(portfolioData);
+      
+      // Calculate HODL comparison
+      const hodlData = await historicalDataService.calculateHodlComparison(positions, 30);
+      setHodlHistory(hodlData);
+      
+      // Get market benchmarks
+      const benchmarks = await historicalDataService.getMarketBenchmarks(30);
+      setMarketBenchmarks(benchmarks);
+      
+    } catch (error) {
+      console.error('Error loading advanced analytics:', error);
+      // Generate mock data for development
+      setPortfolioHistory(generateMockPortfolioHistory());
+      setHodlHistory(generateMockHodlHistory());
+      setMarketBenchmarks([]);
+    }
+  }, [generateMockPortfolioHistory, generateMockHodlHistory]);
 
   const handleScan = useCallback(async (address: string, chain: ChainType) => {
     setIsLoading(true);
@@ -267,6 +379,9 @@ export default function Home() {
         };
         
         setScanResults(newResults as ScanResults);
+        
+        // Load advanced analytics data
+        await loadAdvancedAnalytics(newResults as ScanResults);
       } else {
         // Generate empty results for unknown addresses
         setScanResults({
@@ -291,7 +406,7 @@ export default function Home() {
         progress: 100
       });
     }
-  }, []);
+  }, [loadAdvancedAnalytics]);
 
   const metrics = scanResults ? calculateMetrics(scanResults) : null;
   const protocolDistribution = scanResults ? getProtocolDistribution(scanResults) : [];
@@ -340,6 +455,70 @@ export default function Home() {
                       }}
                     />
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Analytics Toggle */}
+            {allPositions.length > 0 && (
+              <div className="text-center">
+                <button
+                  onClick={() => setShowAdvancedAnalytics(!showAdvancedAnalytics)}
+                  className="crypto-button text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 mx-auto"
+                >
+                  <TrendingUp className="h-5 w-5" />
+                  <span>{showAdvancedAnalytics ? 'Hide' : 'Show'} Advanced Analytics</span>
+                </button>
+              </div>
+            )}
+
+            {/* Advanced Analytics Section */}
+            {showAdvancedAnalytics && allPositions.length > 0 && (
+              <div className="space-y-6">
+                {/* Performance Chart */}
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center space-x-2">
+                    <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6" />
+                    <span>Portfolio Performance</span>
+                  </h2>
+                  <PerformanceChart 
+                    portfolioData={portfolioHistory}
+                    hodlData={hodlHistory}
+                    benchmarkData={Array.isArray(marketBenchmarks) ? {} : marketBenchmarks}
+                  />
+                </div>
+
+                {/* HODL Comparison & Risk Metrics */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                    <HodlComparison 
+                      portfolioHistory={portfolioHistory}
+                      hodlHistory={hodlHistory}
+                      positions={allPositions}
+                    />
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                    <RiskMetrics 
+                      portfolioHistory={portfolioHistory}
+                      positions={allPositions}
+                    />
+                  </div>
+                </div>
+
+                {/* Yield Optimizer & Smart Alerts */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                    <YieldOptimizer 
+                      positions={allPositions}
+                      currentPortfolioValue={scanResults.totalValue}
+                    />
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                    <SmartAlerts 
+                      positions={allPositions}
+                      portfolioHistory={portfolioHistory}
+                    />
+                  </div>
                 </div>
               </div>
             )}

@@ -116,6 +116,27 @@ export interface DashboardMetrics {
   totalYield7d: number;
   totalYield30d: number;
   totalImpermanentLoss: number;
+  
+  // Advanced Performance Metrics
+  totalROI: number;                    // Total Return on Investment
+  hodlROI: number;                     // HODL strategy ROI for comparison
+  outperformance: number;              // LP vs HODL performance difference
+  sharpeRatio: number;                 // Risk-adjusted return
+  maxDrawdown: number;                 // Maximum peak-to-valley decline
+  winRate: number;                     // Percentage of profitable positions
+  volatility: number;                  // Portfolio volatility (annualized)
+  
+  // Time-based metrics
+  valueChange1h: number;
+  valueChange24h: number;
+  valueChange7d: number;
+  valueChange30d: number;
+  
+  // Risk metrics
+  riskLevel: 'low' | 'medium' | 'high' | 'extreme';
+  correlationETH: number;              // Correlation with ETH price
+  correlationBTC: number;              // Correlation with BTC price
+  beta: number;                        // Portfolio beta vs market
 }
 
 // Chart Data Types
@@ -130,6 +151,108 @@ export interface TimeSeriesDataPoint {
   value: number;
   fees?: number;
   apr?: number;
+  impermanentLoss?: number;
+  hodlValue?: number;
+  volume?: number;
+  price?: number;
+}
+
+// Advanced Analytics Types
+export interface HistoricalData {
+  portfolio: TimeSeriesDataPoint[];
+  hodlComparison: TimeSeriesDataPoint[];
+  marketBenchmarks: {
+    eth: TimeSeriesDataPoint[];
+    btc: TimeSeriesDataPoint[];
+    sol?: TimeSeriesDataPoint[];
+  };
+  protocols: Record<string, TimeSeriesDataPoint[]>;
+}
+
+export interface PerformanceMetrics {
+  roi: number;
+  apr: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  volatility: number;
+  beta: number;
+  alpha: number;
+  winRate: number;
+  profitFactor: number;
+  calmarRatio: number;
+}
+
+export interface RiskMetrics {
+  var95: number;                       // Value at Risk (95%)
+  var99: number;                       // Value at Risk (99%)
+  expectedShortfall: number;           // Conditional VaR
+  downsideDeviation: number;           // Downside risk
+  sortinoRatio: number;                // Downside-adjusted return
+  riskLevel: 'low' | 'medium' | 'high' | 'extreme';
+}
+
+export interface HodlComparison {
+  lpStrategy: {
+    value: number;
+    roi: number;
+    fees: number;
+    impermanentLoss: number;
+  };
+  hodlStrategy: {
+    value: number;
+    roi: number;
+    allocation: Record<string, number>; // Token allocations
+  };
+  outperformance: {
+    absolute: number;
+    percentage: number;
+    timeToBreakeven?: number;           // Days to outperform HODL
+  };
+}
+
+export interface MarketBenchmark {
+  asset: 'ETH' | 'BTC' | 'SOL' | 'SPY' | 'DXY';
+  symbol: string;
+  price: number;
+  change24h: number;
+  change7d: number;
+  change30d: number;
+  correlation: number;                 // Correlation with portfolio
+  beta: number;                        // Beta vs this benchmark
+}
+
+export interface YieldOptimization {
+  currentAPR: number;
+  suggestedActions: {
+    action: 'rebalance' | 'exit' | 'enter' | 'compound';
+    protocol: string;
+    pool: string;
+    expectedAPR: number;
+    risk: 'low' | 'medium' | 'high';
+    reasoning: string;
+    urgency: 'low' | 'medium' | 'high';
+  }[];
+  bestOpportunities: {
+    protocol: string;
+    pool: string;
+    apr: number;
+    tvl: number;
+    volume24h: number;
+    risk: 'low' | 'medium' | 'high';
+  }[];
+}
+
+export interface SmartAlert {
+  id: string;
+  type: 'range_exit' | 'rebalance' | 'yield_drop' | 'high_il' | 'opportunity' | 'risk_warning';
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+  message: string;
+  positionId?: string;
+  protocol?: string;
+  actionRequired: boolean;
+  createdAt: string;
+  dismissed: boolean;
 }
 
 export interface ProtocolDistribution extends ChartDataPoint {

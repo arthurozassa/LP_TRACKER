@@ -13,7 +13,28 @@ const exampleMetrics: DashboardMetrics = {
   totalYield24h: 2.1,
   totalYield7d: 8.3,
   totalYield30d: -1.2,
-  totalImpermanentLoss: -456.78
+  totalImpermanentLoss: -456.78,
+  
+  // Advanced Performance Metrics
+  totalROI: 15.2,
+  hodlROI: 12.8,
+  outperformance: 2.4,
+  sharpeRatio: 1.35,
+  maxDrawdown: -8.5,
+  winRate: 75.0,
+  volatility: 25.6,
+  
+  // Time-based metrics
+  valueChange1h: 0.5,
+  valueChange24h: -1.2,
+  valueChange7d: 3.8,
+  valueChange30d: 15.2,
+  
+  // Additional risk metrics
+  riskLevel: 'medium' as 'low' | 'medium' | 'high',
+  correlationETH: 0.75,
+  correlationBTC: 0.45,
+  beta: 1.2
 };
 
 const exampleDistribution: ProtocolDistributionData[] = [
