@@ -76,7 +76,7 @@ const SimpleSearchBar: React.FC<{
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Main Search Input */}
-      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl">
+      <div className="crypto-card border border-orange-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-orange-500/20 transition-all duration-300">
         <div className="flex flex-col space-y-3 sm:space-y-4">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
@@ -87,7 +87,7 @@ const SimpleSearchBar: React.FC<{
               value={address}
               onChange={handleAddressChange}
               placeholder="Enter wallet address..."
-              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-white/5 border border-white/20 rounded-lg sm:rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 crypto-card border border-orange-500/30 rounded-lg sm:rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:border-orange-400/50 transition-all duration-200 text-sm sm:text-base"
               disabled={isLoading}
             />
           </div>
@@ -120,7 +120,7 @@ const SimpleSearchBar: React.FC<{
           <button
             onClick={handleScan}
             disabled={isLoading || !detectedChain || !!error}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base"
+            className="w-full crypto-button disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base"
           >
             {isLoading ? (
               <>
@@ -138,7 +138,7 @@ const SimpleSearchBar: React.FC<{
       </div>
 
       {/* Demo Addresses */}
-      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl">
+      <div className="crypto-card border border-orange-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl">
         <h3 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Try Demo Addresses</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           {DEMO_ADDRESSES.map((demo, index) => (
@@ -146,7 +146,7 @@ const SimpleSearchBar: React.FC<{
               key={index}
               onClick={() => handleDemoClick(demo)}
               disabled={isLoading}
-              className="p-3 sm:p-4 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/20 rounded-lg sm:rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left touch-manipulation"
+              className="p-3 sm:p-4 crypto-card crypto-card-hover border border-orange-500/20 rounded-lg sm:rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left touch-manipulation hover:shadow-orange-500/10"
             >
               <div className="text-white font-medium text-xs sm:text-sm">{demo.label}</div>
               <div className="text-white/60 text-xs mt-1 sm:mt-0">{demo.description}</div>
@@ -298,11 +298,14 @@ export default function Home() {
   const allPositions = scanResults ? Object.values(scanResults.protocols).flatMap(p => p.positions || []) : [];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <main className="min-h-screen" style={{ 
+      background: 'linear-gradient(135deg, #0A0A0F 0%, #151520 25%, #1A1A28 50%, #0A0A0F 100%)',
+      backgroundAttachment: 'fixed'
+    }}>
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-2 sm:mb-4 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2 sm:mb-4 leading-tight crypto-text-gradient">
             Universal LP Position Tracker
           </h1>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/80 mb-4 sm:mb-6 lg:mb-8 max-w-4xl mx-auto px-2">

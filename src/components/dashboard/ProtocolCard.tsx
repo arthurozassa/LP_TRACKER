@@ -97,21 +97,22 @@ export const ProtocolCard: React.FC<ProtocolCardProps> = ({
 
   // Create gradient style based on protocol color
   const gradientStyle = {
-    background: `linear-gradient(135deg, ${color}15, ${color}05)`,
-    borderImage: `linear-gradient(135deg, ${color}40, ${color}20) 1`,
+    background: `linear-gradient(135deg, ${color}20, rgba(245, 75, 0, 0.05))`,
+    borderImage: `linear-gradient(135deg, ${color}60, #F54B0040) 1`,
   };
 
   const hoverGradientStyle = {
-    background: `linear-gradient(135deg, ${color}25, ${color}10)`,
+    background: `linear-gradient(135deg, ${color}35, rgba(245, 75, 0, 0.10))`,
+    boxShadow: `0 8px 32px rgba(245, 75, 0, 0.2)`,
   };
 
   return (
     <div
       className={`
-        relative overflow-hidden rounded-lg sm:rounded-xl border border-white/20 
-        bg-white/10 backdrop-blur-md transition-all duration-300 ease-in-out
-        ${onClick ? 'cursor-pointer hover:shadow-lg hover:shadow-white/10 active:scale-[0.98] touch-manipulation' : ''}
-        ${isExpanded ? 'ring-2 ring-white/30' : ''}
+        relative overflow-hidden rounded-lg sm:rounded-xl border border-orange-500/30 
+        crypto-card backdrop-blur-md transition-all duration-300 ease-in-out
+        ${onClick ? 'cursor-pointer hover:shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] touch-manipulation animate-cryptoGlow' : ''}
+        ${isExpanded ? 'ring-2 ring-orange-500/50' : ''}
         ${isLoading ? 'animate-pulse' : ''}
       `}
       style={gradientStyle}

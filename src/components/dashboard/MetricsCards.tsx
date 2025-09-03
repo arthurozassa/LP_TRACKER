@@ -43,9 +43,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const getChangeColor = () => {
     switch (changeType) {
       case 'positive':
-        return 'text-green-400';
+        return 'text-green-400 profit-glow';
       case 'negative':
-        return 'text-red-400';
+        return 'text-red-400 loss-glow';
       default:
         return 'text-gray-400';
     }
@@ -64,10 +64,10 @@ const MetricCard: React.FC<MetricCardProps> = ({
 
   return (
     <div className="relative group animate-fadeIn">
-      {/* Glassmorphism card */}
-      <div className="relative bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/15">
-        {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-xl pointer-events-none" />
+      {/* Crypto-style glassmorphism card */}
+      <div className="relative crypto-card crypto-card-hover p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:shadow-orange-500/20">
+        {/* Crypto gradient overlay */}
+        <div className="absolute inset-0 opacity-10 rounded-xl pointer-events-none crypto-gradient-primary" />
         
         <div className="relative z-10">
           <div className="flex items-center justify-between">
@@ -94,8 +94,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
             </div>
             
             <div className="ml-4">
-              <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
-                <div className="text-white/80">
+              <div className="p-3 crypto-card rounded-lg backdrop-blur-sm border border-orange-500/30">
+                <div className="text-orange-400">
                   {icon}
                 </div>
               </div>
