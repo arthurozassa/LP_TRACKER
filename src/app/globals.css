@@ -1,144 +1,224 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Crypto/DeFi Color Variables */
+/* Token Terminal Inspired Color Variables */
 :root {
-  /* Crypto Primary Colors */
-  --crypto-orange: #F54B00;
-  --crypto-cyan: #00D4FF;
-  --crypto-green: #00FF88;
-  --crypto-red: #FF3366;
-  --crypto-purple: #8B5CF6;
-  --crypto-yellow: #FFD700;
+  /* Light Mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #f5f5f5;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
   
-  /* Dark Backgrounds */
-  --bg-dark-primary: #0A0A0F;
-  --bg-dark-secondary: #151520;
-  --bg-card-dark: #1A1A28;
-  --bg-glass-crypto: rgba(245, 75, 0, 0.05);
+  /* Dark Mode */
+  --bg-dark-primary: #0d1117;
+  --bg-dark-secondary: #161b22;
+  --bg-dark-tertiary: #21262d;
+  --bg-dark-card: #161b22;
+  --bg-dark-card-hover: #21262d;
   
-  /* Crypto Gradients */
-  --gradient-crypto-primary: linear-gradient(135deg, #F54B00 0%, #FF3366 100%);
-  --gradient-crypto-secondary: linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%);
-  --gradient-crypto-success: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);
-  --gradient-crypto-warning: linear-gradient(135deg, #FFD700 0%, #F54B00 100%);
+  /* Text Colors */
+  --text-primary: #24292f;
+  --text-secondary: #656d76;
+  --text-tertiary: #8b949e;
+  --text-dark-primary: #f0f6fc;
+  --text-dark-secondary: #8b949e;
+  --text-dark-tertiary: #6e7681;
   
-  /* Glass Effects */
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-hover: rgba(255, 255, 255, 0.08);
+  /* Accent Colors */
+  --accent-blue: #0969da;
+  --accent-green: #1a7f37;
+  --accent-red: #cf222e;
+  --accent-orange: #fb8500;
+  --accent-purple: #8250df;
+  --accent-yellow: #bf8700;
+  
+  /* Borders */
+  --border-light: #d0d7de;
+  --border-dark: #30363d;
+  --border-hover-light: #8c959f;
+  --border-hover-dark: #484f58;
+  
+  /* Shadows */
+  --shadow-light: 0 1px 3px rgba(16, 22, 26, 0.1), 0 1px 2px rgba(16, 22, 26, 0.2);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Base Typography */
 body {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-dark-primary);
-  color: #ffffff;
+  color: var(--text-dark-primary);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Crypto-specific utility classes */
+/* Professional utility classes */
 @layer components {
-  .crypto-card {
-    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl;
-    background: var(--bg-glass-crypto);
-    border: 1px solid var(--glass-border);
+  /* Cards */
+  .tt-card {
+    @apply bg-white/[0.03] border border-white/[0.08] rounded-lg;
+    box-shadow: var(--shadow-light);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
   
-  .crypto-card-hover {
-    @apply hover:bg-white/10 hover:border-white/20 transition-all duration-300;
-    background: var(--glass-hover);
+  .tt-card-hover {
+    @apply hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-200;
   }
   
-  .crypto-gradient-primary {
-    background: var(--gradient-crypto-primary);
+  .tt-card-light {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm;
   }
   
-  .crypto-gradient-secondary {
-    background: var(--gradient-crypto-secondary);
+  .tt-card-light-hover {
+    @apply hover:bg-gray-50 hover:border-gray-300 hover:shadow-md transition-all duration-200;
   }
   
-  .crypto-gradient-success {
-    background: var(--gradient-crypto-success);
+  /* Buttons */
+  .tt-button-primary {
+    @apply px-4 py-2 rounded-md font-medium text-white transition-all duration-200;
+    background: var(--accent-blue);
   }
   
-  .crypto-text-gradient {
-    background: var(--gradient-crypto-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .tt-button-primary:hover {
+    @apply transform -translate-y-px;
+    background: #0550ae;
+    box-shadow: var(--shadow-medium);
   }
   
-  .profit-glow {
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+  .tt-button-secondary {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200;
+    background: var(--bg-dark-tertiary);
+    color: var(--text-dark-primary);
+    border: 1px solid var(--border-dark);
   }
   
-  .loss-glow {
-    box-shadow: 0 0 20px rgba(255, 51, 102, 0.3);
+  .tt-button-secondary:hover {
+    background: var(--bg-dark-card-hover);
+    border-color: var(--border-hover-dark);
   }
   
-  .crypto-button {
-    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300;
-    background: var(--gradient-crypto-primary);
-    box-shadow: 0 4px 20px rgba(245, 75, 0, 0.3);
+  /* Text styles */
+  .tt-text-primary {
+    color: var(--text-dark-primary);
   }
   
-  .crypto-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(245, 75, 0, 0.5);
+  .tt-text-secondary {
+    color: var(--text-dark-secondary);
+  }
+  
+  .tt-text-tertiary {
+    color: var(--text-dark-tertiary);
+  }
+  
+  /* Gradients */
+  .tt-gradient-blue {
+    background: linear-gradient(135deg, #0969da 0%, #0550ae 100%);
+  }
+  
+  .tt-gradient-green {
+    background: linear-gradient(135deg, #1a7f37 0%, #116329 100%);
+  }
+  
+  .tt-gradient-red {
+    background: linear-gradient(135deg, #cf222e 0%, #a40e26 100%);
+  }
+  
+  /* Status indicators */
+  .tt-status-positive {
+    @apply text-green-500;
+    color: var(--accent-green);
+  }
+  
+  .tt-status-negative {
+    @apply text-red-500;
+    color: var(--accent-red);
+  }
+  
+  .tt-status-neutral {
+    @apply text-gray-400;
+    color: var(--text-dark-secondary);
+  }
+  
+  /* Layout */
+  .tt-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .tt-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  .tt-section {
+    @apply space-y-4;
+  }
+  
+  /* Typography */
+  .tt-heading-1 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
+    color: var(--text-dark-primary);
+  }
+  
+  .tt-heading-2 {
+    @apply text-xl md:text-2xl font-semibold tracking-tight;
+    color: var(--text-dark-primary);
+  }
+  
+  .tt-heading-3 {
+    @apply text-lg font-semibold;
+    color: var(--text-dark-primary);
+  }
+  
+  .tt-body {
+    @apply text-sm font-normal;
+    color: var(--text-dark-secondary);
+  }
+  
+  .tt-caption {
+    @apply text-xs font-normal;
+    color: var(--text-dark-tertiary);
+  }
+  
+  /* Loading states */
+  .tt-skeleton {
+    @apply bg-gray-200 animate-pulse rounded;
+    background: var(--bg-dark-tertiary);
+  }
+  
+  .tt-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 2s infinite;
   }
 }
 
-/* Custom animations for LP Tracker */
+/* Animations */
 @layer utilities {
   .animate-fadeIn {
-    animation: fadeIn 0.5s ease-out;
+    animation: fadeIn 0.3s ease-out;
   }
   
   .animate-slideUp {
-    animation: slideUp 0.5s ease-out;
+    animation: slideUp 0.3s ease-out;
   }
   
-  .animate-slideInLeft {
-    animation: slideInLeft 0.5s ease-out;
-  }
-  
-  .animate-slideInRight {
-    animation: slideInRight 0.5s ease-out;
-  }
-  
-  .animate-scale {
-    animation: scale 0.5s ease-out;
-  }
-  
-  .animate-flip {
-    animation: flip 0.6s ease-out;
-  }
-  
-  .animate-shake {
-    animation: shake 0.5s ease-out;
-  }
-  
-  .animate-shimmer {
-    animation: shimmer 2s ease-in-out infinite;
+  .animate-slideIn {
+    animation: slideIn 0.3s ease-out;
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -146,113 +226,60 @@ body {
   }
 }
 
-@keyframes slideInLeft {
+@keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-10px);
   }
   to {
     opacity: 1;
     transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes flip {
-  from {
-    opacity: 0;
-    transform: rotateY(-90deg);
-  }
-  to {
-    opacity: 1;
-    transform: rotateY(0);
-  }
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-4px);
-  }
-  75% {
-    transform: translateX(4px);
   }
 }
 
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-/* Crypto-specific animations */
-@keyframes cryptoGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(245, 75, 0, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(245, 75, 0, 0.6);
-  }
+/* Chart and data visualization */
+.tt-chart-container {
+  @apply relative overflow-hidden;
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-dark);
 }
 
-@keyframes profitPulse {
-  0%, 100% {
-    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
-  }
+.tt-metric-card {
+  @apply p-4 rounded-lg;
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-dark);
 }
 
-@keyframes lossShake {
-  0%, 100% {
-    transform: translateX(0);
-    box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
-  }
-  25%, 75% {
-    transform: translateX(-2px);
-    box-shadow: 0 0 15px rgba(255, 51, 102, 0.5);
-  }
-  50% {
-    transform: translateX(2px);
-    box-shadow: 0 0 20px rgba(255, 51, 102, 0.6);
-  }
+.tt-metric-card:hover {
+  background: var(--bg-dark-card-hover);
+  border-color: var(--border-hover-dark);
 }
 
-.animate-cryptoGlow {
-  animation: cryptoGlow 2s ease-in-out infinite;
+/* Custom scrollbar */
+.tt-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-dark) var(--bg-dark-secondary);
 }
 
-.animate-profitPulse {
-  animation: profitPulse 1.5s ease-in-out infinite;
+.tt-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.animate-lossShake {
-  animation: lossShake 0.6s ease-out;
+.tt-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-dark-secondary);
+}
+
+.tt-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-dark);
+  border-radius: 3px;
+}
+
+.tt-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover-dark);
 }

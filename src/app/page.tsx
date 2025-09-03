@@ -82,20 +82,20 @@ const SimpleSearchBar: React.FC<{
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
+    <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Main Search Input */}
-      <div className="crypto-card border border-orange-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-orange-500/20 transition-all duration-300">
-        <div className="flex flex-col space-y-3 sm:space-y-4">
+      <div className="tt-card tt-card-hover p-6">
+        <div className="flex flex-col space-y-4">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-              <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-white/60" />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Wallet className="h-5 w-5 tt-text-tertiary" />
             </div>
             <input
               type="text"
               value={address}
               onChange={handleAddressChange}
               placeholder="Enter wallet address..."
-              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 crypto-card border border-orange-500/30 rounded-lg sm:rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:border-orange-400/50 transition-all duration-200 text-sm sm:text-base"
+              className="w-full pl-12 pr-4 py-3 bg-white/[0.05] border border-white/[0.08] rounded-md tt-text-primary placeholder:tt-text-tertiary focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
               disabled={isLoading}
             />
           </div>
@@ -104,16 +104,16 @@ const SimpleSearchBar: React.FC<{
           {address && (
             <div className="flex items-center space-x-2">
               {detectedChain ? (
-                <div className="flex items-center space-x-2 text-green-400">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-xs sm:text-sm font-medium capitalize">
+                <div className="flex items-center space-x-2 tt-status-positive">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium capitalize">
                     {detectedChain} address detected
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2 text-red-400">
-                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <span className="text-xs sm:text-sm">Invalid address format</span>
+                <div className="flex items-center space-x-2 tt-status-negative">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-sm">Invalid address format</span>
                 </div>
               )}
             </div>
@@ -121,23 +121,23 @@ const SimpleSearchBar: React.FC<{
 
           {/* Error Message */}
           {error && (
-            <div className="text-red-400 text-xs sm:text-sm">{error}</div>
+            <div className="tt-status-negative text-sm">{error}</div>
           )}
 
           {/* Scan Button */}
           <button
             onClick={handleScan}
             disabled={isLoading || !detectedChain || !!error}
-            className="w-full crypto-button disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base"
+            className="w-full tt-button-primary disabled:opacity-50 disabled:cursor-not-allowed py-3 px-6 rounded-md transition-all duration-200 flex items-center justify-center space-x-2"
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
                 <span>Scanning All DEXs...</span>
               </>
             ) : (
               <>
-                <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Search className="h-5 w-5" />
                 <span>Scan All DEXs</span>
               </>
             )}
@@ -146,19 +146,19 @@ const SimpleSearchBar: React.FC<{
       </div>
 
       {/* Demo Addresses */}
-      <div className="crypto-card border border-orange-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl">
-        <h3 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Try Demo Addresses</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+      <div className="tt-card p-6">
+        <h3 className="tt-heading-3 mb-4">Try Demo Addresses</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {DEMO_ADDRESSES.map((demo, index) => (
             <button
               key={index}
               onClick={() => handleDemoClick(demo)}
               disabled={isLoading}
-              className="p-3 sm:p-4 crypto-card crypto-card-hover border border-orange-500/20 rounded-lg sm:rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left touch-manipulation hover:shadow-orange-500/10"
+              className="p-4 tt-card tt-card-hover transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
             >
-              <div className="text-white font-medium text-xs sm:text-sm">{demo.label}</div>
-              <div className="text-white/60 text-xs mt-1 sm:mt-0">{demo.description}</div>
-              <div className="text-white/40 text-xs font-mono mt-1 break-all sm:break-normal">
+              <div className="tt-text-primary font-medium text-sm">{demo.label}</div>
+              <div className="tt-text-secondary text-xs mt-1">{demo.description}</div>
+              <div className="tt-text-tertiary text-xs font-mono mt-1 break-all">
                 {formatAddress(demo.address)}
               </div>
             </button>
@@ -413,18 +413,15 @@ export default function Home() {
   const allPositions = scanResults ? Object.values(scanResults.protocols).flatMap(p => p.positions || []) : [];
 
   return (
-    <main className="min-h-screen" style={{ 
-      background: 'linear-gradient(135deg, #0A0A0F 0%, #151520 25%, #1A1A28 50%, #0A0A0F 100%)',
-      backgroundAttachment: 'fixed'
-    }}>
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+    <main className="min-h-screen bg-gray-900">
+      <div className="tt-container py-6 sm:py-8 lg:py-12">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2 sm:mb-4 leading-tight crypto-text-gradient">
-            Universal LP Position Tracker
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h1 className="tt-heading-1 mb-4">
+            LP Position Tracker
           </h1>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/80 mb-4 sm:mb-6 lg:mb-8 max-w-4xl mx-auto px-2">
-            Scan any wallet address to track liquidity provider positions across all major DEXs on Ethereum and Solana
+          <p className="tt-body max-w-3xl mx-auto text-lg">
+            Track liquidity provider positions across all major DEXs on Ethereum and Solana with institutional-grade analytics
           </p>
         </div>
 
@@ -435,7 +432,7 @@ export default function Home() {
 
         {/* Dashboard */}
         {scanResults && (
-          <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="tt-section">
             {/* Metrics Cards */}
             {metrics && (
               <MetricsCards metrics={metrics} loading={isLoading} />
@@ -443,9 +440,9 @@ export default function Home() {
 
             {/* Protocol Distribution */}
             {Object.keys(scanResults.protocols).length > 0 && (
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-4 sm:mb-6">Protocol Distribution</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+              <div className="tt-card p-6">
+                <h2 className="tt-heading-2 mb-6">Protocol Distribution</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
                   {Object.entries(scanResults.protocols).map(([name, protocolData]) => (
                     <ProtocolCard
                       key={protocolData.protocol.id}
@@ -464,7 +461,7 @@ export default function Home() {
               <div className="text-center">
                 <button
                   onClick={() => setShowAdvancedAnalytics(!showAdvancedAnalytics)}
-                  className="crypto-button text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 mx-auto"
+                  className="tt-button-primary py-3 px-6 rounded-md transition-all duration-200 flex items-center justify-center space-x-2 mx-auto"
                 >
                   <TrendingUp className="h-5 w-5" />
                   <span>{showAdvancedAnalytics ? 'Hide' : 'Show'} Advanced Analytics</span>
@@ -476,9 +473,9 @@ export default function Home() {
             {showAdvancedAnalytics && allPositions.length > 0 && (
               <div className="space-y-6">
                 {/* Performance Chart */}
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center space-x-2">
-                    <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6" />
+                <div className="tt-card p-6">
+                  <h2 className="tt-heading-2 mb-6 flex items-center space-x-2">
+                    <BarChart3 className="h-6 w-6" />
                     <span>Portfolio Performance</span>
                   </h2>
                   <PerformanceChart 
@@ -490,14 +487,14 @@ export default function Home() {
 
                 {/* HODL Comparison & Risk Metrics */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                  <div className="tt-card p-6">
                     <HodlComparison 
                       portfolioHistory={portfolioHistory}
                       hodlHistory={hodlHistory}
                       positions={allPositions}
                     />
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                  <div className="tt-card p-6">
                     <RiskMetrics 
                       portfolioHistory={portfolioHistory}
                       positions={allPositions}
@@ -507,13 +504,13 @@ export default function Home() {
 
                 {/* Yield Optimizer & Smart Alerts */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                  <div className="tt-card p-6">
                     <YieldOptimizer 
                       positions={allPositions}
                       currentPortfolioValue={scanResults.totalValue}
                     />
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                  <div className="tt-card p-6">
                     <SmartAlerts 
                       positions={allPositions}
                       portfolioHistory={portfolioHistory}
@@ -525,11 +522,11 @@ export default function Home() {
 
             {/* Positions List */}
             {allPositions.length > 0 && (
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-4 sm:mb-6">
+              <div className="tt-card p-6">
+                <h2 className="tt-heading-2 mb-6">
                   All Positions ({allPositions.length})
                 </h2>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                   {allPositions.map((position) => (
                     <PositionCard 
                       key={position.id} 
@@ -543,8 +540,8 @@ export default function Home() {
 
             {/* Empty State */}
             {allPositions.length === 0 && (
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center">
-                <div className="text-white/60 text-base sm:text-lg">
+              <div className="tt-card p-12 text-center">
+                <div className="tt-text-secondary text-lg">
                   No liquidity positions found for this address
                 </div>
               </div>
@@ -554,12 +551,12 @@ export default function Home() {
 
         {/* Welcome State */}
         {!scanResults && !isLoading && (
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-center">
-            <Network className="h-12 w-12 sm:h-16 sm:w-16 text-white/60 mx-auto mb-4 sm:mb-6" />
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3 sm:mb-4">
+          <div className="tt-card p-12 text-center">
+            <Network className="h-16 w-16 tt-text-tertiary mx-auto mb-6" />
+            <h2 className="tt-heading-2 mb-4">
               Ready to Track Your LP Positions
             </h2>
-            <p className="text-white/70 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto px-2">
+            <p className="tt-text-secondary max-w-2xl mx-auto">
               Enter a wallet address above to scan across all major DEXs and protocols. 
               We support Ethereum, Solana, and major L2 networks with real-time position tracking.
             </p>

@@ -43,11 +43,11 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const getChangeColor = () => {
     switch (changeType) {
       case 'positive':
-        return 'text-green-400 profit-glow';
+        return 'tt-status-positive';
       case 'negative':
-        return 'text-red-400 loss-glow';
+        return 'tt-status-negative';
       default:
-        return 'text-gray-400';
+        return 'tt-status-neutral';
     }
   };
 
@@ -63,48 +63,39 @@ const MetricCard: React.FC<MetricCardProps> = ({
       : value;
 
   return (
-    <div className="relative group animate-fadeIn">
-      {/* Crypto-style glassmorphism card */}
-      <div className="relative crypto-card crypto-card-hover p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:shadow-orange-500/20">
-        {/* Crypto gradient overlay */}
-        <div className="absolute inset-0 opacity-10 rounded-xl pointer-events-none crypto-gradient-primary" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-gray-300 text-sm font-medium mb-2">
-                {title}
-              </p>
-              
-              <div className="flex items-baseline space-x-2">
-                <h3 className="text-2xl font-bold text-white">
-                  {loading ? (
-                    <div className="h-8 w-24 bg-white/20 rounded animate-pulse" />
-                  ) : (
-                    displayValue
-                  )}
-                </h3>
-                
-                {change !== undefined && !loading && (
-                  <span className={`text-sm font-medium ${getChangeColor()}`}>
-                    {getChangePrefix()}{change.toFixed(2)}%
-                  </span>
-                )}
-              </div>
-            </div>
+    <div className="tt-card tt-card-hover animate-fadeIn">
+      <div className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <p className="tt-text-secondary text-sm font-medium mb-2">
+              {title}
+            </p>
             
-            <div className="ml-4">
-              <div className="p-3 crypto-card rounded-lg backdrop-blur-sm border border-orange-500/30">
-                <div className="text-orange-400">
-                  {icon}
-                </div>
+            <div className="flex items-baseline space-x-2">
+              <h3 className="text-2xl font-bold tt-text-primary">
+                {loading ? (
+                  <div className="h-8 w-24 tt-skeleton" />
+                ) : (
+                  displayValue
+                )}
+              </h3>
+              
+              {change !== undefined && !loading && (
+                <span className={`text-sm font-medium ${getChangeColor()}`}>
+                  {getChangePrefix()}{change.toFixed(2)}%
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="ml-4">
+            <div className="p-3 bg-white/[0.05] border border-white/[0.08] rounded-lg">
+              <div className="tt-text-secondary">
+                {icon}
               </div>
             </div>
           </div>
         </div>
-        
-        {/* Hover glow effect */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300 pointer-events-none" />
       </div>
     </div>
   );

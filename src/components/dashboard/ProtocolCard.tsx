@@ -95,68 +95,29 @@ export const ProtocolCard: React.FC<ProtocolCardProps> = ({
     }
   };
 
-  // Create gradient style based on protocol color
-  const gradientStyle = {
-    background: `linear-gradient(135deg, ${color}20, rgba(245, 75, 0, 0.05))`,
-    borderImage: `linear-gradient(135deg, ${color}60, #F54B0040) 1`,
-  };
-
-  const hoverGradientStyle = {
-    background: `linear-gradient(135deg, ${color}35, rgba(245, 75, 0, 0.10))`,
-    boxShadow: `0 8px 32px rgba(245, 75, 0, 0.2)`,
-  };
-
   return (
     <div
       className={`
-        relative overflow-hidden rounded-lg sm:rounded-xl border border-orange-500/30 
-        crypto-card backdrop-blur-md transition-all duration-300 ease-in-out
-        ${onClick ? 'cursor-pointer hover:shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] touch-manipulation animate-cryptoGlow' : ''}
-        ${isExpanded ? 'ring-2 ring-orange-500/50' : ''}
-        ${isLoading ? 'animate-pulse' : ''}
+        tt-card tt-card-hover transition-all duration-200
+        ${onClick ? 'cursor-pointer' : ''}
+        ${isExpanded ? 'ring-2 ring-blue-500/50' : ''}
+        ${isLoading ? 'tt-skeleton' : ''}
       `}
-      style={gradientStyle}
       onClick={handleClick}
-      onMouseEnter={(e) => {
-        if (onClick) {
-          e.currentTarget.style.background = hoverGradientStyle.background;
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = gradientStyle.background;
-      }}
     >
-      {/* Loading overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
-        </div>
-      )}
-
-      {/* Gradient accent border */}
-      <div
-        className="absolute inset-0 rounded-xl opacity-50"
-        style={{
-          background: `linear-gradient(135deg, ${color}30, transparent, ${color}15)`,
-          mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-          maskComposite: 'subtract',
-          padding: '1px',
-        }}
-      />
-
       {/* Content */}
-      <div className="relative z-20 p-3 sm:p-4 lg:p-6">
+      <div className="p-4">
         {/* Header */}
-        <div className="mb-3 sm:mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <span className="text-xl sm:text-2xl flex-shrink-0" role="img" aria-label={protocol.name}>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <span className="text-2xl flex-shrink-0" role="img" aria-label={protocol.name}>
               {emoji}
             </span>
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white truncate">
+              <h3 className="tt-heading-3 truncate">
                 {protocol.name}
               </h3>
-              <p className="text-xs sm:text-sm text-white/70 capitalize truncate">
+              <p className="tt-text-tertiary text-sm capitalize truncate">
                 {protocol.chain}
               </p>
             </div>
@@ -164,51 +125,51 @@ export const ProtocolCard: React.FC<ProtocolCardProps> = ({
           
           {/* Active indicator */}
           {totalPositions > 0 && (
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-              <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="hidden sm:inline text-xs font-medium text-green-300">Active</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span className="text-xs font-medium tt-status-positive">Active</span>
             </div>
           )}
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {/* Positions Count */}
-          <div className="rounded-md sm:rounded-lg bg-white/5 p-2 sm:p-3 backdrop-blur-sm">
-            <p className="text-xs font-medium text-white/60 uppercase tracking-wide truncate">
+          <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3">
+            <p className="text-xs font-medium tt-text-tertiary uppercase tracking-wide truncate">
               Positions
             </p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-white truncate">
+            <p className="text-lg font-bold tt-text-primary truncate">
               {isLoading ? '...' : totalPositions.toLocaleString()}
             </p>
           </div>
 
           {/* Total Value */}
-          <div className="rounded-md sm:rounded-lg bg-white/5 p-2 sm:p-3 backdrop-blur-sm">
-            <p className="text-xs font-medium text-white/60 uppercase tracking-wide truncate">
+          <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3">
+            <p className="text-xs font-medium tt-text-tertiary uppercase tracking-wide truncate">
               Total Value
             </p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-white truncate">
+            <p className="text-lg font-bold tt-text-primary truncate">
               {isLoading ? '...' : formatCurrency(totalValue)}
             </p>
           </div>
 
           {/* Fees Earned */}
-          <div className="rounded-md sm:rounded-lg bg-white/5 p-2 sm:p-3 backdrop-blur-sm">
-            <p className="text-xs font-medium text-white/60 uppercase tracking-wide truncate">
+          <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3">
+            <p className="text-xs font-medium tt-text-tertiary uppercase tracking-wide truncate">
               Fees Earned
             </p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-green-300 truncate">
+            <p className="text-lg font-bold tt-status-positive truncate">
               {isLoading ? '...' : formatCurrency(totalFeesEarned)}
             </p>
           </div>
 
           {/* Average APR */}
-          <div className="rounded-md sm:rounded-lg bg-white/5 p-2 sm:p-3 backdrop-blur-sm">
-            <p className="text-xs font-medium text-white/60 uppercase tracking-wide truncate">
+          <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3">
+            <p className="text-xs font-medium tt-text-tertiary uppercase tracking-wide truncate">
               Avg APR
             </p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-blue-300 truncate">
+            <p className="text-lg font-bold tt-text-primary truncate">
               {isLoading ? '...' : formatPercentage(avgApr)}
             </p>
           </div>
@@ -216,10 +177,9 @@ export const ProtocolCard: React.FC<ProtocolCardProps> = ({
 
         {/* Click indicator */}
         {onClick && !isLoading && (
-          <div className="mt-3 sm:mt-4 flex items-center justify-center">
-            <div className="flex items-center gap-1 sm:gap-2 text-xs text-white/50">
-              <span className="hidden sm:inline">Click to filter</span>
-              <span className="sm:hidden">Tap to filter</span>
+          <div className="mt-4 flex items-center justify-center">
+            <div className="flex items-center gap-2 text-xs tt-text-tertiary">
+              <span>Click to filter</span>
               <svg
                 className="h-3 w-3 transition-transform group-hover:translate-x-1"
                 fill="none"
