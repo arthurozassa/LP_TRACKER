@@ -454,11 +454,11 @@ export function getTokenInfo(address: string): SolanaTokenInfo {
     },
   };
   
-  const known = knownTokens[mint];
+  const known = knownTokens[address];
   
   return {
-    mint,
-    symbol: known?.symbol || `TOKEN_${mint.slice(0, 8)}`,
+    mint: address,
+    symbol: known?.symbol || `TOKEN_${address.slice(0, 8)}`,
     name: known?.name || `Unknown Token`,
     decimals: known?.decimals || 9,
     logoURI: known?.logoURI,
