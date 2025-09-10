@@ -373,7 +373,7 @@ export class JupiterAPIClient {
       // Tokens
       tokens: {
         token0: {
-          address: apiPosition.collateral.mint,
+          address: apiPosition.collateral.address,
           symbol: 'USDC', // Most Jupiter positions use USDC
           amount: parseFloat(apiPosition.collateral.amount),
           decimals: 6
