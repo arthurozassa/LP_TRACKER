@@ -3,7 +3,7 @@
  * Handles direct contract calls for V2 pools and positions
  */
 
-import { ethers, BigNumber } from 'ethers';
+import { ethers } from 'ethers'; // Removed string import for compatibility
 import { 
   Token, 
   PoolV2, 
@@ -12,8 +12,7 @@ import {
   UniswapErrorCodes,
   UNISWAP_V2_FACTORY_ABI,
   UNISWAP_V2_PAIR_ABI,
-  ERC20_ABI,
-  getNetworkConfig
+  ERC20_ABI
 } from '../common/types';
 import { 
   normalizeAddress, 
@@ -21,7 +20,8 @@ import {
   formatTokenAmount, 
   retryWithBackoff,
   withTimeout,
-  validateToken
+  validateToken,
+  getNetworkConfig
 } from '../common/utils';
 
 // ============================================================================
@@ -30,28 +30,28 @@ import {
 
 export interface V2FactoryContract {
   getPair(tokenA: string, tokenB: string): Promise<string>;
-  allPairs(index: BigNumber): Promise<string>;
-  allPairsLength(): Promise<BigNumber>;
+  allPairs(index: string): Promise<string>;
+  allPairsLength(): Promise<string>;
 }
 
 export interface V2PairContract {
   getReserves(): Promise<{
-    reserve0: BigNumber;
-    reserve1: BigNumber;
+    reserve0: string;
+    reserve1: string;
     blockTimestampLast: number;
   }>;
   token0(): Promise<string>;
   token1(): Promise<string>;
-  totalSupply(): Promise<BigNumber>;
-  balanceOf(address: string): Promise<BigNumber>;
-  kLast(): Promise<BigNumber>;
+  totalSupply(): Promise<string>;
+  balanceOf(address: string): Promise<string>;
+  kLast(): Promise<string>;
 }
 
 export interface ERC20Contract {
   decimals(): Promise<number>;
   symbol(): Promise<string>;
   name(): Promise<string>;
-  balanceOf(address: string): Promise<BigNumber>;
+  balanceOf(address: string): Promise<string>;
 }
 
 // ============================================================================
@@ -59,11 +59,11 @@ export interface ERC20Contract {
 // ============================================================================
 
 export class V2ContractFactory {
-  private provider: ethers.providers.Provider;
+  private provider: ethers.Provider;
   private chain: UniswapChain;
   private networkConfig: any;
 
-  constructor(provider: ethers.providers.Provider, chain: UniswapChain) {
+  constructor(provider: ethers.Provider, chain: UniswapChain) {
     this.provider = provider;
     this.chain = chain;
     this.networkConfig = getNetworkConfig(chain);
@@ -114,8 +114,15 @@ export class V2ContractFactory {
   /**
    * Gets provider for read operations
    */
-  getProvider(): ethers.providers.Provider {
+  getProvider(): ethers.Provider {
     return this.provider;
+  }
+
+  /**
+   * Gets chain for this factory
+   */
+  getChain(): UniswapChain {
+    return this.chain;
   }
 }
 
@@ -147,7 +154,7 @@ export class V2ContractOperations {
       });
 
       // Check if pair exists (address is not zero)
-      if (pairAddress === ethers.constants.AddressZero) {
+      if (pairAddress === ethers.ZeroAddress) {
         return null;
       }
 
@@ -156,7 +163,7 @@ export class V2ContractOperations {
       throw new UniswapError(
         `Failed to get pair address for ${tokenA}/${tokenB}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         UniswapErrorCodes.CONTRACT_ERROR,
-        this.contractFactory.chain,
+        this.contractFactory.getChain(),
         'v2'
       );
     }
@@ -206,7 +213,7 @@ export class V2ContractOperations {
       throw new UniswapError(
         `Failed to get all pairs: ${error instanceof Error ? error.message : 'Unknown error'}`,
         UniswapErrorCodes.CONTRACT_ERROR,
-        this.contractFactory.chain,
+        this.contractFactory.getChain(),
         'v2'
       );
     }
@@ -229,7 +236,7 @@ export class V2ContractOperations {
       throw new UniswapError(
         `Failed to get total pairs count: ${error instanceof Error ? error.message : 'Unknown error'}`,
         UniswapErrorCodes.CONTRACT_ERROR,
-        this.contractFactory.chain,
+        this.contractFactory.getChain(),
         'v2'
       );
     }
@@ -241,9 +248,9 @@ export class V2ContractOperations {
   async getPairData(pairAddress: string): Promise<{
     token0Address: string;
     token1Address: string;
-    reserve0: BigNumber;
-    reserve1: BigNumber;
-    totalSupply: BigNumber;
+    reserve0: string;
+    reserve1: string;
+    totalSupply: string;
     blockTimestampLast: number;
   }> {
     try {
@@ -268,7 +275,7 @@ export class V2ContractOperations {
       throw new UniswapError(
         `Failed to get pair data for ${pairAddress}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         UniswapErrorCodes.CONTRACT_ERROR,
-        this.contractFactory.chain,
+        this.contractFactory.getChain(),
         'v2'
       );
     }
@@ -277,7 +284,7 @@ export class V2ContractOperations {
   /**
    * Gets LP token balance for an address
    */
-  async getLPBalance(pairAddress: string, userAddress: string): Promise<BigNumber> {
+  async getLPBalance(pairAddress: string, userAddress: string): Promise<string> {
     try {
       const pairContract = this.contractFactory.getPairContract(pairAddress);
       
@@ -291,7 +298,7 @@ export class V2ContractOperations {
       throw new UniswapError(
         `Failed to get LP balance for ${userAddress} in ${pairAddress}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         UniswapErrorCodes.CONTRACT_ERROR,
-        this.contractFactory.chain,
+        this.contractFactory.getChain(),
         'v2'
       );
     }
@@ -303,7 +310,7 @@ export class V2ContractOperations {
   async getTokenMetadata(tokenAddress: string): Promise<Token> {
     try {
       const tokenContract = this.contractFactory.getERC20Contract(tokenAddress);
-      const networkConfig = getNetworkConfig(this.contractFactory.chain);
+      const networkConfig = getNetworkConfig(this.contractFactory.getChain());
       
       const [decimals, symbol, name] = await Promise.all([
         retryWithBackoff(() => withTimeout(tokenContract.decimals(), 10000)),
@@ -328,7 +335,7 @@ export class V2ContractOperations {
       throw new UniswapError(
         `Failed to get token metadata for ${tokenAddress}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         UniswapErrorCodes.INVALID_TOKEN,
-        this.contractFactory.chain,
+        this.contractFactory.getChain(),
         'v2'
       );
     }
@@ -372,7 +379,7 @@ export class V2ContractOperations {
       
       // This is a basic check - in production you'd want to get USD values
       // For now, we just check that reserves are not zero
-      return !pairData.reserve0.isZero() && !pairData.reserve1.isZero();
+      return pairData.reserve0 !== '0' && pairData.reserve1 !== '0';
     } catch (error) {
       return false;
     }
@@ -383,13 +390,13 @@ export class V2ContractOperations {
    */
   async getUserLPPositions(userAddress: string, pairAddresses: string[]): Promise<{
     pairAddress: string;
-    balance: BigNumber;
+    balance: string;
     hasPosition: boolean;
   }[]> {
     const batchSize = 20;
     const results: {
       pairAddress: string;
-      balance: BigNumber;
+      balance: string;
       hasPosition: boolean;
     }[] = [];
 
@@ -401,12 +408,12 @@ export class V2ContractOperations {
           return {
             pairAddress,
             balance,
-            hasPosition: !balance.isZero()
+            hasPosition: balance !== '0'
           };
         } catch (error) {
           return {
             pairAddress,
-            balance: BigNumber.from(0),
+            balance: '0',
             hasPosition: false
           };
         }
@@ -426,9 +433,9 @@ export class V2ContractOperations {
     address: string;
     token0: Token;
     token1: Token;
-    reserve0: BigNumber;
-    reserve1: BigNumber;
-    totalSupply: BigNumber;
+    reserve0: string;
+    reserve1: string;
+    totalSupply: string;
     blockTimestampLast: number;
   }> {
     const pairData = await this.getPairData(pairAddress);
@@ -458,7 +465,7 @@ export class V2ContractOperations {
  * Creates V2 contract operations instance
  */
 export function createV2ContractOperations(
-  provider: ethers.providers.Provider,
+  provider: ethers.Provider,
   chain: UniswapChain
 ): V2ContractOperations {
   const contractFactory = new V2ContractFactory(provider, chain);

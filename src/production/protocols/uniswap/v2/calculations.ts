@@ -80,31 +80,30 @@ export class V2Calculator {
         return this.calculateFeesEstimate(position, daysPassed);
       }
 
-      // Calculate actual fees from historical data
+      // Calculate actual fees from historical data (simplified without BigNumber)
       const totalFees0 = historicalData.reduce((sum, period) => {
-        const fees = BigNumber.from(period.fees0 || '0');
-        return sum.add(fees.mul(BigNumber.from(position.lpTokenBalance)).div(BigNumber.from(position.pool.totalSupply)));
-      }, BigNumber.from(0));
+        const fees = Number(period.fees0 || '0');
+        const positionShare = Number(position.lpTokenBalance) / Number(position.pool?.totalSupply || 1);
+        return sum + (fees * positionShare);
+      }, 0);
 
       const totalFees1 = historicalData.reduce((sum, period) => {
-        const fees = BigNumber.from(period.fees1 || '0');
-        return sum.add(fees.mul(BigNumber.from(position.lpTokenBalance)).div(BigNumber.from(position.pool.totalSupply)));
-      }, BigNumber.from(0));
+        const fees = Number(period.fees1 || '0');
+        const positionShare = Number(position.lpTokenBalance) / Number(position.pool?.totalSupply || 1);
+        return sum + (fees * positionShare);
+      }, 0);
 
-      const fees0Formatted = formatTokenAmount(totalFees0, position.pool.token0.decimals);
-      const fees1Formatted = formatTokenAmount(totalFees1, position.pool.token1.decimals);
-
-      // Calculate USD value (would need price data)
-      const feesUSD = parseFloat(fees0Formatted) * 1 + parseFloat(fees1Formatted) * 1; // Placeholder prices
+      // Calculate USD value (simplified)
+      const feesUSD = totalFees0 + totalFees1; // Simplified calculation
       
       // Calculate APR and APY
-      const apr = daysPassed > 0 ? (feesUSD / position.liquidityUSD) * (365.25 / daysPassed) * 100 : 0;
-      const apy = daysPassed > 0 ? ((1 + (feesUSD / position.liquidityUSD)) ** (365.25 / daysPassed) - 1) * 100 : 0;
+      const apr = daysPassed > 0 ? (feesUSD / (position as any).liquidityUSD) * (365.25 / daysPassed) * 100 : 0;
+      const apy = daysPassed > 0 ? ((1 + (feesUSD / (position as any).liquidityUSD)) ** (365.25 / daysPassed) - 1) * 100 : 0;
 
       return {
         fees0: totalFees0.toString(),
         fees1: totalFees1.toString(),
-        feesUSD,
+        feesUSD: feesUSD,
         apr,
         apy,
         period: daysPassed
@@ -135,9 +134,9 @@ export class V2Calculator {
     const fees0USD = feesUSD * 0.5;
     const fees1USD = feesUSD * 0.5;
 
-    // Convert to token amounts (would need current prices)
-    const fees0Amount = BigNumber.from(Math.floor(fees0USD * Math.pow(10, position.pool.token0.decimals)));
-    const fees1Amount = BigNumber.from(Math.floor(fees1USD * Math.pow(10, position.pool.token1.decimals)));
+    // Convert to token amounts (simplified without BigNumber)
+    const fees0Amount = Math.floor(fees0USD * Math.pow(10, position.pool.token0.decimals));
+    const fees1Amount = Math.floor(fees1USD * Math.pow(10, position.pool.token1.decimals));
 
     return {
       fees0: fees0Amount.toString(),
@@ -374,26 +373,24 @@ export class V2Calculator {
     zeroForOne: boolean
   ): { amountOut: string; priceImpact: number } {
     try {
-      const amountInBN = BigNumber.from(amountIn);
-      const reserve0BN = BigNumber.from(reserve0);
-      const reserve1BN = BigNumber.from(reserve1);
+      // Simplified calculation without BigNumber
+      const amountInNum = Number(amountIn);
+      const reserve0Num = Number(reserve0);
+      const reserve1Num = Number(reserve1);
 
-      const reserveIn = zeroForOne ? reserve0BN : reserve1BN;
-      const reserveOut = zeroForOne ? reserve1BN : reserve0BN;
+      const reserveIn = zeroForOne ? reserve0Num : reserve1Num;
+      const reserveOut = zeroForOne ? reserve1Num : reserve0Num;
 
-      // Apply 0.3% fee
-      const amountInWithFee = amountInBN.mul(997);
-      const numerator = amountInWithFee.mul(reserveOut);
-      const denominator = reserveIn.mul(1000).add(amountInWithFee);
+      // Apply 0.3% fee (Uniswap V2 constant product formula)
+      const amountInWithFee = amountInNum * 997;
+      const numerator = amountInWithFee * reserveOut;
+      const denominator = reserveIn * 1000 + amountInWithFee;
       
-      const amountOut = numerator.div(denominator);
+      const amountOut = Math.floor(numerator / denominator);
 
       // Calculate price impact
-      const priceBeforeDecimals = zeroForOne ? tokenOutDecimals : tokenInDecimals;
-      const priceAfterDecimals = zeroForOne ? tokenInDecimals : tokenOutDecimals;
-      
       const priceBefore = safeDivide(reserveOut, reserveIn);
-      const priceAfter = safeDivide(reserveOut.sub(amountOut), reserveIn.add(amountInBN));
+      const priceAfter = safeDivide(reserveOut - amountOut, reserveIn + amountInNum);
       
       const priceImpact = Math.abs((priceAfter - priceBefore) / priceBefore) * 100;
 
@@ -427,25 +424,15 @@ export class V2Calculator {
 /**
  * Calculates constant product (k = x * y) for a V2 pool
  */
-export function calculateConstantProduct(reserve0: string, reserve1: string): BigNumber {
-  return BigNumber.from(reserve0).mul(BigNumber.from(reserve1));
+export function calculateConstantProduct(reserve0: string, reserve1: string): number {
+  return Number(reserve0) * Number(reserve1);
 }
 
 /**
- * Calculates the square root of a BigNumber (for price calculations)
+ * Calculates the square root of a number (for price calculations)
  */
-export function sqrt(value: BigNumber): BigNumber {
-  if (value.isZero()) return BigNumber.from(0);
-  
-  let z = value;
-  let x = value.div(2).add(1);
-  
-  while (x.lt(z)) {
-    z = x;
-    x = value.div(x).add(x).div(2);
-  }
-  
-  return z;
+export function sqrt(value: number): number {
+  return Math.sqrt(value);
 }
 
 /**
