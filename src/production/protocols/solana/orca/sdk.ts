@@ -485,8 +485,8 @@ export class OrcaSDKWrapper {
       
       // Metadata
       lastSlot: 0,
-      createdAt: currentTime,
-      updatedAt: currentTime
+      createdAt: currentTime.toString(),
+      updatedAt: currentTime.toString()
     };
   }
 
