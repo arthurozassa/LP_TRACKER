@@ -524,7 +524,7 @@ export function calculateRewards(
       }
 
       return {
-        mint,
+        address: mint,
         amount: reward.amountOwed,
         value,
         apr,
