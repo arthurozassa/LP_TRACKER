@@ -166,7 +166,7 @@ export function parsePoolStateAccount(data: Buffer): RaydiumPool {
     const currentPrice = sqrtPrice * sqrtPrice;
 
     const tokenA = {
-      mint: tokenMint0.toString('hex'),
+      address: tokenMint0.toString('hex'),
       vault: tokenVault0.toString('hex'),
       decimals: mintDecimals0,
       symbol: 'UNKNOWN',
@@ -174,7 +174,7 @@ export function parsePoolStateAccount(data: Buffer): RaydiumPool {
     };
 
     const tokenB = {
-      mint: tokenMint1.toString('hex'),
+      address: tokenMint1.toString('hex'),
       vault: tokenVault1.toString('hex'),
       decimals: mintDecimals1,
       symbol: 'UNKNOWN',
@@ -215,7 +215,7 @@ export function parsePoolStateAccount(data: Buffer): RaydiumPool {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Raydium PoolState account',
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       data,
       error as Error
     );
@@ -302,7 +302,7 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
 
     return {
       id: `raydium-${poolId.toString('hex')}-${nftOwner.toString('hex')}`,
-      protocol: ProtocolType.RAYDIUM,
+      protocol: 'raydium-clmm',
       chain: ChainType.SOLANA,
       pool: poolId.toString('hex'),
       
@@ -316,13 +316,13 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
       // Tokens
       tokens: {
         token0: {
-          mint: '', // Would get from pool info
+          address: '', // Would get from pool info
           symbol: 'UNKNOWN',
           amount: Math.floor(amountA),
           decimals: 9
         },
         token1: {
-          mint: '', // Would get from pool info
+          address: '', // Would get from pool info
           symbol: 'UNKNOWN',
           amount: Math.floor(amountB),
           decimals: 9
@@ -368,7 +368,7 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Raydium position account',
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       data,
       error as Error
     );
@@ -428,7 +428,7 @@ export function parseAmmConfigAccount(data: Buffer): {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Raydium AmmConfig account',
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       data,
       error as Error
     );
@@ -480,7 +480,7 @@ export async function scanRaydiumPools(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to scan Raydium pools',
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'SCAN_FAILED',
       error as Error
     );
@@ -498,7 +498,7 @@ export async function scanRaydiumPositions(
     if (!isValidSolanaAddress(walletAddress)) {
       throw new SolanaIntegrationError(
         `Invalid wallet address: ${walletAddress}`,
-        ProtocolType.RAYDIUM,
+        'raydium-clmm',
         'INVALID_ADDRESS'
       );
     }
@@ -549,7 +549,7 @@ export async function scanRaydiumPositions(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to scan Raydium positions for wallet ${walletAddress}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'SCAN_FAILED',
       error as Error
     );
@@ -672,7 +672,7 @@ export function calculatePositionAmounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate position amounts`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -714,7 +714,7 @@ export async function getRaydiumPoolState(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get Raydium pool state for ${poolAddress}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'POOL_STATE_ERROR',
       error as Error
     );

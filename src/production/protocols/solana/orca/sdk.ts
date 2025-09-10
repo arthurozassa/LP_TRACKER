@@ -43,7 +43,7 @@ export interface WhirlpoolData {
   feeRate: number;
   protocolFeeRate: number;
   rewardInfos: Array<{
-    mint: string;
+    address: string;
     vault: string;
     authority: string;
     emissionsPerSecondX64: string;
@@ -124,7 +124,7 @@ export class OrcaSDKWrapper {
     } catch (error) {
       throw new SolanaIntegrationError(
         `Failed to get whirlpool ${address}`,
-        ProtocolType.ORCA,
+        'orca-whirlpools',
         'SDK_ERROR',
         error as Error
       );
@@ -175,7 +175,7 @@ export class OrcaSDKWrapper {
     } catch (error) {
       throw new SolanaIntegrationError(
         `Failed to calculate token amounts for pool ${poolAddress}`,
-        ProtocolType.ORCA,
+        'orca-whirlpools',
         'CALCULATION_ERROR',
         error as Error
       );
@@ -199,7 +199,7 @@ export class OrcaSDKWrapper {
     } catch (error) {
       throw new SolanaIntegrationError(
         'Failed to calculate price range',
-        ProtocolType.ORCA,
+        'orca-whirlpools',
         'CALCULATION_ERROR',
         error as Error
       );
@@ -255,7 +255,7 @@ export class OrcaSDKWrapper {
     } catch (error) {
       throw new SolanaIntegrationError(
         'Failed to calculate fees',
-        ProtocolType.ORCA,
+        'orca-whirlpools',
         'CALCULATION_ERROR',
         error as Error
       );
@@ -304,7 +304,7 @@ export class OrcaSDKWrapper {
       // Calculate rewards
       let rewardsEarned = 0;
       if (prices.rewards) {
-        for (const [index, rewardInfo] of position.rewardInfos.entries()) {
+        for (const [index, rewardInfo] of Array.from(position.rewardInfos.entries())) {
           if (rewardInfo.amountOwed && pool.rewardInfos[index]) {
             const rewardPrice = prices.rewards.get(pool.rewardInfos[index].mint) || 0;
             const rewardAmount = tokenAmountToUi(rewardInfo.amountOwed, 9);
@@ -358,7 +358,7 @@ export class OrcaSDKWrapper {
     } catch (error) {
       throw new SolanaIntegrationError(
         `Failed to analyze position ${position.address}`,
-        ProtocolType.ORCA,
+        'orca-whirlpools',
         'ANALYSIS_ERROR',
         error as Error
       );
@@ -416,7 +416,7 @@ export class OrcaSDKWrapper {
     } catch (error) {
       throw new SolanaIntegrationError(
         'Failed to calculate impermanent loss',
-        ProtocolType.ORCA,
+        'orca-whirlpools',
         'CALCULATION_ERROR',
         error as Error
       );
@@ -439,7 +439,7 @@ export class OrcaSDKWrapper {
 
     return {
       id: `orca-${positionData.whirlpool}-${positionData.positionMint}`,
-      protocol: ProtocolType.ORCA,
+      protocol: 'orca-whirlpools',
       chain: 'solana' as any,
       pool: positionData.whirlpool,
       
@@ -451,13 +451,13 @@ export class OrcaSDKWrapper {
       
       tokens: {
         token0: {
-          mint: poolData.tokenMintA,
+          address: poolData.tokenMintA,
           symbol: 'UNKNOWN',
           amount: Number(analysis.tokenAmounts?.tokenA || '0'),
           decimals: 6
         },
         token1: {
-          mint: poolData.tokenMintB,
+          address: poolData.tokenMintB,
           symbol: 'UNKNOWN',
           amount: Number(analysis.tokenAmounts?.tokenB || '0'),
           decimals: 9
@@ -575,7 +575,7 @@ export async function getEnhancedOrcaPosition(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to enhance Orca position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'ENHANCEMENT_ERROR',
       error as Error
     );

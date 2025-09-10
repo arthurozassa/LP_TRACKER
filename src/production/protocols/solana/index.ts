@@ -432,7 +432,7 @@ export class SolanaDEXService {
     try {
       const [positions, pools] = await Promise.all([
         scanOrcaPositions(this.context, walletAddress),
-        this.getCachedPools('orca', () => scanOrcaPools(this.context))
+        this.getCachedPools('orca-whirlpools', () => scanOrcaPools(this.context))
       ]);
 
       const totalValue = positions.reduce((sum, pos) => sum + (pos.value || 0), 0);

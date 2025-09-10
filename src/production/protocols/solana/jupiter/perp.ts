@@ -294,7 +294,7 @@ export function parseJupiterPositionAccount(data: Buffer): JupiterPosition {
  */
 export function parseCustodyAccount(data: Buffer): {
   pool: string;
-  mint: string;
+  address: string;
   tokenAccount: string;
   decimals: number;
   isStable: boolean;
@@ -477,7 +477,7 @@ export function parseCustodyAccount(data: Buffer): {
 
     return {
       pool: pool.toString('hex'),
-      mint: mint.toString('hex'),
+      address: mint.toString('hex'),
       tokenAccount: tokenAccount.toString('hex'),
       decimals,
       isStable,
@@ -663,7 +663,7 @@ export async function getJupiterPoolInfo(
     let volume24h = 0;
     
     for (const custody of custodies) {
-      const ownedValue = Number(custody.assets.owned) / Math.pow(10, custody.decimals);
+      const ownedValue = Number(custody.assets.owned) / Math.pow(10, custody.decimals || 9);
       totalAum += ownedValue;
       
       // Sum up various fee types (simplified)

@@ -161,7 +161,7 @@ export function parseWhirlpoolAccount(data: Buffer): OrcaPool {
       offset += 16;
 
       rewardInfos.push({
-        mint: mint.toString('hex'),
+        address: mint.toString('hex'),
         vault: vault.toString('hex'),
         authority: authority.toString('hex'),
         emissionsPerSecondX64,
@@ -183,7 +183,7 @@ export function parseWhirlpoolAccount(data: Buffer): OrcaPool {
     offset += 8;
 
     const tokenA = {
-      mint: tokenMintA.toString('hex'),
+      address: tokenMintA.toString('hex'),
       vault: tokenVaultA.toString('hex'),
       decimals: 9, // Would fetch from mint
       symbol: 'UNKNOWN',
@@ -191,7 +191,7 @@ export function parseWhirlpoolAccount(data: Buffer): OrcaPool {
     };
 
     const tokenB = {
-      mint: tokenMintB.toString('hex'),
+      address: tokenMintB.toString('hex'),
       vault: tokenVaultB.toString('hex'),
       decimals: 9, // Would fetch from mint
       symbol: 'UNKNOWN',
@@ -231,7 +231,7 @@ export function parseWhirlpoolAccount(data: Buffer): OrcaPool {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Orca Whirlpool account',
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       data,
       error as Error
     );
@@ -295,7 +295,7 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
       offset += 8;
 
       rewardInfos.push({
-        mint: '', // Would get from pool
+        address: '', // Would get from pool
         vault: '',
         authority: '',
         emissionsPerSecondX64: '0',
@@ -320,7 +320,7 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
 
     return {
       id: `orca-${whirlpool.toString('hex')}-${positionMint.toString('hex')}`,
-      protocol: ProtocolType.ORCA,
+      protocol: 'orca-whirlpools',
       chain: ChainType.SOLANA,
       pool: whirlpool.toString('hex'),
       
@@ -334,13 +334,13 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
       // Tokens
       tokens: {
         token0: {
-          mint: '', // Would get from pool info
+          address: '', // Would get from pool info
           symbol: 'UNKNOWN',
           amount: Math.floor(amountA),
           decimals: 9
         },
         token1: {
-          mint: '', // Would get from pool info
+          address: '', // Would get from pool info
           symbol: 'UNKNOWN',
           amount: Math.floor(amountB),
           decimals: 9
@@ -379,7 +379,7 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Orca position account',
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       data,
       error as Error
     );
@@ -423,7 +423,7 @@ export function parseWhirlpoolsConfigAccount(data: Buffer): {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse WhirlpoolsConfig account',
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       data,
       error as Error
     );
@@ -475,7 +475,7 @@ export async function scanOrcaPools(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to scan Orca pools',
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'SCAN_FAILED',
       error as Error
     );
@@ -493,7 +493,7 @@ export async function scanOrcaPositions(
     if (!isValidSolanaAddress(walletAddress)) {
       throw new SolanaIntegrationError(
         `Invalid wallet address: ${walletAddress}`,
-        ProtocolType.ORCA,
+        'orca-whirlpools',
         'INVALID_ADDRESS'
       );
     }
@@ -557,7 +557,7 @@ export async function scanOrcaPositions(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to scan Orca positions for wallet ${walletAddress}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'SCAN_FAILED',
       error as Error
     );
@@ -626,7 +626,7 @@ export async function enrichOrcaPosition(
         if (pool.rewardInfos && pool.rewardInfos[index]) {
           return {
             ...reward,
-            mint: pool.rewardInfos[index].mint,
+            address: pool.rewardInfos[index].mint,
             vault: pool.rewardInfos[index].vault,
             authority: pool.rewardInfos[index].authority,
             emissionsPerSecondX64: pool.rewardInfos[index].emissionsPerSecondX64,
@@ -685,7 +685,7 @@ export function calculateOrcaPositionAmounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate Orca position amounts`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -727,7 +727,7 @@ export async function getOrcaPoolState(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get Orca pool state for ${poolAddress}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'POOL_STATE_ERROR',
       error as Error
     );

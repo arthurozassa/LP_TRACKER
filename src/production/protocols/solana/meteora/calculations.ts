@@ -382,7 +382,7 @@ export function calculateRewards(
 ): {
   totalRewardValue: number;
   rewardBreakdown: Array<{
-    mint: string;
+    address: string;
     amount: string;
     value: number;
     apr?: number;
@@ -395,7 +395,7 @@ export function calculateRewards(
       const value = amountUi * price;
 
       return {
-        mint: reward.mint,
+        address: reward.mint,
         amount: reward.amount,
         value,
         // APR calculation would require emission rates and time data

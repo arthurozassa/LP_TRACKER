@@ -52,7 +52,7 @@ interface JupiterPoolResponse {
   name: string;
   symbol: string;
   custodies: Array<{
-    mint: string;
+    address: string;
     symbol: string;
     decimals: number;
     oracle: string;
@@ -98,7 +98,7 @@ interface JupiterPositionResponse {
   custody: string;
   side: 'long' | 'short';
   collateral: {
-    mint: string;
+    address: string;
     amount: string;
     usdValue: string;
   };

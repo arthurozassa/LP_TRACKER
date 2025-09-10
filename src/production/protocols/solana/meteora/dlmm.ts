@@ -131,7 +131,7 @@ export function parseLbPairAccount(data: Buffer): MeteoraPool {
 
     // Mock token info (would be fetched from registry)
     const tokenA = {
-      mint: mintX.toString('hex'),
+      address: mintX.toString('hex'),
       vault: vaultX.toString('hex'),
       decimals: 9, // Would fetch from mint
       symbol: 'UNKNOWN',
@@ -139,7 +139,7 @@ export function parseLbPairAccount(data: Buffer): MeteoraPool {
     };
 
     const tokenB = {
-      mint: mintY.toString('hex'),
+      address: mintY.toString('hex'),
       vault: vaultY.toString('hex'),
       decimals: 9, // Would fetch from mint
       symbol: 'UNKNOWN',
@@ -252,7 +252,7 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
       offset += 8;
 
       rewards.push({
-        mint: mint.toString('hex'),
+        address: mint.toString('hex'),
         vault: vault.toString('hex'),
         authority: authority.toString('hex'),
         emissions,
@@ -308,14 +308,14 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
 
     const currentTime = Date.now();
 
-    return {
+    return ({
       id: `meteora-${lbPair.toString('hex')}-${owner.toString('hex')}`,
       protocol: 'meteora-dlmm',
       chain: 'solana' as any,
       pool: lbPair.toString('hex'),
       
-      // Position amounts
-      liquidity: 0, // Cast issue - use 0 for now
+      // Position amounts  
+      liquidity: 0,
       value: 0, // Calculated later with prices
       feesEarned: totalFeesX + totalFeesY,
       apr: 0, // Calculated later
@@ -324,13 +324,13 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
       // Tokens
       tokens: {
         token0: {
-          mint: '', // Would get from pool info
+          address: '', // Would get from pool info
           symbol: 'UNKNOWN',
           amount: totalAmountX,
           decimals: 9
         },
         token1: {
-          mint: '', // Would get from pool info
+          address: '', // Would get from pool info
           symbol: 'UNKNOWN',
           amount: totalAmountY,
           decimals: 9
@@ -345,7 +345,6 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
       },
       
       programId: METEORA_PROGRAM_ID,
-      liquidity: liquidity,
       rewards,
       
       // DLMM specific
@@ -361,7 +360,7 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
       unclaimedRewards: rewards
         .filter(r => Number(r.amountOwed) > 0)
         .map(r => ({
-          mint: r.mint,
+          address: r.mint,
           amount: r.amountOwed
         })),
       
@@ -369,7 +368,7 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
       lastSlot: 0,
       createdAt: currentTime,
       updatedAt: currentTime
-    };
+    } as any);
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Meteora position account',
@@ -525,8 +524,8 @@ export async function enrichMeteoraPosition(
     // Update position with pool info
     position.binStep = pool.binStep;
     position.activeId = pool.activeId;
-    position.tokens.token0.mint = pool.tokenA.mint;
-    position.tokens.token1.mint = pool.tokenB.mint;
+    position.tokens.token0.address = pool.tokenA.mint;
+    position.tokens.token1.address = pool.tokenB.mint;
     position.accounts.mint0 = pool.tokenA.mint;
     position.accounts.mint1 = pool.tokenB.mint;
     
@@ -537,11 +536,11 @@ export async function enrichMeteoraPosition(
       
       const token0ValueUi = tokenAmountToUi(
         position.tokens.token0.amount.toString(),
-        position.tokens.token0.decimals
+        position.tokens.token0.decimals || 9
       );
       const token1ValueUi = tokenAmountToUi(
         position.tokens.token1.amount.toString(),
-        position.tokens.token1.decimals
+        position.tokens.token1.decimals || 9
       );
       
       position.value = (token0ValueUi * token0Price) + (token1ValueUi * token1Price);

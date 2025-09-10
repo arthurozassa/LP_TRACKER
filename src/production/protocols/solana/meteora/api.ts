@@ -45,7 +45,7 @@ interface MeteoraPoolResponse {
   protocol_fee_percentage: number;
   liquidity: string;
   reward_infos: Array<{
-    mint: string;
+    address: string;
     vault: string;
     funder: string;
     reward_duration: number;
@@ -84,7 +84,7 @@ interface MeteoraPositionResponse {
   unclaimed_fee_x: string;
   unclaimed_fee_y: string;
   unclaimed_rewards: Array<{
-    mint: string;
+    address: string;
     amount: string;
   }>;
   position_value_usd: number;
@@ -264,7 +264,7 @@ export class MeteoraAPIClient {
       programId: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
       
       tokenA: {
-        mint: pool.mint_x,
+        address: pool.mint_x,
         vault: '', // Not provided by API
         decimals: 9, // Default, would need to fetch from mint
         symbol: 'UNKNOWN',
@@ -272,7 +272,7 @@ export class MeteoraAPIClient {
       },
       
       tokenB: {
-        mint: pool.mint_y,
+        address: pool.mint_y,
         vault: '', // Not provided by API
         decimals: 9, // Default, would need to fetch from mint
         symbol: 'UNKNOWN',
@@ -378,7 +378,7 @@ export class MeteoraAPIClient {
       },
       
       unclaimedRewards: position.unclaimed_rewards.map(reward => ({
-        mint: reward.mint,
+        address: reward.mint,
         amount: reward.amount
       })),
       

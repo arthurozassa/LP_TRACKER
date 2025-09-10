@@ -72,7 +72,7 @@ export function derivePoolAddress(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to derive pool address for ${tokenMint0}/${tokenMint1}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'ADDRESS_DERIVATION_ERROR',
       error as Error
     );
@@ -103,7 +103,7 @@ export function derivePositionNftMint(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to derive position NFT mint for pool ${poolAddress}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'ADDRESS_DERIVATION_ERROR',
       error as Error
     );
@@ -132,7 +132,7 @@ export function derivePersonalPositionAddress(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to derive personal position address for NFT ${nftMint}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'ADDRESS_DERIVATION_ERROR',
       error as Error
     );
@@ -161,7 +161,7 @@ export function deriveTickArrayAddress(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to derive tick array address for pool ${poolAddress}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'ADDRESS_DERIVATION_ERROR',
       error as Error
     );
@@ -188,7 +188,7 @@ export function deriveObservationAddress(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to derive observation address for pool ${poolAddress}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'ADDRESS_DERIVATION_ERROR',
       error as Error
     );
@@ -256,7 +256,7 @@ export async function fetchPositionAccountBundle(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to fetch position account bundle for ${positionAddress}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'BUNDLE_FETCH_ERROR',
       error as Error
     );
@@ -295,7 +295,7 @@ export async function fetchMultiplePositionBundles(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to fetch multiple position bundles`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'BATCH_FETCH_ERROR',
       error as Error
     );
@@ -377,7 +377,7 @@ export async function findWalletPositions(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to find wallet positions for ${walletAddress}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'WALLET_SCAN_ERROR',
       error as Error
     );
@@ -448,7 +448,7 @@ export async function getPoolTickArrays(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get tick arrays for pool ${pool.address}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'TICK_ARRAY_ERROR',
       error as Error
     );
@@ -518,7 +518,7 @@ export function parseTickArrayAccount(data: Buffer): {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse tick array account',
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       data,
       error as Error
     );

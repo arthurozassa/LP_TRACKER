@@ -67,7 +67,7 @@ export function findProgramAddress(
  * Get associated token account address
  */
 export function getAssociatedTokenAccount(
-  mint: string,
+  address: string,
   owner: string
 ): string {
   // In production, this would use getAssociatedTokenAddress
@@ -142,7 +142,7 @@ export function parseTokenAccountData(data: Buffer): SolanaTokenAccount {
     return {
       pubkey: '', // Will be filled by caller
       account: {
-        mint: bufferToBase58(data.slice(0, 32)),
+        address: bufferToBase58(data.slice(0, 32)),
         owner: bufferToBase58(data.slice(32, 64)),
         amount: data.readBigUInt64LE(64).toString(),
         delegatedAmount: data.readBigUInt64LE(72).toString(),
@@ -431,7 +431,7 @@ export function calculatePositionMetrics(
 /**
  * Get token info from cache or default
  */
-export function getTokenInfo(mint: string): SolanaTokenInfo {
+export function getTokenInfo(address: string): SolanaTokenInfo {
   // In production, this would query a token registry or cache
   const knownTokens: Record<string, Partial<SolanaTokenInfo>> = {
     [SOLANA_TOKEN_MINTS.SOL]: {

@@ -54,7 +54,7 @@ export function tickToSqrtPriceX64(tick: number): string {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to convert tick ${tick} to sqrt price`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -74,7 +74,7 @@ export function sqrtPriceX64ToTick(sqrtPriceX64: string): number {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to convert sqrt price ${sqrtPriceX64} to tick`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -90,7 +90,7 @@ export function tickToPrice(tick: number): number {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate price from tick ${tick}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -110,7 +110,7 @@ export function priceToTick(price: number): number {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate tick from price ${price}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -163,7 +163,7 @@ export function calculateTokenAmounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to calculate token amounts from liquidity',
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -207,7 +207,7 @@ export function calculateLiquidityFromAmounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to calculate liquidity from token amounts',
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -242,8 +242,8 @@ export function calculatePositionValue(
     );
     
     // Convert to UI amounts
-    const token0AmountUi = tokenAmountToUi(tokenAmounts.amount0, position.tokens.token0.decimals);
-    const token1AmountUi = tokenAmountToUi(tokenAmounts.amount1, position.tokens.token1.decimals);
+    const token0AmountUi = tokenAmountToUi(tokenAmounts.amount0, position.tokens.token0.decimals || 9);
+    const token1AmountUi = tokenAmountToUi(tokenAmounts.amount1, position.tokens.token1.decimals || 9);
     
     // Calculate values
     const token0Value = token0AmountUi * prices.token0;
@@ -282,7 +282,7 @@ export function calculatePositionValue(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate position value for ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -332,7 +332,7 @@ export function calculateImpermanentLoss(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate impermanent loss for position ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -397,7 +397,7 @@ export function calculateFeesEarned(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate fees for position ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -444,7 +444,7 @@ export function calculateFeeGrowth(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate fee growth for position ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -464,7 +464,7 @@ export function calculateRewards(
 ): {
   totalRewardValue: number;
   rewardBreakdown: Array<{
-    mint: string;
+    address: string;
     amount: string;
     value: number;
     apr?: number;
@@ -478,7 +478,7 @@ export function calculateRewards(
       const value = amountUi * price;
 
       return {
-        mint: reward.rewardMint,
+        address: reward.rewardMint,
         amount: reward.rewardAmountOwed,
         value,
         // APR calculation would need emission rates and time data
@@ -499,7 +499,7 @@ export function calculateRewards(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate rewards for position ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -583,7 +583,7 @@ export function calculateRiskMetrics(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate risk metrics for position ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -716,7 +716,7 @@ export function calculateRaydiumPositionMetrics(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate comprehensive metrics for position ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -755,8 +755,8 @@ export function formatRaydiumPosition(
       { label: 'Liquidity', value: formatTokenAmount(metrics.raydium.liquidity, 18) },
       { label: 'Utilization', value: `${(metrics.raydium.utilizationRate * 100).toFixed(1)}%` },
       { label: 'Risk Level', value: metrics.raydium.risk.overallRisk },
-      { label: 'Unclaimed Fees 0', value: formatTokenAmount(position.feeOwedA || '0', position.tokens.token0.decimals) },
-      { label: 'Unclaimed Fees 1', value: formatTokenAmount(position.feeOwedB || '0', position.tokens.token1.decimals) },
+      { label: 'Unclaimed Fees 0', value: formatTokenAmount(position.feeOwedA || '0', position.tokens.token0.decimals || 9) },
+      { label: 'Unclaimed Fees 1', value: formatTokenAmount(position.feeOwedB || '0', position.tokens.token1.decimals || 9) },
     ];
 
     const rangeInfo = {
@@ -775,7 +775,7 @@ export function formatRaydiumPosition(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to format position ${position.id}`,
-      ProtocolType.RAYDIUM,
+      'raydium-clmm',
       'FORMAT_ERROR',
       error as Error
     );

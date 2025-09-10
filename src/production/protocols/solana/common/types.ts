@@ -21,7 +21,7 @@ export interface SolanaTokenAccount {
   pubkey: string;
   account: {
     owner: string;
-    mint: string;
+    address: string;
     amount: string;
     delegatedAmount?: string;
     delegate?: string;
@@ -87,7 +87,7 @@ export interface SolanaPosition extends Position {
 }
 
 export interface SolanaReward {
-  mint: string;
+  address: string;
   vault: string;
   authority: string;
   emissions: string;
@@ -105,7 +105,7 @@ export interface SolanaPool {
   
   // Token information
   tokenA: {
-    mint: string;
+    address: string;
     vault: string;
     decimals: number;
     symbol: string;
@@ -113,7 +113,7 @@ export interface SolanaPool {
   };
   
   tokenB: {
-    mint: string;
+    address: string;
     vault: string;
     decimals: number;
     symbol: string;
@@ -174,7 +174,7 @@ export interface MeteoraPosition extends SolanaPosition {
   
   // Rewards
   unclaimedRewards: Array<{
-    mint: string;
+    address: string;
     amount: string;
   }>;
 }
@@ -269,7 +269,7 @@ export interface OrcaPosition extends SolanaPosition {
   
   // Rewards
   rewardInfos: Array<{
-    mint: string;
+    address: string;
     vault: string;
     authority: string;
     emissionsPerSecondX64: string;
@@ -503,7 +503,7 @@ export interface SolanaContext {
 }
 
 export interface SolanaTokenInfo {
-  mint: string;
+  address: string;
   symbol: string;
   name: string;
   decimals: number;

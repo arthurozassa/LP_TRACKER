@@ -60,7 +60,7 @@ export function tickToPrice(tick: number): number {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate price from tick ${tick}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -80,7 +80,7 @@ export function priceToTick(price: number): number {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate tick from price ${price}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -97,7 +97,7 @@ export function sqrtPriceX64ToPrice(sqrtPriceX64: string): number {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to convert sqrt price ${sqrtPriceX64} to price`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -118,7 +118,7 @@ export function priceToSqrtPriceX64(price: number): string {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to convert price ${price} to sqrt price`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -171,7 +171,7 @@ export function calculateTokenAmounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to calculate token amounts from liquidity',
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -215,7 +215,7 @@ export function calculateLiquidityFromAmounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to calculate liquidity from token amounts',
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -250,8 +250,8 @@ export function calculatePositionValue(
     );
     
     // Convert to UI amounts
-    const token0AmountUi = tokenAmountToUi(tokenAmounts.amount0, position.tokens.token0.decimals);
-    const token1AmountUi = tokenAmountToUi(tokenAmounts.amount1, position.tokens.token1.decimals);
+    const token0AmountUi = tokenAmountToUi(tokenAmounts.amount0, position.tokens.token0.decimals || 9);
+    const token1AmountUi = tokenAmountToUi(tokenAmounts.amount1, position.tokens.token1.decimals || 9);
     
     // Calculate values
     const token0Value = token0AmountUi * prices.token0;
@@ -290,7 +290,7 @@ export function calculatePositionValue(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate position value for ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -353,7 +353,7 @@ export function calculateImpermanentLoss(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate impermanent loss for position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -384,11 +384,11 @@ export function calculateFeesEarned(
     // Calculate unclaimed fees in UI amounts
     const feesToken0Ui = tokenAmountToUi(
       position.tokensOwed0 || '0',
-      position.tokens.token0.decimals
+      position.tokens.token0.decimals || 9
     );
     const feesToken1Ui = tokenAmountToUi(
       position.tokensOwed1 || '0',
-      position.tokens.token1.decimals
+      position.tokens.token1.decimals || 9
     );
     
     // Calculate fee values in USD
@@ -397,7 +397,7 @@ export function calculateFeesEarned(
     const totalFees = feesToken0 + feesToken1;
     
     // Estimate daily fees based on position age
-    const positionAge = (Date.now() - position.createdAt) / (1000 * 60 * 60 * 24);
+    const positionAge = (Date.now() - (position.createdAt ? new Date(position.createdAt).getTime() : 0)) / (1000 * 60 * 60 * 24);
     const dailyFees = positionAge > 0 ? totalFees / positionAge : 0;
     
     // Calculate fee APR
@@ -418,7 +418,7 @@ export function calculateFeesEarned(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate fees for position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -470,7 +470,7 @@ export function calculateExpectedFees(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate expected fees for position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -491,7 +491,7 @@ export function calculateRewards(
 ): {
   totalRewardValue: number;
   rewardBreakdown: Array<{
-    mint: string;
+    address: string;
     amount: string;
     value: number;
     apr?: number;
@@ -511,8 +511,8 @@ export function calculateRewards(
       let emissionRate = 0;
       let apr = 0;
       
-      if (poolReward && poolReward.emissionsPerSecondX64) {
-        const emissionsPerSecond = Number(poolReward.emissionsPerSecondX64) / ORCA_CONSTANTS.Q64;
+      if (poolReward && (poolReward as any).emissionsPerSecondX64) {
+        const emissionsPerSecond = Number((poolReward as any).emissionsPerSecondX64) / ORCA_CONSTANTS.Q64;
         emissionRate = emissionsPerSecond * ORCA_CONSTANTS.SECONDS_PER_DAY;
         
         // Calculate APR based on emissions and position share
@@ -543,7 +543,7 @@ export function calculateRewards(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate rewards for position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -627,7 +627,7 @@ export function calculateRiskMetrics(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate risk metrics for position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -675,7 +675,7 @@ export function calculateOrcaPositionMetrics(
       totalRewardValue: number;
       rewardAPR: number;
       rewardBreakdown: Array<{
-        mint: string;
+        address: string;
         amount: string;
         value: number;
         apr?: number;
@@ -710,7 +710,7 @@ export function calculateOrcaPositionMetrics(
     const riskMetrics = calculateRiskMetrics(position, pool, prices, marketData);
     
     // Calculate age in days
-    const ageInDays = (Date.now() - position.createdAt) / (1000 * 60 * 60 * 24);
+    const ageInDays = (Date.now() - (position.createdAt ? new Date(position.createdAt).getTime() : 0)) / (1000 * 60 * 60 * 24);
 
     // Calculate price ranges
     const priceLower = tickToPrice(position.tickLowerIndex);
@@ -741,7 +741,7 @@ export function calculateOrcaPositionMetrics(
       },
       ageInDays,
       lastActiveSlot: position.lastSlot,
-      lastRewardClaim: position.updatedAt,
+      lastRewardClaim: position.updatedAt ? new Date(position.updatedAt).getTime() : 0,
 
       // Orca-specific metrics
       orca: {
@@ -779,7 +779,7 @@ export function calculateOrcaPositionMetrics(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate comprehensive metrics for position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -839,7 +839,7 @@ export function formatOrcaPosition(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to format position ${position.id}`,
-      ProtocolType.ORCA,
+      'orca-whirlpools',
       'FORMAT_ERROR',
       error as Error
     );
