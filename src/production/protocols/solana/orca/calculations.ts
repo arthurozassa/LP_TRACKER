@@ -502,7 +502,7 @@ export function calculateRewards(
   try {
     const rewardBreakdown = position.rewardInfos?.map((reward, index) => {
       const poolReward = pool.rewardInfos?.[index];
-      const mint = poolReward?.mint || '';
+      const mint = poolReward?.address || '';
       const price = rewardPrices.get(mint) || 0;
       const amountUi = tokenAmountToUi(reward.amountOwed, 9); // Assume 9 decimals
       const value = amountUi * price;
