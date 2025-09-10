@@ -449,10 +449,10 @@ export async function getEnhancedMeteoraPositions(
       if (pool) {
         position.binStep = pool.binStep;
         position.activeId = pool.activeId;
-        position.tokens.token0.address = pool.tokenA.mint;
-        position.tokens.token1.address = pool.tokenB.mint;
-        position.accounts.mint0 = pool.tokenA.mint;
-        position.accounts.mint1 = pool.tokenB.mint;
+        position.tokens.token0.address = pool.tokenA.address;
+        position.tokens.token1.address = pool.tokenB.address;
+        position.accounts.mint0 = pool.tokenA.address;
+        position.accounts.mint1 = pool.tokenB.address;
       }
       return position;
     });
