@@ -360,7 +360,7 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
       unclaimedRewards: rewards
         .filter(r => Number(r.amountOwed) > 0)
         .map(r => ({
-          address: r.mint,
+          address: r.address,
           amount: r.amountOwed
         })),
       
