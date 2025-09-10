@@ -287,7 +287,7 @@ export class SolanaDEXService {
       const rewardMints = new Set<string>();
       positions.forEach(pos => {
         pos.rewards?.forEach(reward => {
-          if (reward.mint) rewardMints.add(reward.mint);
+          if (reward.address) rewardMints.add(reward.address);
         });
       });
       const rewardPrices = await this.fetchTokenPrices(Array.from(rewardMints));
