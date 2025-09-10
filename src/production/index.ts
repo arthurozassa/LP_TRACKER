@@ -147,10 +147,10 @@ class ProductionInfrastructure {
           scheduler: !!this.scheduler,
           monitoring: !!this.monitoring
         }
-      });
+      } as any);
 
     } catch (error) {
-      logger.error('Failed to initialize production infrastructure', { error });
+      logger.error('Failed to initialize production infrastructure', { error } as any);
       await this.cleanup();
       throw error;
     }
