@@ -117,7 +117,7 @@ class ProductionInfrastructure {
       queues: !!this.config.queue,
       scheduler: this.config.scheduler?.enabled !== false,
       monitoring: this.config.monitoring?.alertsEnabled !== false
-    });
+    } as any);
 
     try {
       // Initialize cache system

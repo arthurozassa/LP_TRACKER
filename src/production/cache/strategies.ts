@@ -327,7 +327,7 @@ class MultiLevelCache {
       logger.debug('Multi-set completed', { itemCount: items.length, success } as any);
       return success;
     } catch (error) {
-      logger.error('Multi-set error', { error });
+      logger.error('Multi-set error', { error } as any);
       return false;
     }
   }
@@ -358,10 +358,10 @@ class MultiLevelCache {
       const results = await Promise.allSettled(promises);
       success = results.every(result => result.status === 'fulfilled');
 
-      logger.info('Cache clear completed', { pattern, success });
+      logger.info('Cache clear completed', { pattern, success } as any);
       return success;
     } catch (error) {
-      logger.error('Cache clear error', { error });
+      logger.error('Cache clear error', { error } as any);
       return false;
     }
   }
@@ -481,14 +481,14 @@ class MultiLevelCache {
       await Promise.allSettled(batchPromises);
     }
 
-    logger.info('Cache warmup completed', results);
+    logger.info('Cache warmup completed', results as any);
     return results;
   }
 
   // Cleanup and maintenance
   async cleanup(): Promise<void> {
     // Clear all refresh timeouts
-    for (const [key, timeoutId] of this.refreshTimeouts) {
+    for (const [key, timeoutId] of Array.from(this.refreshTimeouts.entries())) {
       clearTimeout(timeoutId);
       logger.debug('Cleared refresh timeout', { key } as any);
     }
