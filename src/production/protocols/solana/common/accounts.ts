@@ -43,7 +43,7 @@ export async function fetchAccountInfo(
     if (!isValidSolanaAddress(address)) {
       throw new SolanaIntegrationError(
         `Invalid address: ${address}`,
-        ProtocolType.UNKNOWN,
+        'meteora-dlmm',
         'INVALID_ADDRESS'
       );
     }
@@ -82,7 +82,7 @@ export async function fetchMultipleAccountInfos(
       if (!isValidSolanaAddress(address)) {
         throw new SolanaIntegrationError(
           `Invalid address: ${address}`,
-          ProtocolType.UNKNOWN,
+          'meteora-dlmm',
           'INVALID_ADDRESS'
         );
       }
@@ -101,7 +101,7 @@ export async function fetchMultipleAccountInfos(
           { commitment: context.commitment }
         );
         
-        return response.map(account => {
+        return response.map((account: any) => {
           if (!account) return null;
           
           return {
@@ -138,7 +138,7 @@ export async function fetchProgramAccounts(
     if (!isValidSolanaAddress(programId)) {
       throw new SolanaIntegrationError(
         `Invalid program ID: ${programId}`,
-        ProtocolType.UNKNOWN,
+        'meteora-dlmm',
         'INVALID_PROGRAM_ID'
       );
     }
@@ -158,7 +158,7 @@ export async function fetchProgramAccounts(
         config
       );
       
-      return response.map(({ pubkey, account }) => ({
+      return response.map(({ pubkey, account }: any) => ({
         pubkey: pubkey.toString(),
         account: {
           executable: account.executable,
@@ -186,7 +186,7 @@ export async function fetchTokenAccountsByOwner(
     if (!isValidSolanaAddress(owner)) {
       throw new SolanaIntegrationError(
         `Invalid owner address: ${owner}`,
-        ProtocolType.UNKNOWN,
+        'meteora-dlmm',
         'INVALID_ADDRESS'
       );
     }
@@ -194,7 +194,7 @@ export async function fetchTokenAccountsByOwner(
     if (mint && !isValidSolanaAddress(mint)) {
       throw new SolanaIntegrationError(
         `Invalid mint address: ${mint}`,
-        ProtocolType.UNKNOWN,
+        'meteora-dlmm',
         'INVALID_ADDRESS'
       );
     }
@@ -213,7 +213,7 @@ export async function fetchTokenAccountsByOwner(
         }
       );
       
-      return response.value.map(({ pubkey, account }) => ({
+      return response.value.map(({ pubkey, account }: any) => ({
         pubkey: pubkey.toString(),
         account: account.data.parsed.info
       }));
@@ -340,7 +340,7 @@ export async function scanPositionAccounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to scan position accounts for wallet ${walletAddress}`,
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       'SCAN_FAILED',
       error as Error
     );
@@ -382,7 +382,7 @@ export async function scanPoolAccounts(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to scan pool accounts',
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       'SCAN_FAILED',
       error as Error
     );

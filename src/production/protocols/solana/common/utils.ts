@@ -42,7 +42,7 @@ export function base58ToBuffer(base58: string): Buffer {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Invalid base58 string: ${base58}`,
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       'INVALID_BASE58',
       error as Error
     );
@@ -87,7 +87,7 @@ export function normalizeAddress(address: string): string {
   if (!isValidSolanaAddress(address)) {
     throw new SolanaIntegrationError(
       `Invalid Solana address: ${address}`,
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       'INVALID_ADDRESS'
     );
   }
@@ -122,7 +122,7 @@ export function parseAccountData<T>(
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse account data',
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       data,
       error as Error
     );
@@ -162,7 +162,7 @@ export function parseTokenAccountData(data: Buffer): SolanaTokenAccount {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse token account data',
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       data,
       error as Error
     );
@@ -178,7 +178,7 @@ export function parseU64(data: Buffer, offset: number = 0): U64String {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse U64',
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       data,
       error as Error
     );
@@ -192,11 +192,11 @@ export function parseU128(data: Buffer, offset: number = 0): string {
   try {
     const low = data.readBigUInt64LE(offset);
     const high = data.readBigUInt64LE(offset + 8);
-    return (high << 64n | low).toString();
+    return (high << BigInt(64) | low).toString();
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse U128',
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       data,
       error as Error
     );
@@ -212,7 +212,7 @@ export function parseI64(data: Buffer, offset: number = 0): string {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse I64',
-      ProtocolType.UNKNOWN,
+      'meteora-dlmm',
       data,
       error as Error
     );
@@ -329,8 +329,8 @@ export function calculatePositionValue(
   position: SolanaPosition,
   config: SolanaCalculationConfig
 ): number {
-  const token0Price = config.priceFeeds.get(position.tokens.token0.mint) || 0;
-  const token1Price = config.priceFeeds.get(position.tokens.token1.mint) || 0;
+  const token0Price = config.priceFeeds.get(position.tokens.token0.address || '') || 0;
+  const token1Price = config.priceFeeds.get(position.tokens.token1.address || '') || 0;
   
   const token0ValueUi = tokenAmountToUi(
     position.tokens.token0.amount.toString(),
@@ -382,8 +382,8 @@ export function calculatePositionMetrics(
   const totalFeesEarned = calculateFeesEarned(position, config);
   const apr = calculateAPR(position, config);
   
-  const token0Price = config.priceFeeds.get(position.tokens.token0.mint) || 0;
-  const token1Price = config.priceFeeds.get(position.tokens.token1.mint) || 0;
+  const token0Price = config.priceFeeds.get(position.tokens.token0.address || '') || 0;
+  const token1Price = config.priceFeeds.get(position.tokens.token1.address || '') || 0;
   
   const token0ValueUi = tokenAmountToUi(
     position.tokens.token0.amount.toString(),
@@ -418,7 +418,7 @@ export function calculatePositionMetrics(
       current: token0Price / token1Price,
       inRange: position.inRange
     },
-    ageInDays: (Date.now() - position.createdAt) / (1000 * 60 * 60 * 24),
+    ageInDays: (Date.now() - new Date(position.createdAt || '').getTime()) / (1000 * 60 * 60 * 24),
     lastActiveSlot: position.lastSlot,
     lastRewardClaim: position.updatedAt
   };
@@ -524,7 +524,7 @@ export function handleRpcError(error: any, context: string): never {
   
   throw new SolanaIntegrationError(
     message,
-    ProtocolType.UNKNOWN,
+    'meteora-dlmm',
     code,
     error
   );

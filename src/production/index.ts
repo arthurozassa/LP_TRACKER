@@ -38,7 +38,7 @@ export type {
   HistoricalPerformanceJobData
 } from './queue/processors';
 
-const logger = pino({ name: 'production-infrastructure' });
+const logger = pino({ name: 'production-infrastructure' } as any);
 
 export interface ProductionConfig {
   redis: {
@@ -176,7 +176,7 @@ class ProductionInfrastructure {
       memory: true,
       multiLevel: true,
       invalidation: true
-    });
+    } as any);
   }
 
   private async initializeQueueSystem(): Promise<void> {
@@ -275,7 +275,7 @@ class ProductionInfrastructure {
       logger.info('Cache warmup jobs queued');
 
     } catch (error) {
-      logger.error('Cache warmup failed', { error });
+      logger.error('Cache warmup failed', { error } as any);
     }
   }
 
@@ -381,7 +381,7 @@ class ProductionInfrastructure {
       };
 
     } catch (error) {
-      logger.error('Failed to get system health', { error });
+      logger.error('Failed to get system health', { error } as any);
       return {
         overall: 'unhealthy',
         components: {
@@ -403,15 +403,15 @@ class ProductionInfrastructure {
     }
   }
 
-  getQueueManager(): QueueManager | null {
+  getQueueManager(): QueueManagerClass | null {
     return this.queueManager;
   }
 
-  getScheduler(): JobScheduler | null {
+  getScheduler(): JobSchedulerClass | null {
     return this.scheduler;
   }
 
-  getMonitoring(): QueueMonitoring | null {
+  getMonitoring(): QueueMonitoringClass | null {
     return this.monitoring;
   }
 
@@ -460,7 +460,7 @@ class ProductionInfrastructure {
       logger.info('Production infrastructure cleanup completed');
 
     } catch (error) {
-      logger.error('Error during cleanup', { error });
+      logger.error('Error during cleanup', { error } as any);
       throw error;
     }
   }

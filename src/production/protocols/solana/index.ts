@@ -123,14 +123,14 @@ export class SolanaDEXService {
       if (!isValidSolanaAddress(walletAddress)) {
         throw new SolanaIntegrationError(
           `Invalid wallet address: ${walletAddress}`,
-          ProtocolType.UNKNOWN,
+          'meteora-dlmm',
           'INVALID_ADDRESS'
         );
       }
 
       const results: SolanaScanResult = {
         walletAddress,
-        protocol: ProtocolType.UNKNOWN, // Will aggregate multiple protocols
+        protocol: 'meteora-dlmm', // Will aggregate multiple protocols
         positions: [],
         pools: [],
         totalValue: 0,
@@ -201,7 +201,7 @@ export class SolanaDEXService {
     } catch (error) {
       throw new SolanaIntegrationError(
         `Failed to scan Solana positions for ${walletAddress}`,
-        ProtocolType.UNKNOWN,
+        'meteora-dlmm',
         'SCAN_FAILED',
         error as Error
       );
@@ -262,7 +262,7 @@ export class SolanaDEXService {
     } catch (error) {
       throw new SolanaIntegrationError(
         'Failed to enhance Solana positions',
-        ProtocolType.UNKNOWN,
+        'meteora-dlmm',
         'ENHANCEMENT_FAILED',
         error as Error
       );
@@ -344,7 +344,7 @@ export class SolanaDEXService {
     } catch (error) {
       throw new SolanaIntegrationError(
         'Failed to calculate position metrics',
-        ProtocolType.UNKNOWN,
+        'meteora-dlmm',
         'METRICS_CALCULATION_FAILED',
         error as Error
       );

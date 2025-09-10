@@ -70,8 +70,7 @@ export interface SolanaPosition extends Position {
   discriminator?: Buffer;
   bump?: number;
   
-  // Position state
-  liquidity: string;
+  // Position state (liquidity inherited as number from Position)
   tickLower?: number;
   tickUpper?: number;
   feeGrowthInside0LastX64?: string;
@@ -84,8 +83,7 @@ export interface SolanaPosition extends Position {
   
   // Metadata
   lastSlot: number;
-  createdAt: number;
-  updatedAt: number;
+  // createdAt and updatedAt inherited as string from Position
 }
 
 export interface SolanaReward {
@@ -534,23 +532,23 @@ export interface SolanaProtocolInfo {
 // ============================================================================
 
 export function isSolanaPosition(position: Position): position is SolanaPosition {
-  return position.chain === ChainType.SOLANA && 'accounts' in position;
+  return position.chain === 'solana' && 'accounts' in position;
 }
 
 export function isMeteoraPosition(position: SolanaPosition): position is MeteoraPosition {
-  return position.protocol === ProtocolType.METEORA && 'binStep' in position;
+  return position.protocol === 'meteora-dlmm' && 'binStep' in position;
 }
 
 export function isRaydiumPosition(position: SolanaPosition): position is RaydiumPosition {
-  return position.protocol === ProtocolType.RAYDIUM && 'poolId' in position;
+  return position.protocol === 'raydium-clmm' && 'poolId' in position;
 }
 
 export function isOrcaPosition(position: SolanaPosition): position is OrcaPosition {
-  return position.protocol === ProtocolType.ORCA && 'whirlpool' in position;
+  return position.protocol === 'orca-whirlpools' && 'whirlpool' in position;
 }
 
 export function isJupiterPosition(position: SolanaPosition): position is JupiterPosition {
-  return position.protocol === ProtocolType.JUPITER && 'perpetuals' in position;
+  return position.protocol === 'jupiter' && 'perpetuals' in position;
 }
 
 export function isValidSolanaAddress(address: string): boolean {
