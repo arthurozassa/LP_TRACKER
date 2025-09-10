@@ -336,7 +336,7 @@ export async function findWalletPositions(
       try {
         // Check if this token has amount = 1 (NFT characteristic)
         if (account.data.parsed?.info?.tokenAmount?.uiAmount === 1) {
-          const nftMint = account.data.parsed.info.mint;
+          const nftMint = account.data.parsed.info.address;
           
           // Try to derive personal position address
           const [personalPositionAddress] = derivePersonalPositionAddress(

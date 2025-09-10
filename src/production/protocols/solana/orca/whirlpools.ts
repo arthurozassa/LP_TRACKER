@@ -513,7 +513,7 @@ export async function scanOrcaPositions(
         // Check if this token has amount = 1 (NFT characteristic)
         const tokenInfo = account.data.parsed?.info;
         if (tokenInfo?.tokenAmount?.uiAmount === 1) {
-          const positionMint = tokenInfo.mint;
+          const positionMint = tokenInfo.address;
           
           // Try to find the position account for this NFT
           // Position accounts are PDAs derived from the mint
@@ -586,12 +586,12 @@ export async function enrichOrcaPosition(
     const pool = parseWhirlpoolAccount(poolAccount.data as Buffer);
     
     // Update position with pool info
-    position.tokens.token0.mint = pool.tokenA.mint;
-    position.tokens.token1.mint = pool.tokenB.mint;
+    position.tokens.token0.address = pool.tokenA.address;
+    position.tokens.token1.address = pool.tokenB.address;
     position.tokens.token0.decimals = pool.tokenA.decimals;
     position.tokens.token1.decimals = pool.tokenB.decimals;
-    position.accounts.mint0 = pool.tokenA.mint;
-    position.accounts.mint1 = pool.tokenB.mint;
+    position.accounts.mint0 = pool.tokenA.address;
+    position.accounts.mint1 = pool.tokenB.address;
     
     // Check if position is in range
     position.inRange = (pool.tickCurrent || 0) >= position.tickLowerIndex && 
@@ -599,8 +599,8 @@ export async function enrichOrcaPosition(
     
     // Calculate position value if prices are available
     if (priceFeeds) {
-      const token0Price = priceFeeds.get(pool.tokenA.mint) || 0;
-      const token1Price = priceFeeds.get(pool.tokenB.mint) || 0;
+      const token0Price = priceFeeds.get(pool.tokenA.address) || 0;
+      const token1Price = priceFeeds.get(pool.tokenB.address) || 0;
       
       const token0ValueUi = tokenAmountToUi(
         position.tokens.token0.amount.toString(),
@@ -626,7 +626,7 @@ export async function enrichOrcaPosition(
         if (pool.rewardInfos && pool.rewardInfos[index]) {
           return {
             ...reward,
-            address: pool.rewardInfos[index].mint,
+            address: pool.rewardInfos[index].address,
             vault: pool.rewardInfos[index].vault,
             authority: pool.rewardInfos[index].authority,
             emissionsPerSecondX64: pool.rewardInfos[index].emissionsPerSecondX64,

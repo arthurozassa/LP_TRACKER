@@ -578,12 +578,12 @@ export async function enrichRaydiumPosition(
     const pool = parsePoolStateAccount(poolAccount.data as Buffer);
     
     // Update position with pool info
-    position.tokens.token0.mint = pool.tokenA.mint;
-    position.tokens.token1.mint = pool.tokenB.mint;
+    position.tokens.token0.address = pool.tokenA.address;
+    position.tokens.token1.address = pool.tokenB.address;
     position.tokens.token0.decimals = pool.tokenA.decimals;
     position.tokens.token1.decimals = pool.tokenB.decimals;
-    position.accounts.mint0 = pool.tokenA.mint;
-    position.accounts.mint1 = pool.tokenB.mint;
+    position.accounts.mint0 = pool.tokenA.address;
+    position.accounts.mint1 = pool.tokenB.address;
     
     // Check if position is in range
     position.inRange = pool.tickCurrent >= position.tickLower && 
@@ -591,8 +591,8 @@ export async function enrichRaydiumPosition(
     
     // Calculate position value if prices are available
     if (priceFeeds) {
-      const token0Price = priceFeeds.get(pool.tokenA.mint) || 0;
-      const token1Price = priceFeeds.get(pool.tokenB.mint) || 0;
+      const token0Price = priceFeeds.get(pool.tokenA.address) || 0;
+      const token1Price = priceFeeds.get(pool.tokenB.address) || 0;
       
       const token0ValueUi = tokenAmountToUi(
         position.tokens.token0.amount.toString(),
