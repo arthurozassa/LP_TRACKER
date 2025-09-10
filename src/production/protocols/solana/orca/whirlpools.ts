@@ -213,7 +213,6 @@ export function parseWhirlpoolAccount(data: Buffer): OrcaPool {
       whirlpoolsConfig: whirlpoolsConfig.toString('hex'),
       whirlpoolBump,
       tickArrays,
-      feeRate: feeRate / 10000,
       protocolFeeRate: protocolFeeRate / 10000,
       rewardLastUpdatedTimestamp,
       rewardVaultBalances: rewardInfos.map(r => '0'), // Would fetch from vaults
