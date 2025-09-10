@@ -259,7 +259,7 @@ export class UniswapProtocolAdapter {
       v3ByChain.get(chainKey)!.push(pos);
     }
 
-    for (const [chainKey, positions] of v3ByChain) {
+    for (const [chainKey, positions] of Array.from(v3ByChain.entries())) {
       const protocolId = chainKey === UniswapChain.ETHEREUM ? 'uniswap-v3' : `uniswap-v3-${chainKey}`;
       const v3Positions = positions.map(pos => this.convertV3Position(pos));
       
@@ -271,7 +271,7 @@ export class UniswapProtocolAdapter {
         protocol: {
           id: protocolId,
           name: `Uniswap V3${chainKey !== UniswapChain.ETHEREUM ? ` (${chainKey})` : ''}`,
-          chain: this.mapUniswapChainToString(chainKey) as any,
+          chain: this.mapUniswapChainToString(chainKey as UniswapChain) as any,
           logoUri: 'https://app.uniswap.org/logo.png',
           website: 'https://app.uniswap.org',
           supported: true,
@@ -350,11 +350,6 @@ export class UniswapProtocolAdapter {
       },
       createdAt: pos.createdAt.toISOString(),
       updatedAt: pos.lastUpdate.toISOString(),
-      // V3 specific fields
-      tokenId: pos.tokenId,
-      tickLower: pos.tickLower,
-      tickUpper: pos.tickUpper,
-      priceRange: pos.priceRange,
     };
   }
 

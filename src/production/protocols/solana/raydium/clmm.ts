@@ -290,7 +290,7 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
     const priceUpper = Math.pow(1.0001, tickUpperIndex);
 
     // Calculate token amounts (simplified - real calculation is complex)
-    const liquidityNum = Number(liquidity);
+    const liquidityNum = parseFloat(liquidity);
     const priceRange = priceUpper - priceLower;
     const midPrice = (priceLower + priceUpper) / 2;
     
@@ -307,7 +307,7 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
       pool: poolId.toString('hex'),
       
       // Position amounts
-      liquidity: Number(liquidity),
+      liquidity: liquidityNum,
       value: 0, // Calculated later with prices
       feesEarned: Number(tokenFeesOwed0) + Number(tokenFeesOwed1),
       apr: 0, // Calculated later
@@ -337,7 +337,6 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
       },
       
       programId: RAYDIUM_CLMM_PROGRAM_ID,
-      liquidity: liquidity,
       tickLower: tickLowerIndex,
       tickUpper: tickUpperIndex,
       feeGrowthInside0LastX64,
@@ -362,8 +361,8 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
       
       // Metadata
       lastSlot: 0,
-      createdAt: currentTime,
-      updatedAt: currentTime
+      createdAt: currentTime.toString(),
+      updatedAt: currentTime.toString()
     };
   } catch (error) {
     throw new SolanaParsingError(
@@ -586,8 +585,8 @@ export async function enrichRaydiumPosition(
     position.accounts.mint1 = pool.tokenB.address;
     
     // Check if position is in range
-    position.inRange = pool.tickCurrent >= position.tickLower && 
-                      pool.tickCurrent <= position.tickUpper;
+    position.inRange = (pool.tickCurrent || 0) >= (position.tickLower || 0) && 
+                      (pool.tickCurrent || 0) <= (position.tickUpper || 0);
     
     // Calculate position value if prices are available
     if (priceFeeds) {

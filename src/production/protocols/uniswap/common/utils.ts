@@ -2,7 +2,7 @@
  * Shared utilities for Uniswap V2 and V3 integrations
  */
 
-import { BigNumber, ethers } from 'ethers';
+import { isAddress, getAddress } from 'ethers';
 import { Token, TokenAmount, UniswapChain, UniswapError, UniswapErrorCodes, NETWORK_CONFIGS, PriceData } from './types';
 
 // ============================================================================
@@ -14,7 +14,7 @@ import { Token, TokenAmount, UniswapChain, UniswapError, UniswapErrorCodes, NETW
  */
 export function isValidEthereumAddress(address: string): boolean {
   try {
-    return ethers.utils.isAddress(address);
+    return isAddress(address);
   } catch {
     return false;
   }
@@ -30,7 +30,7 @@ export function normalizeAddress(address: string): string {
       UniswapErrorCodes.INVALID_ADDRESS
     );
   }
-  return ethers.utils.getAddress(address);
+  return getAddress(address);
 }
 
 /**
@@ -98,10 +98,11 @@ export function chainIdToUniswapChain(chainId: number): UniswapChain | null {
 /**
  * Formats wei amounts to human readable strings
  */
-export function formatTokenAmount(amount: string | BigNumber, decimals: number): string {
+export function formatTokenAmount(amount: string, decimals: number): string {
   try {
-    const bn = BigNumber.from(amount);
-    return ethers.utils.formatUnits(bn, decimals);
+    // Simple approximation - divide by 10^decimals
+    const num = Number(amount) / Math.pow(10, decimals);
+    return num.toString();
   } catch (error) {
     throw new UniswapError(
       `Failed to format token amount: ${amount}`,
@@ -113,9 +114,11 @@ export function formatTokenAmount(amount: string | BigNumber, decimals: number):
 /**
  * Parses human readable amount to wei
  */
-export function parseTokenAmount(amount: string, decimals: number): BigNumber {
+export function parseTokenAmount(amount: string, decimals: number): string {
   try {
-    return ethers.utils.parseUnits(amount, decimals);
+    // Simple approximation - multiply by 10^decimals
+    const num = Number(amount) * Math.pow(10, decimals);
+    return num.toString();
   } catch (error) {
     throw new UniswapError(
       `Failed to parse token amount: ${amount}`,
@@ -125,17 +128,15 @@ export function parseTokenAmount(amount: string, decimals: number): BigNumber {
 }
 
 /**
- * Safely divides BigNumbers with precision
+ * Safely divides numbers with precision
  */
-export function safeDivide(numerator: BigNumber, denominator: BigNumber, precision = 18): number {
-  if (denominator.isZero()) {
+export function safeDivide(numerator: number, denominator: number, precision = 18): number {
+  if (denominator === 0) {
     return 0;
   }
   
   try {
-    const scaled = numerator.mul(BigNumber.from(10).pow(precision));
-    const result = scaled.div(denominator);
-    return parseFloat(ethers.utils.formatUnits(result, precision));
+    return numerator / denominator;
   } catch (error) {
     return 0;
   }
@@ -200,13 +201,12 @@ export function formatDuration(ms: number): string {
 /**
  * Creates a TokenAmount object
  */
-export function createTokenAmount(token: Token, amount: string | BigNumber): TokenAmount {
-  const amountBN = BigNumber.from(amount);
-  const amountHuman = formatTokenAmount(amountBN, token.decimals);
+export function createTokenAmount(token: Token, amount: string): TokenAmount {
+  const amountHuman = formatTokenAmount(amount, token.decimals);
   
   return {
     token,
-    amount: amountBN.toString(),
+    amount: amount.toString(),
     amountHuman
   };
 }

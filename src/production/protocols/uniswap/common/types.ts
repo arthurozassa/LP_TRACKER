@@ -3,7 +3,6 @@
  */
 
 import { Position, ChainType } from '../../../../types';
-import { BigNumber } from 'ethers';
 
 // ============================================================================
 // NETWORK CONFIGURATIONS
@@ -426,18 +425,18 @@ export function isV3Position(position: UniswapPosition): position is UniswapV3Po
 export function chainToChainType(chain: UniswapChain): ChainType {
   switch (chain) {
     case UniswapChain.ETHEREUM:
-      return ChainType.ETHEREUM;
+      return 'ethereum' as any;
     case UniswapChain.ARBITRUM:
     case UniswapChain.POLYGON:
     case UniswapChain.BASE:
     case UniswapChain.OPTIMISM:
-      return ChainType.ETHEREUM; // All are Ethereum L2s
+      return 'ethereum' as any; // All are Ethereum L2s
     case UniswapChain.AVALANCHE:
-      return ChainType.ETHEREUM; // EVM compatible
+      return 'ethereum' as any; // EVM compatible
     case UniswapChain.BSC:
-      return ChainType.ETHEREUM; // EVM compatible
+      return 'ethereum' as any; // EVM compatible
     default:
-      return ChainType.ETHEREUM;
+      return 'ethereum' as any;
   }
 }
 

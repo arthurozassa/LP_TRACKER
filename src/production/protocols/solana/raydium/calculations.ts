@@ -236,8 +236,8 @@ export function calculatePositionValue(
     // Calculate actual token amounts based on current pool state
     const tokenAmounts = calculateTokenAmounts(
       position.liquidity.toString(),
-      position.tickLower,
-      position.tickUpper,
+      position.tickLower || 0,
+      position.tickUpper || 0,
       pool.tickCurrent || 0
     );
     
@@ -251,8 +251,8 @@ export function calculatePositionValue(
     const totalValue = token0Value + token1Value;
     
     // Check if in range
-    const inRange = (pool.tickCurrent || 0) >= position.tickLower && 
-                   (pool.tickCurrent || 0) <= position.tickUpper;
+    const inRange = (pool.tickCurrent || 0) >= (position.tickLower || 0) && 
+                   (pool.tickCurrent || 0) <= (position.tickUpper || 0);
     
     // Calculate utilization rate (how much of the range is being used)
     let utilizationRate = 0;
@@ -260,14 +260,14 @@ export function calculatePositionValue(
       utilizationRate = 1; // Full utilization when in range
     } else {
       // Partial utilization based on how far out of range
-      const rangeTicks = position.tickUpper - position.tickLower;
+      const rangeTicks = (position.tickUpper || 0) - (position.tickLower || 0);
       const currentTick = pool.tickCurrent || 0;
       
-      if (currentTick < position.tickLower) {
-        const distance = position.tickLower - currentTick;
+      if (currentTick < (position.tickLower || 0)) {
+        const distance = (position.tickLower || 0) - currentTick;
         utilizationRate = Math.max(0, 1 - (distance / rangeTicks));
-      } else if (currentTick > position.tickUpper) {
-        const distance = currentTick - position.tickUpper;
+      } else if (currentTick > (position.tickUpper || 0)) {
+        const distance = currentTick - (position.tickUpper || 0);
         utilizationRate = Math.max(0, 1 - (distance / rangeTicks));
       }
     }
@@ -363,11 +363,11 @@ export function calculateFeesEarned(
     // Calculate unclaimed fees in UI amounts
     const feesToken0Ui = tokenAmountToUi(
       position.feeOwedA || position.tokensOwed0 || '0',
-      position.tokens.token0.decimals
+      position.tokens.token0.decimals || 9
     );
     const feesToken1Ui = tokenAmountToUi(
       position.feeOwedB || position.tokensOwed1 || '0',
-      position.tokens.token1.decimals
+      position.tokens.token1.decimals || 9
     );
     
     // Calculate fee values in USD
@@ -376,7 +376,7 @@ export function calculateFeesEarned(
     const totalFees = feesToken0 + feesToken1;
     
     // Estimate daily fees (would need historical data for accurate calculation)
-    const positionAge = (Date.now() - position.createdAt) / (1000 * 60 * 60 * 24);
+    const positionAge = (Date.now() - (position.createdAt ? new Date(position.createdAt).getTime() : Date.now())) / (1000 * 60 * 60 * 24);
     const dailyFees = positionAge > 0 ? totalFees / positionAge : 0;
     
     // Calculate fee APR
@@ -531,8 +531,8 @@ export function calculateRiskMetrics(
 } {
   try {
     // Concentration risk - how narrow is the price range
-    const priceLower = tickToPrice(position.tickLower);
-    const priceUpper = tickToPrice(position.tickUpper);
+    const priceLower = tickToPrice(position.tickLower || 0);
+    const priceUpper = tickToPrice(position.tickUpper || 0);
     const currentPrice = tickToPrice(pool.tickCurrent || 0);
     const priceRange = (priceUpper - priceLower) / currentPrice;
     const concentrationRisk = Math.max(0, Math.min(1, 1 / (1 + priceRange)));
@@ -552,9 +552,9 @@ export function calculateRiskMetrics(
 
     // Range risk - how likely is the position to go out of range
     const currentTick = pool.tickCurrent || 0;
-    const tickRange = position.tickUpper - position.tickLower;
-    const distanceToLower = Math.abs(currentTick - position.tickLower);
-    const distanceToUpper = Math.abs(currentTick - position.tickUpper);
+    const tickRange = (position.tickUpper || 0) - (position.tickLower || 0);
+    const distanceToLower = Math.abs(currentTick - (position.tickLower || 0));
+    const distanceToUpper = Math.abs(currentTick - (position.tickUpper || 0));
     const minDistance = Math.min(distanceToLower, distanceToUpper);
     const rangeRisk = Math.max(0, 1 - (minDistance / tickRange));
 
@@ -651,11 +651,11 @@ export function calculateRaydiumPositionMetrics(
     const riskMetrics = calculateRiskMetrics(position, pool, prices, marketData);
     
     // Calculate age in days
-    const ageInDays = (Date.now() - position.createdAt) / (1000 * 60 * 60 * 24);
+    const ageInDays = (Date.now() - (position.createdAt ? new Date(position.createdAt).getTime() : Date.now())) / (1000 * 60 * 60 * 24);
 
     // Calculate price ranges
-    const priceLower = tickToPrice(position.tickLower);
-    const priceUpper = tickToPrice(position.tickUpper);
+    const priceLower = tickToPrice(position.tickLower || 0);
+    const priceUpper = tickToPrice(position.tickUpper || 0);
     const currentPrice = tickToPrice(pool.tickCurrent || 0);
 
     return {
@@ -682,13 +682,13 @@ export function calculateRaydiumPositionMetrics(
       },
       ageInDays,
       lastActiveSlot: position.lastSlot,
-      lastRewardClaim: position.updatedAt,
+      lastRewardClaim: position.updatedAt ? new Date(position.updatedAt).getTime() : Date.now(),
 
       // Raydium-specific metrics
       raydium: {
         tickRange: {
-          lower: position.tickLower,
-          upper: position.tickUpper,
+          lower: position.tickLower || 0,
+          upper: position.tickUpper || 0,
           current: pool.tickCurrent || 0
         },
         priceRange: {

@@ -308,7 +308,7 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
     const priceUpper = Math.pow(1.0001, tickUpperIndex);
 
     // Calculate token amounts (simplified - real calculation is complex)
-    const liquidityNum = Number(liquidity);
+    const liquidityNum = parseFloat(liquidity);
     const midPrice = Math.sqrt(priceLower * priceUpper);
     
     // Rough approximation of token amounts
@@ -324,7 +324,7 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
       pool: whirlpool.toString('hex'),
       
       // Position amounts
-      liquidity: Number(liquidity),
+      liquidity: liquidityNum,
       value: 0, // Calculated later with prices
       feesEarned: Number(feeOwedA) + Number(feeOwedB),
       apr: 0, // Calculated later
@@ -354,7 +354,6 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
       },
       
       programId: ORCA_WHIRLPOOL_PROGRAM_ID,
-      liquidity: liquidity,
       tickLower: tickLowerIndex,
       tickUpper: tickUpperIndex,
       feeGrowthInside0LastX64: feeGrowthCheckpointA,
@@ -372,8 +371,8 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
       
       // Metadata
       lastSlot: 0,
-      createdAt: currentTime,
-      updatedAt: currentTime
+      createdAt: currentTime.toString(),
+      updatedAt: currentTime.toString()
     };
   } catch (error) {
     throw new SolanaParsingError(
@@ -628,7 +627,7 @@ export async function enrichOrcaPosition(
             address: pool.rewardInfos[index].address,
             vault: pool.rewardInfos[index].vault,
             authority: pool.rewardInfos[index].authority,
-            emissionsPerSecondX64: pool.rewardInfos[index].emissionsPerSecondX64,
+            emissions: pool.rewardInfos[index].emissions || '0',
           };
         }
         return reward;

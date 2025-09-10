@@ -3,7 +3,7 @@
  * Handles fee calculations, APR/APY, and impermanent loss calculations
  */
 
-import { BigNumber } from 'ethers';
+// import { BigNumber } from 'ethers'; // Removed for compatibility
 import { 
   UniswapV2Position, 
   PriceData, 
