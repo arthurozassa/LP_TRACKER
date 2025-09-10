@@ -378,7 +378,7 @@ export class MeteoraAPIClient {
       },
       
       unclaimedRewards: position.unclaimed_rewards.map(reward => ({
-        address: reward.mint,
+        address: reward.address,
         amount: reward.amount
       })),
       
