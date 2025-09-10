@@ -389,7 +389,7 @@ export class JupiterAPIClient {
       // Solana specific
       accounts: {
         position: apiPosition.address,
-        mint0: apiPosition.collateral.mint,
+        mint0: apiPosition.collateral.address,
         mint1: '',
       },
       
