@@ -524,15 +524,15 @@ export async function enrichMeteoraPosition(
     // Update position with pool info
     position.binStep = pool.binStep;
     position.activeId = pool.activeId;
-    position.tokens.token0.address = pool.tokenA.mint;
-    position.tokens.token1.address = pool.tokenB.mint;
-    position.accounts.mint0 = pool.tokenA.mint;
-    position.accounts.mint1 = pool.tokenB.mint;
+    position.tokens.token0.address = pool.tokenA.address;
+    position.tokens.token1.address = pool.tokenB.address;
+    position.accounts.mint0 = pool.tokenA.address;
+    position.accounts.mint1 = pool.tokenB.address;
     
     // Calculate position value if prices are available
     if (priceFeeds) {
-      const token0Price = priceFeeds.get(pool.tokenA.mint) || 0;
-      const token1Price = priceFeeds.get(pool.tokenB.mint) || 0;
+      const token0Price = priceFeeds.get(pool.tokenA.address) || 0;
+      const token1Price = priceFeeds.get(pool.tokenB.address) || 0;
       
       const token0ValueUi = tokenAmountToUi(
         position.tokens.token0.amount.toString(),
