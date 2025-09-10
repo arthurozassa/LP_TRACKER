@@ -74,7 +74,7 @@ export function getAssociatedTokenAccount(
   const seeds = [
     Buffer.from(owner, 'utf8'),
     Buffer.from(SOLANA_PROGRAMS.TOKEN, 'utf8'),
-    Buffer.from(mint, 'utf8')
+    Buffer.from(address, 'utf8')
   ];
   const [ata] = findProgramAddress(seeds, SOLANA_PROGRAMS.ASSOCIATED_TOKEN);
   return ata;
