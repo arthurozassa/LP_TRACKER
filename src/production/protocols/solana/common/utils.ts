@@ -457,7 +457,7 @@ export function getTokenInfo(address: string): SolanaTokenInfo {
   const known = knownTokens[address];
   
   return {
-    mint: address,
+    address: address,
     symbol: known?.symbol || `TOKEN_${address.slice(0, 8)}`,
     name: known?.name || `Unknown Token`,
     decimals: known?.decimals || 9,
