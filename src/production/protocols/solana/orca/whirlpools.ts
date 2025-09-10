@@ -320,7 +320,7 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
     return {
       id: `orca-${whirlpool.toString('hex')}-${positionMint.toString('hex')}`,
       protocol: 'orca-whirlpools',
-      chain: ChainType.SOLANA,
+      chain: 'solana' as any,
       pool: whirlpool.toString('hex'),
       
       // Position amounts

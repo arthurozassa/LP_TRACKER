@@ -303,7 +303,7 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
     return {
       id: `raydium-${poolId.toString('hex')}-${nftOwner.toString('hex')}`,
       protocol: 'raydium-clmm',
-      chain: ChainType.SOLANA,
+      chain: 'solana' as any,
       pool: poolId.toString('hex'),
       
       // Position amounts
