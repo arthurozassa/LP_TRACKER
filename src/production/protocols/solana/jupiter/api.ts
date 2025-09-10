@@ -400,7 +400,7 @@ export class JupiterAPIClient {
       perpetuals: apiPosition.pool,
       custody: apiPosition.custody,
       owner: apiPosition.owner,
-      collateralMint: apiPosition.collateral.mint,
+      collateralMint: apiPosition.collateral.address,
       collateralAmount: apiPosition.collateral.amount,
       sizeUsd: (parseFloat(apiPosition.size.usdValue) * 1e6).toString(), // Convert to micro USD
       collateralUsd: (parseFloat(apiPosition.collateral.usdValue) * 1e6).toString(),
