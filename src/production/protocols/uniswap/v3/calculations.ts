@@ -3,7 +3,7 @@
  * Advanced calculations for V3 concentrated liquidity positions
  */
 
-import { BigNumber } from 'ethers';
+// import { BigNumber } from 'ethers'; // Removed BigNumber import for compatibility
 import { 
   UniswapV3Position, 
   PriceData, 
@@ -72,8 +72,8 @@ export interface V3FeeTierInfo {
 
 export class V3Calculator {
   private readonly SECONDS_PER_YEAR = 365.25 * 24 * 60 * 60;
-  private readonly Q96 = BigNumber.from(2).pow(96);
-  private readonly Q128 = BigNumber.from(2).pow(128);
+  private readonly Q96 = Math.pow(2, 96);
+  private readonly Q128 = Math.pow(2, 128);
 
   /**
    * Calculates current liquidity amounts from position

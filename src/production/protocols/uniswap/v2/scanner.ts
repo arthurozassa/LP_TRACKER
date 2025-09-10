@@ -3,7 +3,7 @@
  * Scans and tracks V2 LP positions for a given wallet
  */
 
-import { ethers, BigNumber } from 'ethers';
+import { ethers } from 'ethers'; // Removed BigNumber import for compatibility
 import { 
   UniswapV2Position, 
   UniswapChain, 
@@ -57,7 +57,7 @@ export class V2PositionScanner {
   private config: V2ScanConfig;
 
   constructor(
-    provider: ethers.providers.Provider,
+    provider: ethers.Provider,
     chain: UniswapChain,
     config: Partial<V2ScanConfig> = {}
   ) {
@@ -235,27 +235,27 @@ export class V2PositionScanner {
   private async createPositionFromLPBalance(
     userAddress: string,
     pairAddress: string,
-    lpBalance: BigNumber
+    lpBalance: string
   ): Promise<UniswapV2Position | null> {
     try {
       // Get detailed pair info
       const pairInfo = await this.contractOps.getDetailedPairInfo(pairAddress);
       
       // Check if position meets minimum liquidity requirements
-      if (lpBalance.isZero()) {
+      if (lpBalance === '0') {
         return null;
       }
 
       // Calculate user's share of the pool
-      const shareOfPool = safeDivide(lpBalance, pairInfo.totalSupply);
+      const shareOfPool = safeDivide(Number(lpBalance), Number(pairInfo.totalSupply));
       
       if (shareOfPool < 0.000001) { // Less than 0.0001% of pool
         return null;
       }
 
-      // Calculate token amounts based on pool share
-      const token0Amount = pairInfo.reserve0.mul(lpBalance).div(pairInfo.totalSupply);
-      const token1Amount = pairInfo.reserve1.mul(lpBalance).div(pairInfo.totalSupply);
+      // Calculate token amounts based on pool share (simplified calculation)
+      const token0Amount = Math.floor((Number(pairInfo.reserve0) * Number(lpBalance)) / Number(pairInfo.totalSupply)).toString();
+      const token1Amount = Math.floor((Number(pairInfo.reserve1) * Number(lpBalance)) / Number(pairInfo.totalSupply)).toString();
 
       // Create pool object
       const pool: PoolV2 = {
@@ -305,7 +305,7 @@ export class V2PositionScanner {
         // Metadata
         createdAt: new Date(), // Would need transaction history for actual date
         lastUpdate: new Date(),
-        isActive: !lpBalance.isZero()
+        isActive: lpBalance !== '0'
       };
 
       return position;
@@ -355,7 +355,7 @@ export class V2PositionScanner {
     try {
       const lpBalance = await this.contractOps.getLPBalance(pairAddress, userAddress);
       
-      if (lpBalance.isZero()) {
+      if (lpBalance === '0') {
         return null;
       }
 
@@ -411,7 +411,7 @@ export class V2PositionScanner {
  * Creates a V2 position scanner
  */
 export function createV2Scanner(
-  provider: ethers.providers.Provider,
+  provider: ethers.Provider,
   chain: UniswapChain,
   config?: Partial<V2ScanConfig>
 ): V2PositionScanner {
