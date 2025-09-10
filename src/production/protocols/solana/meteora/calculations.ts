@@ -390,12 +390,12 @@ export function calculateRewards(
 } {
   try {
     const rewardBreakdown = position.unclaimedRewards.map(reward => {
-      const price = rewardPrices.get(reward.mint) || 0;
+      const price = rewardPrices.get(reward.address) || 0;
       const amountUi = tokenAmountToUi(reward.amount, 9); // Assume 9 decimals for reward tokens
       const value = amountUi * price;
 
       return {
-        address: reward.mint,
+        address: reward.address,
         amount: reward.amount,
         value,
         // APR calculation would require emission rates and time data
