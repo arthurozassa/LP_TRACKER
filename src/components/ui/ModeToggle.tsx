@@ -166,7 +166,7 @@ const ModeToggle: React.FC<ModeToggleProps> = ({
               <Zap className={iconSizes[size]} />
             )}
             {showLabels && (
-              <span className="font-medium capitalize">{mode}</span>
+              <span className="font-medium capitalize">{isDemo ? 'demo' : 'production'}</span>
             )}
           </div>
           
@@ -267,7 +267,7 @@ const ModeToggle: React.FC<ModeToggleProps> = ({
         <ModeTooltip 
           isOpen={showTooltipModal}
           onClose={() => setShowTooltipModal(false)}
-          mode={mode}
+          mode={isDemo ? 'demo' : 'production'}
         />
       )}
     </>

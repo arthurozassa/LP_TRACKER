@@ -11,9 +11,14 @@ import { getMultiLevelCache, CacheStrategies } from './cache/strategies';
 import { getCacheInvalidationManager } from './cache/invalidation';
 
 // Queue system imports
-import { createQueueManager, getQueueManager, QueueManager, QueueConfig } from './queue/processors';
-import { createJobScheduler, getJobScheduler, JobScheduler, SchedulerConfig } from './queue/scheduler';
-import { createQueueMonitoring, getQueueMonitoring, QueueMonitoring, MonitoringConfig } from './queue/monitoring';
+import QueueManagerClass, { createQueueManager, getQueueManager, QueueConfig } from './queue/processors';
+import JobSchedulerClass, { createJobScheduler, getJobScheduler, SchedulerConfig } from './queue/scheduler';
+import QueueMonitoringClass, { createQueueMonitoring, getQueueMonitoring, MonitoringConfig } from './queue/monitoring';
+
+// Type aliases for consistency
+type QueueManager = typeof QueueManagerClass;
+type JobScheduler = typeof JobSchedulerClass;
+type QueueMonitoring = typeof QueueMonitoringClass;
 
 // Job data types
 export type {
@@ -92,9 +97,9 @@ export interface SystemHealth {
 }
 
 class ProductionInfrastructure {
-  private queueManager: QueueManager | null = null;
-  private scheduler: JobScheduler | null = null;
-  private monitoring: QueueMonitoring | null = null;
+  private queueManager: QueueManagerClass | null = null;
+  private scheduler: JobSchedulerClass | null = null;
+  private monitoring: QueueMonitoringClass | null = null;
   private initialized = false;
   private startTime = Date.now();
 
@@ -502,9 +507,9 @@ export { CacheStrategies };
 // Export main classes for advanced usage
 export {
   ProductionInfrastructure,
-  QueueManager,
-  JobScheduler,
-  QueueMonitoring
+  QueueManagerClass as QueueManager,
+  JobSchedulerClass as JobScheduler,
+  QueueMonitoringClass as QueueMonitoring
 };
 
 // Default configuration for common setups

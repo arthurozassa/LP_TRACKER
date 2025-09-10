@@ -273,19 +273,20 @@ export const POST = asyncHandler(async (request: NextRequest) => {
   }
 
   const { timeframe, includeComparisons, includeForecasting } = validation.data!;
+  const safeTimeframe = timeframe || '24h';
 
   // Calculate analytics
-  const aggregates = calculateAggregates(timeframe);
+  const aggregates = calculateAggregates(safeTimeframe);
   
   const response: AnalyticsResponse = {
     aggregates,
-    timeframe,
+    timeframe: safeTimeframe,
     topOpportunities: generateTopOpportunities(),
   };
 
   // Add comparisons if requested
   if (includeComparisons) {
-    response.comparison = calculateComparisons(timeframe);
+    response.comparison = calculateComparisons(safeTimeframe);
   }
 
   // Add forecasting if requested
@@ -318,26 +319,28 @@ export const GET = asyncHandler(async (request: NextRequest) => {
 
   // Validate timeframe
   const validTimeframes = ['24h', '7d', '30d', '90d', '1y'];
-  if (!validTimeframes.includes(timeframe)) {
+  const safeTimeframe2 = timeframe || '24h';
+  
+  if (!validTimeframes.includes(safeTimeframe2)) {
     return errorResponse(
       ERROR_CODES.INVALID_TIMEFRAME,
-      `Invalid timeframe: ${timeframe}. Must be one of: ${validTimeframes.join(', ')}`,
+      `Invalid timeframe: ${safeTimeframe2}. Must be one of: ${validTimeframes.join(', ')}`,
       HTTP_STATUS.BAD_REQUEST
     );
   }
 
   // Calculate analytics
-  const aggregates = calculateAggregates(timeframe);
+  const aggregates = calculateAggregates(safeTimeframe2);
   
   const response: AnalyticsResponse = {
     aggregates,
-    timeframe,
+    timeframe: safeTimeframe2,
     topOpportunities: generateTopOpportunities(),
   };
 
   // Add comparisons if requested
   if (includeComparisons) {
-    response.comparison = calculateComparisons(timeframe);
+    response.comparison = calculateComparisons(safeTimeframe2);
   }
 
   // Add forecasting if requested

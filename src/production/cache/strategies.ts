@@ -52,7 +52,7 @@ class MultiLevelCache {
       if (memoryResult !== null) {
         // Validate if validator is provided
         if (!validator || validator(memoryResult)) {
-          logger.debug('Cache hit: memory', { key });
+          logger.debug('Cache hit: memory', { key } as any);
           
           // Check if refresh-ahead is needed
           if (strategy.refreshAhead && loader) {
@@ -73,7 +73,7 @@ class MultiLevelCache {
       if (redisResult !== null) {
         // Validate if validator is provided
         if (!validator || validator(redisResult)) {
-          logger.debug('Cache hit: redis', { key });
+          logger.debug('Cache hit: redis', { key } as any);
           
           // Write to memory cache if enabled
           if (strategy.memory) {
@@ -95,7 +95,7 @@ class MultiLevelCache {
 
     // Level 3: Load from source if loader provided
     if (loader) {
-      logger.debug('Cache miss: loading from source', { key });
+      logger.debug('Cache miss: loading from source', { key } as any);
       
       try {
         const freshData = await loader();
@@ -105,15 +105,15 @@ class MultiLevelCache {
           await this.set(key, freshData, options);
           return freshData;
         } else {
-          logger.warn('Loaded data failed validation', { key });
+          logger.warn('Loaded data failed validation', { key } as any);
           return null;
         }
       } catch (error) {
-        logger.error('Failed to load data from source', { key, error });
+        logger.error('Failed to load data from source', { key, error } as any);
         
         // Fallback to database if enabled (this would be implemented by the caller)
         if (options.fallbackToDb) {
-          logger.info('Attempting database fallback', { key });
+          logger.info('Attempting database fallback', { key } as any);
         }
         
         return null;
@@ -148,7 +148,7 @@ class MultiLevelCache {
         success = results.every(result => result.status === 'fulfilled' && result.value);
         
         if (!success) {
-          logger.warn('Some cache layers failed during write-through', { key });
+          logger.warn('Some cache layers failed during write-through', { key } as any);
         }
       }
       // Write-back strategy: write to memory immediately, Redis asynchronously
@@ -163,18 +163,18 @@ class MultiLevelCache {
           setImmediate(async () => {
             try {
               await this.redisCache.set(key, value, strategy.redis!);
-              logger.debug('Write-back to Redis completed', { key });
+              logger.debug('Write-back to Redis completed', { key } as any);
             } catch (error) {
-              logger.error('Write-back to Redis failed', { key, error });
+              logger.error('Write-back to Redis failed', { key, error } as any);
             }
           });
         }
       }
 
-      logger.debug('Cache set completed', { key, strategy: strategy.writeThrough ? 'write-through' : 'write-back' });
+      logger.debug('Cache set completed', { key, strategy: strategy.writeThrough ? 'write-through' : 'write-back' } as any);
       return success;
     } catch (error) {
-      logger.error('Cache set error', { key, error });
+      logger.error('Cache set error', { key, error } as any);
       return false;
     }
   }
@@ -207,7 +207,7 @@ class MultiLevelCache {
     const results = await Promise.allSettled(promises);
     success = results.every(result => result.status === 'fulfilled' && result.value);
 
-    logger.debug('Cache delete completed', { key, success });
+    logger.debug('Cache delete completed', { key, success } as any);
     return success;
   }
 
@@ -277,7 +277,7 @@ class MultiLevelCache {
         memoryHits: keys.length - missedKeys.length,
         redisHits: missedKeys.length - remainingMisses.length,
         totalMisses: remainingMisses.length
-      });
+      } as any);
     }
 
     return results;
@@ -324,7 +324,7 @@ class MultiLevelCache {
       const results = await Promise.allSettled(promises);
       success = results.every(result => result.status === 'fulfilled' && result.value);
 
-      logger.debug('Multi-set completed', { itemCount: items.length, success });
+      logger.debug('Multi-set completed', { itemCount: items.length, success } as any);
       return success;
     } catch (error) {
       logger.error('Multi-set error', { error });
@@ -425,15 +425,15 @@ class MultiLevelCache {
       if (ttl > 0 && ttl < (originalTtl * refreshThreshold)) {
         // Prevent multiple refresh operations for the same key
         if (!this.refreshTimeouts.has(key)) {
-          logger.debug('Scheduling refresh-ahead', { key, ttl, threshold: originalTtl * refreshThreshold });
+          logger.debug('Scheduling refresh-ahead', { key, ttl, threshold: originalTtl * refreshThreshold } as any);
           
           const timeoutId = setTimeout(async () => {
             try {
               const freshData = await loader();
               await this.set(key, freshData, options);
-              logger.debug('Refresh-ahead completed', { key });
+              logger.debug('Refresh-ahead completed', { key } as any);
             } catch (error) {
-              logger.error('Refresh-ahead failed', { key, error });
+              logger.error('Refresh-ahead failed', { key, error } as any);
             } finally {
               this.refreshTimeouts.delete(key);
             }
@@ -466,15 +466,15 @@ class MultiLevelCache {
             const data = await loader(key);
             await this.set(key, data, options);
             results.successful++;
-            logger.debug('Cache warmed', { key });
+            logger.debug('Cache warmed', { key } as any);
           } else {
             results.successful++;
-            logger.debug('Cache already warm', { key });
+            logger.debug('Cache already warm', { key } as any);
           }
         } catch (error) {
           results.failed++;
           results.errors.push({ key, error });
-          logger.error('Cache warmup failed', { key, error });
+          logger.error('Cache warmup failed', { key, error } as any);
         }
       });
 
@@ -490,7 +490,7 @@ class MultiLevelCache {
     // Clear all refresh timeouts
     for (const [key, timeoutId] of this.refreshTimeouts) {
       clearTimeout(timeoutId);
-      logger.debug('Cleared refresh timeout', { key });
+      logger.debug('Cleared refresh timeout', { key } as any);
     }
     this.refreshTimeouts.clear();
 

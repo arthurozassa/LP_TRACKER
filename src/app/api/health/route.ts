@@ -47,9 +47,12 @@ async function checkExternalApiHealth(): Promise<{
   defi_llama: 'healthy' | 'unhealthy';
   coingecko: 'healthy' | 'unhealthy';
 }> {
-  const results = {
-    defi_llama: 'healthy' as const,
-    coingecko: 'healthy' as const,
+  const results: {
+    defi_llama: 'healthy' | 'unhealthy';
+    coingecko: 'healthy' | 'unhealthy';
+  } = {
+    defi_llama: 'healthy',
+    coingecko: 'healthy',
   };
 
   try {
@@ -278,20 +281,26 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     let resultIndex = 0;
     
     if (checkDatabase) {
-      services.database = results[resultIndex].status === 'fulfilled' ? results[resultIndex].value : 'unhealthy';
+      const dbResult = results[resultIndex];
+      services.database = dbResult.status === 'fulfilled' ? 
+        (dbResult as PromiseFulfilledResult<any>).value : 'unhealthy';
       resultIndex++;
     }
     
     if (checkCache) {
-      services.cache = results[resultIndex].status === 'fulfilled' ? results[resultIndex].value : 'unhealthy';
+      const cacheResult = results[resultIndex];
+      services.cache = cacheResult.status === 'fulfilled' ? 
+        (cacheResult as PromiseFulfilledResult<any>).value : 'unhealthy';
       resultIndex++;
     }
     
     if (checkExternalApis) {
-      services.external_apis = results[resultIndex].status === 'fulfilled' ? results[resultIndex].value : {
-        defi_llama: 'unhealthy',
-        coingecko: 'unhealthy',
-      };
+      const apiResult = results[resultIndex];
+      services.external_apis = apiResult.status === 'fulfilled' ? 
+        (apiResult as PromiseFulfilledResult<any>).value : {
+          defi_llama: 'unhealthy',
+          coingecko: 'unhealthy',
+        };
     }
 
     // Build response

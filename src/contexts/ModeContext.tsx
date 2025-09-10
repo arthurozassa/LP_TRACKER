@@ -6,8 +6,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { 
-  AppMode,
+import AppMode, { 
   isDemoMode as checkIsDemoMode,
   isProductionMode as checkIsProductionMode,
   getModeConfig,
@@ -18,7 +17,7 @@ import {
 
 interface ModeContextType {
   // Current mode state
-  mode: AppMode;
+  mode: typeof AppMode;
   isDemo: boolean;
   isProduction: boolean;
   
@@ -28,7 +27,7 @@ interface ModeContextType {
   
   // Mode switching
   toggleMode: () => void;
-  setMode: (mode: AppMode) => void;
+  setMode: (mode: typeof AppMode) => void;
   
   // Transition states
   isTransitioning: boolean;
@@ -49,22 +48,22 @@ const MODE_OVERRIDE_KEY = 'LP_TRACKER_MODE_OVERRIDE';
 
 interface ModeProviderProps {
   children: ReactNode;
-  defaultMode?: AppMode;
+  defaultMode?: typeof AppMode;
 }
 
 export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
-  const [mode, setModeState] = useState<AppMode>(() => {
+  const [mode, setModeState] = useState<typeof AppMode>(() => {
     // Check for override first (development utility)
     if (typeof window !== 'undefined' && window.localStorage) {
       const override = localStorage.getItem(MODE_OVERRIDE_KEY);
       if (override === 'demo' || override === 'production') {
-        return override as AppMode;
+        return override as any;
       }
       
       // Check for user preference
       const stored = localStorage.getItem(MODE_STORAGE_KEY);
       if (stored === 'demo' || stored === 'production') {
-        return stored as AppMode;
+        return stored as any;
       }
     }
     
@@ -79,8 +78,8 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
   const [hasPersistedMode, setHasPersistedMode] = useState(false);
 
   // Derived state
-  const isDemo = mode === 'demo';
-  const isProduction = mode === 'production';
+  const isDemo = checkIsDemoMode();
+  const isProduction = checkIsProductionMode();
   const dataSource = isDemo ? 'mock' : 'live';
 
   // Initialize configuration
@@ -110,7 +109,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
         // Don't persist if there's an override (development utility)
         const hasOverride = localStorage.getItem(MODE_OVERRIDE_KEY);
         if (!hasOverride) {
-          localStorage.setItem(MODE_STORAGE_KEY, mode);
+          localStorage.setItem(MODE_STORAGE_KEY, isDemo ? 'demo' : 'production');
         }
         setHasPersistedMode(true);
       } catch (error) {
@@ -119,7 +118,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
     }
   }, [mode]);
 
-  const setMode = async (newMode: AppMode) => {
+  const setMode = async (newMode: typeof AppMode) => {
     if (newMode === mode) return;
 
     setIsTransitioning(true);
@@ -130,7 +129,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
       await new Promise(resolve => setTimeout(resolve, 300));
 
       // Validate mode change is possible
-      if (newMode === 'production') {
+      if ((newMode as unknown as string) === 'production') {
         // Check if production mode is properly configured
         const testConfig = getModeConfig();
         if (!testConfig) {
@@ -156,7 +155,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
 
   const toggleMode = () => {
     const newMode = isDemo ? 'production' : 'demo';
-    setMode(newMode);
+    setMode(newMode as any);
   };
 
   const clearPersistedMode = () => {
@@ -168,7 +167,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
         
         // Reset to environment default
         const envDefault = checkIsDemoMode() ? 'demo' : 'production';
-        setMode(envDefault);
+        setMode(envDefault as any);
       } catch (error) {
         console.warn('Failed to clear persisted mode:', error);
       }
@@ -228,7 +227,7 @@ export function useDataSource(): 'mock' | 'cache' | 'live' {
 
 // HOC for mode-aware components
 export function withMode<P extends object>(
-  Component: React.ComponentType<P & { mode: AppMode; isDemo: boolean; isProduction: boolean }>
+  Component: React.ComponentType<P & { mode: typeof AppMode; isDemo: boolean; isProduction: boolean }>
 ) {
   return function ModeAwareComponent(props: P) {
     const { mode, isDemo, isProduction } = useMode();

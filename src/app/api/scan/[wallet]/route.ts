@@ -95,7 +95,7 @@ async function performWalletScan(
     const totalProtocols = protocols.length;
 
     for (const protocol of protocols) {
-      if (scanProgress.status === 'failed') break;
+      if ((scanProgress.status as string) === 'failed') break;
 
       scanProgress.currentProtocol = protocol;
       scanProgress.progress = Math.round((completedCount / totalProtocols) * 100);
@@ -153,7 +153,7 @@ async function performWalletScan(
     }
 
     // Compile final results
-    const scanResults: ScanResults = {
+    const finalScanResults: ScanResults = {
       chain: chains[0] as any,
       walletAddress,
       totalValue: Object.values(allProtocolData).reduce((sum, pd) => sum + pd.totalValue, 0),
@@ -173,7 +173,7 @@ async function performWalletScan(
     scanProgress.completedAt = new Date().toISOString();
     
     // Store results
-    scanResults.set(scanId, scanResults);
+    scanResults.set(scanId, finalScanResults);
 
   } catch (error) {
     console.error('Scan failed:', error);

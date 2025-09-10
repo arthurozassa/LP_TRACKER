@@ -473,7 +473,7 @@ export default function Home() {
               <div className={`w-1.5 h-1.5 rounded-full ${
                 isDemo ? 'bg-blue-400' : 'bg-green-400'
               }`}></div>
-              <span>Currently in {mode} mode {isDemo ? '(Sample Data)' : '(Live Data)'}</span>
+              <span>Currently in {isDemo ? 'demo' : 'production'} mode {isDemo ? '(Sample Data)' : '(Live Data)'}</span>
             </div>
           </div>
         </div>

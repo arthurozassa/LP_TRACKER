@@ -8,7 +8,7 @@ import { asyncHandler, successResponse, errorResponse } from '@/lib/middleware/e
 import { cors, setCorsHeaders } from '@/lib/middleware/cors';
 import { createEndpointRateLimit, addRateLimitHeaders } from '@/lib/middleware/rateLimit';
 import { validateWalletAddress, validateScanRequest, validateUrlParam } from '@/lib/validators';
-import { getUniswapAdapter } from '@/src/production/protocols/uniswap/adapter';
+import { getUniswapAdapter } from '@/production/protocols/uniswap/adapter';
 import type { ScanResults, ScanApiResponse, ProtocolData, Position } from '@/types';
 import type { ScanRequest, ScanJobResponse, ScanProgress } from '@/types/api';
 import { ERROR_CODES, HTTP_STATUS } from '@/types/api';
@@ -195,7 +195,7 @@ async function performEnhancedWalletScan(
 
     // Scan other protocols individually
     for (const protocol of otherProtocols) {
-      if (scanProgress.status === 'failed') break;
+      if ((scanProgress.status as string) === 'failed') break;
 
       scanProgress.currentProtocol = protocol;
       scanProgress.progress = Math.round((completedCount / totalProtocols) * 100);
@@ -260,7 +260,7 @@ async function performEnhancedWalletScan(
     console.error('Enhanced scan failed:', error);
     scanProgress.status = 'failed';
     scanProgress.progress = 0;
-    scanProgress.error = error instanceof Error ? error.message : 'Unknown error occurred';
+    (scanProgress as any).error = error instanceof Error ? error.message : 'Unknown error occurred';
   }
 }
 
@@ -460,7 +460,7 @@ export const POST = asyncHandler(async (request: NextRequest, { params }: { para
     const job = scanJobs.get(scanId);
     if (job) {
       job.status = 'failed';
-      job.error = error instanceof Error ? error.message : 'Unknown error';
+      (job as any).error = error instanceof Error ? error.message : 'Unknown error';
     }
   });
 

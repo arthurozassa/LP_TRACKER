@@ -148,17 +148,17 @@ class CacheInvalidationManager {
     // Global invalidation
     this.addRule({
       type: 'manual',
-      matcher: (event) => event.type === 'manual' && event.scope.global,
+      matcher: (event) => event.type === 'manual' && !!event.scope.global,
       keys: () => ['*'], // Invalidate everything
       delay: 0
     });
 
-    logger.info('Default invalidation rules set up', { ruleCount: this.rules.length });
+    logger.info('Default invalidation rules set up');
   }
 
   addRule(rule: InvalidationRule): void {
     this.rules.push(rule);
-    logger.debug('Invalidation rule added', { type: rule.type, hasMatcher: !!rule.matcher });
+    logger.debug('Invalidation rule added');
   }
 
   removeRule(type: InvalidationType, matcher?: (event: InvalidationEvent) => boolean): boolean {
@@ -171,16 +171,12 @@ class CacheInvalidationManager {
     }
 
     const removed = initialLength - this.rules.length;
-    logger.debug('Invalidation rules removed', { type, removed });
+    logger.debug('Invalidation rules removed');
     return removed > 0;
   }
 
   async invalidate(event: InvalidationEvent): Promise<void> {
-    logger.debug('Invalidation event received', { 
-      type: event.type, 
-      scope: event.scope, 
-      source: event.source 
-    });
+    logger.debug('Invalidation event received');
 
     this.eventQueue.push(event);
     this.stats.queuedInvalidations = this.eventQueue.length;
@@ -224,13 +220,13 @@ class CacheInvalidationManager {
       }
 
       // Process batched events
-      for (const [batchKey, events] of batchedEvents) {
+      for (const [batchKey, events] of Array.from(batchedEvents.entries())) {
         await this.processBatchedEvents(events);
       }
 
       this.stats.queuedInvalidations = 0;
     } catch (error) {
-      logger.error('Error processing invalidation queue', { error });
+      logger.error('Error processing invalidation queue');
     } finally {
       this.processing = false;
       
@@ -246,7 +242,7 @@ class CacheInvalidationManager {
     const matchingRules = this.rules.filter(rule => rule.matcher(event));
 
     if (matchingRules.length === 0) {
-      logger.debug('No matching rules for invalidation event', { type: event.type });
+      logger.debug('No matching rules for invalidation event');
       return;
     }
 
@@ -279,7 +275,7 @@ class CacheInvalidationManager {
       type: event.type,
       keysInvalidated: allKeys.size,
       processingTime: Date.now() - startTime
-    });
+    } as any);
   }
 
   private async processBatchedEvents(events: InvalidationEvent[]): Promise<void> {
@@ -316,7 +312,7 @@ class CacheInvalidationManager {
       eventCount: events.length,
       keysInvalidated: allKeys.size,
       processingTime
-    });
+    } as any);
   }
 
   private async invalidateKeys(keys: string[], strategies: CacheStrategy[]): Promise<void> {
@@ -351,7 +347,7 @@ class CacheInvalidationManager {
         total: promises.length, 
         failures,
         keys: keys.slice(0, 10) // Log first 10 keys for debugging
-      });
+      } as any);
     }
   }
 
@@ -360,7 +356,7 @@ class CacheInvalidationManager {
       await this.cache.clear(pattern, { strategy });
       return true;
     } catch (error) {
-      logger.error('Pattern invalidation failed', { pattern, error });
+      logger.error('Pattern invalidation failed');
       return false;
     }
   }
@@ -460,7 +456,7 @@ class CacheInvalidationManager {
       type: event.type, 
       delay,
       executeAt: new Date(Date.now() + delay).toISOString()
-    });
+    } as any);
   }
 
   // Dependency tracking
@@ -472,7 +468,7 @@ class CacheInvalidationManager {
     }
     this.dependencies.get(dependsOn)!.add(key);
     
-    logger.debug('Cache dependency added', { key, dependsOn });
+    logger.debug('Cache dependency added');
   }
 
   removeDependency(key: string, dependsOn: string): void {

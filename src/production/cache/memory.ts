@@ -46,7 +46,7 @@ class MemoryCache {
           return JSON.stringify(value.value).length;
         },
         dispose: (value, key, reason) => {
-          logger.debug('Cache entry disposed', { namespace, key, reason });
+          logger.debug('Cache entry disposed', { namespace, key, reason } as any);
         }
       });
 
@@ -88,11 +88,11 @@ class MemoryCache {
       stats.hits++;
       this.updateStats(namespace);
       
-      logger.debug('Memory cache hit', { namespace, key, accessCount: entry.accessCount });
+      logger.debug('Memory cache hit', { namespace, key, accessCount: entry.accessCount } as any);
       return entry.value;
     } else {
       stats.misses++;
-      logger.debug('Memory cache miss', { namespace, key });
+      logger.debug('Memory cache miss', { namespace, key } as any);
       return null;
     }
   }
@@ -115,10 +115,10 @@ class MemoryCache {
       stats.sets++;
       this.updateStats(namespace);
       
-      logger.debug('Memory cache set', { namespace, key, size: JSON.stringify(value).length });
+      logger.debug('Memory cache set', { namespace, key, size: JSON.stringify(value).length } as any);
       return true;
     } catch (error) {
-      logger.error('Memory cache set error', { namespace, key, error });
+      logger.error('Memory cache set error', { namespace, key, error } as any);
       return false;
     }
   }
@@ -140,7 +140,7 @@ class MemoryCache {
     if (result) {
       stats.deletes++;
       this.updateStats(namespace);
-      logger.debug('Memory cache delete', { namespace, key });
+      logger.debug('Memory cache delete', { namespace, key } as any);
     }
 
     return result;
@@ -154,7 +154,7 @@ class MemoryCache {
       const size = cache.size;
       cache.clear();
       this.updateStats(namespace);
-      logger.info('Memory cache cleared', { namespace, entriesCleared: size });
+      logger.info('Memory cache cleared', { namespace, entriesCleared: size } as any);
     }
   }
 
@@ -210,7 +210,7 @@ class MemoryCache {
   getAllStats(): Record<string, MemoryCacheStats> {
     const allStats: Record<string, MemoryCacheStats> = {};
     
-    for (const [namespace, stats] of this.stats) {
+    for (const [namespace, stats] of Array.from(this.stats.entries())) {
       this.updateStats(namespace);
       allStats[namespace] = { ...stats };
     }
@@ -232,7 +232,7 @@ class MemoryCache {
       }
     } else {
       // Reset all namespace stats
-      for (const [ns, stats] of this.stats) {
+      for (const [ns, stats] of Array.from(this.stats.entries())) {
         const cache = this.caches.get(ns);
         stats.hits = 0;
         stats.misses = 0;
@@ -309,7 +309,7 @@ class MemoryCache {
     const pruned = initialSize - finalSize;
 
     this.updateStats(namespace);
-    logger.info('Memory cache pruned', { namespace, entriesPruned: pruned });
+    logger.info('Memory cache pruned', { namespace, entriesPruned: pruned } as any);
 
     return pruned;
   }
@@ -325,7 +325,7 @@ class MemoryCache {
       this.caches.delete(namespace);
       this.stats.delete(namespace);
       
-      logger.info('Memory cache namespace deleted', { namespace, entriesDeleted: size });
+      logger.info('Memory cache namespace deleted', { namespace, entriesDeleted: size } as any);
       return true;
     }
     
@@ -342,7 +342,7 @@ class MemoryCache {
     let estimatedSizeBytes = 0;
     const namespaces: Record<string, { entries: number; sizeBytes: number }> = {};
 
-    for (const [namespace, cache] of this.caches) {
+    for (const [namespace, cache] of Array.from(this.caches.entries())) {
       const entries = cache.size;
       const sizeBytes = cache.calculatedSize || 0;
       

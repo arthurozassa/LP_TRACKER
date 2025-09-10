@@ -10,7 +10,7 @@ const defaultConfig: RateLimitConfig = {
   maxRequests: 100, // 100 requests per window
   skipSuccessfulRequests: false,
   skipFailedRequests: false,
-  keyGenerator: (req: NextRequest) => {
+  keyGenerator: (req: any) => {
     // Use IP address as default key
     const forwarded = req.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0] : req.headers.get('x-real-ip') || 'unknown';
@@ -121,7 +121,7 @@ export function addRateLimitHeaders(response: NextResponse, request: NextRequest
 export function cleanupRateLimitStore(): void {
   const now = Date.now();
   
-  for (const [key, entry] of rateLimitStore.entries()) {
+  for (const [key, entry] of Array.from(rateLimitStore.entries())) {
     if (entry.resetTime <= now) {
       rateLimitStore.delete(key);
     }
@@ -156,7 +156,7 @@ export function createEndpointRateLimit(endpoint: keyof typeof rateLimitConfigs)
   const config = rateLimitConfigs[endpoint];
   return rateLimit({
     ...config,
-    keyGenerator: (req: NextRequest) => {
+    keyGenerator: (req: any) => {
       const forwarded = req.headers.get('x-forwarded-for');
       const ip = forwarded ? forwarded.split(',')[0] : req.headers.get('x-real-ip') || 'unknown';
       return `rate-limit:${endpoint}:${ip}`;

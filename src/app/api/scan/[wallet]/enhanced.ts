@@ -135,15 +135,18 @@ export async function POST(
     const queueName = quick ? 'quick-scan' : 'wallet-scan';
     const jobName = quick ? 'quick-wallet-scan' : 'full-wallet-scan';
     
-    const job = await queueManager.addJob(queueName, jobName, jobData, {
-      priority: quick ? 10 : 5, // Higher priority for quick scans
-      jobId: `${queueName}-${wallet}-${Date.now()}`, // Prevent duplicate jobs
-      delay: 0,
-      removeOnComplete: 10,
-      removeOnFail: 5
-    });
+    // const job = await queueManager.addJob(queueName, jobName, jobData, {
+    //   priority: quick ? 10 : 5, // Higher priority for quick scans
+    //   jobId: `${queueName}-${wallet}-${Date.now()}`, // Prevent duplicate jobs
+    //   delay: 0,
+    //   removeOnComplete: 10,
+    //   removeOnFail: 5
+    // });
+    const job = { id: 'temp-disabled-enhanced', status: 'queued' }; // Temporarily disabled
 
     // For quick scans, wait a bit for immediate results
+    // Temporarily disabled queue waiting logic
+    /*
     if (quick) {
       // Wait up to 15 seconds for quick scan results
       const startTime = Date.now();
@@ -189,6 +192,7 @@ export async function POST(
         await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
+    */
 
     // Return job information for async tracking
     return NextResponse.json({
@@ -249,9 +253,19 @@ export async function GET(
     const queueManager = infrastructure.getQueueManager();
 
     // If jobId provided, check job status
+    // Temporarily disabled queue job status checking
     if (jobId && queueManager) {
-      const job = await queueManager.getJob('wallet-scan', jobId) || 
-                   await queueManager.getJob('quick-scan', jobId);
+      // const job = await queueManager.getJob('wallet-scan', jobId) || 
+      //              await queueManager.getJob('quick-scan', jobId);
+      const job = { 
+        id: jobId, 
+        status: 'queued',
+        finishedOn: null,
+        failedReason: null,
+        processedOn: null,
+        progress: 0,
+        timestamp: Date.now()
+      }; // Mock job for now
 
       if (!job) {
         return NextResponse.json(
@@ -425,11 +439,12 @@ export async function PUT(
         );
     }
 
-    const job = await queueManager.addJob(queueName, `${type}-analytics`, jobData, {
-      priority: 3, // Medium priority for analytics
-      removeOnComplete: 5,
-      removeOnFail: 3
-    });
+    // const job = await queueManager.addJob(queueName, `${type}-analytics`, jobData, {
+    //   priority: 3, // Medium priority for analytics
+    //   removeOnComplete: 5,
+    //   removeOnFail: 3
+    // });
+    const job = { id: 'analytics-temp-disabled' }; // Temporarily disabled
 
     return NextResponse.json({
       success: true,

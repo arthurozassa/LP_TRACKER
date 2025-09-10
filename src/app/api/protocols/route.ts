@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { asyncHandler, successResponse, errorResponse } from '@/lib/middleware/errorHandler';
 import { cors, setCorsHeaders } from '@/lib/middleware/cors';
 import { createEndpointRateLimit, addRateLimitHeaders } from '@/lib/middleware/rateLimit';
@@ -244,7 +244,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
   const limit = url.searchParams.get('limit');
 
   // Validate pagination
-  const pagination = validatePagination(page, limit);
+  const pagination = validatePagination(page || undefined, limit || undefined);
   if (pagination.error) {
     return errorResponse(
       ERROR_CODES.MISSING_REQUIRED_FIELD,
@@ -304,9 +304,8 @@ export const GET = asyncHandler(async (request: NextRequest) => {
     },
   };
 
-  const nextResponse = new Response(JSON.stringify(response), {
+  const nextResponse = NextResponse.json(response, {
     status: HTTP_STATUS.OK,
-    headers: { 'Content-Type': 'application/json' },
   });
 
   return addRateLimitHeaders(setCorsHeaders(nextResponse, request), request, {});

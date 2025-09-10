@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { ApiResponse, ApiError, ValidationError } from '@/types/api';
+import type { ApiResponse, ApiError as ApiErrorType, ValidationError as ValidationErrorType } from '@/types/api';
 import { HTTP_STATUS, ERROR_CODES } from '@/types/api';
 
 // Custom error classes
