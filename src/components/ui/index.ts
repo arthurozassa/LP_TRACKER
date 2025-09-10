@@ -11,3 +11,4 @@ export { default as AnimatedCard } from './AnimatedCard';
 export { default as ProtocolLoadingIndicator } from './ProtocolLoadingIndicator';
 export { default as ScanningAnimation } from './ScanningAnimation';
 export { default as EnhancedLoadingState } from './EnhancedLoadingState';
+export { default as ModeToggle, CompactModeToggle, FullModeToggle } from './ModeToggle';

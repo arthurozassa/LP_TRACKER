@@ -13,9 +13,12 @@ import {
   SmartAlerts 
 } from '../components/analytics';
 import { ScanResults, ChainType, LoadingState, DashboardMetrics, ProtocolDistribution } from '../types';
-import { getMockDataByAddress } from '../mock-data';
+import { getMockDataByAddress } from '../demo';
 import { historicalDataService } from '../services/historicalData';
 import { detectChainType, isEthereumAddress, isSolanaAddress } from '../types';
+import { useMode } from '../contexts/ModeContext';
+import { getProductionScanner } from '../services/productionScanner';
+import ModeToggle from '../components/ui/ModeToggle';
 
 // Demo addresses
 const DEMO_ADDRESSES = [
@@ -43,7 +46,8 @@ const DEMO_ADDRESSES = [
 const SimpleSearchBar: React.FC<{
   onScan: (address: string, chain: ChainType) => void;
   isLoading: boolean;
-}> = ({ onScan, isLoading }) => {
+  isDemo: boolean;
+}> = ({ onScan, isLoading, isDemo }) => {
   const [address, setAddress] = useState('');
   const [detectedChain, setDetectedChain] = useState<ChainType | null>(null);
   const [error, setError] = useState('');
@@ -145,31 +149,45 @@ const SimpleSearchBar: React.FC<{
         </div>
       </div>
 
-      {/* Demo Addresses */}
-      <div className="tt-card p-6">
-        <h3 className="tt-heading-3 mb-4">Try Demo Addresses</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {DEMO_ADDRESSES.map((demo, index) => (
-            <button
-              key={index}
-              onClick={() => handleDemoClick(demo)}
-              disabled={isLoading}
-              className="p-4 tt-card tt-card-hover transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
-            >
-              <div className="tt-text-primary font-medium text-sm">{demo.label}</div>
-              <div className="tt-text-secondary text-xs mt-1">{demo.description}</div>
-              <div className="tt-text-tertiary text-xs font-mono mt-1 break-all">
-                {formatAddress(demo.address)}
-              </div>
-            </button>
-          ))}
+      {/* Demo Addresses - Only show in demo mode */}
+      {isDemo && (
+        <div className="tt-card p-6">
+          <h3 className="tt-heading-3 mb-4">Try Demo Addresses</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {DEMO_ADDRESSES.map((demo, index) => (
+              <button
+                key={index}
+                onClick={() => handleDemoClick(demo)}
+                disabled={isLoading}
+                className="p-4 tt-card tt-card-hover transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+              >
+                <div className="tt-text-primary font-medium text-sm">{demo.label}</div>
+                <div className="tt-text-secondary text-xs mt-1">{demo.description}</div>
+                <div className="tt-text-tertiary text-xs font-mono mt-1 break-all">
+                  {formatAddress(demo.address)}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+      
+      {/* Production Mode Info */}
+      {!isDemo && (
+        <div className="tt-card p-6">
+          <h3 className="tt-heading-3 mb-4">Production Mode</h3>
+          <div className="tt-text-secondary text-sm">
+            Enter any wallet address to scan for live LP positions across supported protocols.
+            Data is fetched from real-time sources and may take longer to load.
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default function Home() {
+  const { mode, isDemo, isProduction, isTransitioning, dataSource } = useMode();
   const [scanResults, setScanResults] = useState<ScanResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingState, setLoadingState] = useState<LoadingState>({
@@ -178,6 +196,7 @@ export default function Home() {
     failedProtocols: [],
     progress: 0
   });
+  const [scanError, setScanError] = useState<string | null>(null);
   
   // Advanced analytics data
   const [portfolioHistory, setPortfolioHistory] = useState<any[]>([]);
@@ -314,6 +333,7 @@ export default function Home() {
 
   const handleScan = useCallback(async (address: string, chain: ChainType) => {
     setIsLoading(true);
+    setScanError(null);
     setLoadingState({
       isScanning: true,
       completedProtocols: [],
@@ -322,81 +342,100 @@ export default function Home() {
     });
 
     try {
-      // Simulate scanning delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      let scanResults: ScanResults;
       
-      // Try to get mock data
-      const mockData = getMockDataByAddress(address) as any;
-      
-      if (mockData) {
-        // Convert the old structure to new ScanResults structure
-        const newResults = {
-          chain,
-          walletAddress: address,
-          totalValue: mockData.totalValue,
-          totalPositions: mockData.totalPositions,
-          totalFeesEarned: Object.values(mockData.protocols).flatMap((p: any) => p.positions).reduce((sum: number, pos: any) => sum + pos.feesEarned, 0),
-          avgApr: Object.values(mockData.protocols).flatMap((p: any) => p.positions).reduce((sum: number, pos: any) => sum + pos.apr, 0) / Object.values(mockData.protocols).flatMap((p: any) => p.positions).length,
-          protocols: Object.entries(mockData.protocols).reduce((acc, [name, data]) => {
-            acc[name as any] = {
-              protocol: {
-                id: name as any,
-                name,
-                chain,
-                logoUri: '',
-                website: '',
-                supported: true
-              },
-              positions: (data as any).positions.map((pos: any) => ({
-                ...pos,
-                chain,
-                poolAddress: `0x${Math.random().toString(16).slice(2, 42)}`,
-                apy: pos.apr * 1.1,
-                createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-                updatedAt: new Date().toISOString(),
-                tokens: {
-                  token0: {
-                    ...pos.tokens.token0,
-                    address: `0x${Math.random().toString(16).slice(2, 42)}`,
-                    decimals: 18
-                  },
-                  token1: {
-                    ...pos.tokens.token1,
-                    address: `0x${Math.random().toString(16).slice(2, 42)}`,
-                    decimals: 18
+      if (isDemo) {
+        // Demo Mode: Use mock data
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+        
+        const mockData = getMockDataByAddress(address) as any;
+        
+        if (mockData) {
+          // Convert the old structure to new ScanResults structure
+          scanResults = {
+            chain,
+            walletAddress: address,
+            totalValue: mockData.totalValue,
+            totalPositions: mockData.totalPositions,
+            totalFeesEarned: Object.values(mockData.protocols).flatMap((p: any) => p.positions).reduce((sum: number, pos: any) => sum + pos.feesEarned, 0),
+            avgApr: Object.values(mockData.protocols).flatMap((p: any) => p.positions).reduce((sum: number, pos: any) => sum + pos.apr, 0) / Object.values(mockData.protocols).flatMap((p: any) => p.positions).length,
+            protocols: Object.entries(mockData.protocols).reduce((acc, [name, data]) => {
+              acc[name as any] = {
+                protocol: {
+                  id: name as any,
+                  name,
+                  chain,
+                  logoUri: '',
+                  website: '',
+                  supported: true
+                },
+                positions: (data as any).positions.map((pos: any) => ({
+                  ...pos,
+                  chain,
+                  poolAddress: `0x${Math.random().toString(16).slice(2, 42)}`,
+                  apy: pos.apr * 1.1,
+                  createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  tokens: {
+                    token0: {
+                      ...pos.tokens.token0,
+                      address: `0x${Math.random().toString(16).slice(2, 42)}`,
+                      decimals: 18
+                    },
+                    token1: {
+                      ...pos.tokens.token1,
+                      address: `0x${Math.random().toString(16).slice(2, 42)}`,
+                      decimals: 18
+                    }
                   }
-                }
-              })),
-              totalValue: (data as any).positions.reduce((sum: number, p: any) => sum + p.value, 0),
-              totalPositions: (data as any).positions.length,
-              totalFeesEarned: (data as any).positions.reduce((sum: number, p: any) => sum + p.feesEarned, 0),
-              avgApr: (data as any).positions.reduce((sum: number, p: any) => sum + p.apr, 0) / (data as any).positions.length,
-              isLoading: false
-            };
-            return acc;
-          }, {} as Record<string, any>),
-          lastUpdated: new Date().toISOString()
-        };
-        
-        setScanResults(newResults as ScanResults);
-        
-        // Load advanced analytics data
-        await loadAdvancedAnalytics(newResults as ScanResults);
+                })),
+                totalValue: (data as any).positions.reduce((sum: number, p: any) => sum + p.value, 0),
+                totalPositions: (data as any).positions.length,
+                totalFeesEarned: (data as any).positions.reduce((sum: number, p: any) => sum + p.feesEarned, 0),
+                avgApr: (data as any).positions.reduce((sum: number, p: any) => sum + p.apr, 0) / (data as any).positions.length,
+                isLoading: false
+              };
+              return acc;
+            }, {} as Record<string, any>),
+            lastUpdated: new Date().toISOString()
+          };
+        } else {
+          // Generate empty results for unknown demo addresses
+          scanResults = {
+            chain,
+            walletAddress: address,
+            totalValue: 0,
+            totalPositions: 0,
+            totalFeesEarned: 0,
+            avgApr: 0,
+            protocols: {} as Record<string, any>,
+            lastUpdated: new Date().toISOString()
+          };
+        }
       } else {
-        // Generate empty results for unknown addresses
-        setScanResults({
-          chain,
-          walletAddress: address,
-          totalValue: 0,
-          totalPositions: 0,
-          totalFeesEarned: 0,
-          avgApr: 0,
-          protocols: {} as Record<string, any>,
-          lastUpdated: new Date().toISOString()
-        } as ScanResults);
+        // Production Mode: Use production scanner
+        const productionScanner = getProductionScanner();
+        const response = await productionScanner.scanWallet(address, chain, {
+          includeHistoricalData: true,
+          includeFees: true,
+          timeframe: '30d'
+        });
+        
+        if (!response.success) {
+          throw new Error(response.error || 'Failed to scan wallet');
+        }
+        
+        scanResults = response.data!;
       }
+      
+      setScanResults(scanResults);
+      
+      // Load advanced analytics data
+      await loadAdvancedAnalytics(scanResults);
+      
     } catch (error) {
       console.error('Scan error:', error);
+      setScanError(error instanceof Error ? error.message : 'An error occurred during scanning');
     } finally {
       setIsLoading(false);
       setLoadingState({
@@ -406,7 +445,7 @@ export default function Home() {
         progress: 100
       });
     }
-  }, [loadAdvancedAnalytics]);
+  }, [isDemo, loadAdvancedAnalytics]);
 
   const metrics = scanResults ? calculateMetrics(scanResults) : null;
   const protocolDistribution = scanResults ? getProtocolDistribution(scanResults) : [];
@@ -423,12 +462,42 @@ export default function Home() {
           <p className="tt-body max-w-3xl mx-auto text-lg">
             Track liquidity provider positions across all major DEXs on Ethereum and Solana with institutional-grade analytics
           </p>
+          
+          {/* Current mode indicator */}
+          <div className="flex justify-center mt-4">
+            <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${
+              isDemo 
+                ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300'
+                : 'bg-green-500/10 border border-green-500/20 text-green-300'
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${
+                isDemo ? 'bg-blue-400' : 'bg-green-400'
+              }`}></div>
+              <span>Currently in {mode} mode {isDemo ? '(Sample Data)' : '(Live Data)'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Header with Mode Toggle */}
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <ModeToggle size="md" showLabels={true} />
         </div>
 
         {/* Search Bar */}
         <div className="mb-6 sm:mb-8 lg:mb-12">
-          <SimpleSearchBar onScan={handleScan} isLoading={isLoading} />
+          <SimpleSearchBar onScan={handleScan} isLoading={isLoading || isTransitioning} isDemo={isDemo} />
         </div>
+        
+        {/* Error Display */}
+        {scanError && (
+          <div className="mb-6 tt-card p-4 border-l-4 border-red-500">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span className="text-red-300 font-medium">Scan Failed</span>
+            </div>
+            <p className="tt-text-secondary text-sm mt-2">{scanError}</p>
+          </div>
+        )}
 
         {/* Dashboard */}
         {scanResults && (
@@ -544,21 +613,75 @@ export default function Home() {
                 <div className="tt-text-secondary text-lg">
                   No liquidity positions found for this address
                 </div>
+                {isProduction && (
+                  <div className="tt-text-tertiary text-sm mt-2">
+                    Data sourced from live protocols - this address may not have active LP positions
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
         {/* Welcome State */}
-        {!scanResults && !isLoading && (
+        {!scanResults && !isLoading && !isTransitioning && (
           <div className="tt-card p-12 text-center">
             <Network className="h-16 w-16 tt-text-tertiary mx-auto mb-6" />
             <h2 className="tt-heading-2 mb-4">
               Ready to Track Your LP Positions
             </h2>
+            <p className="tt-text-secondary max-w-2xl mx-auto mb-6">
+              {isDemo 
+                ? 'Currently in Demo Mode - explore with sample data and try the demo addresses below.'
+                : 'Currently in Production Mode - enter any wallet address to scan for live LP positions across supported protocols.'
+              }
+            </p>
+            
+            {/* Mode-specific features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-6">
+              <div className={`p-4 rounded-lg border ${isDemo ? 'bg-blue-500/10 border-blue-500/20' : 'bg-gray-500/10 border-gray-500/20'}`}>
+                <h3 className="font-semibold mb-2">{isDemo ? '🧪 Demo Features' : '🚀 Production Features'}</h3>
+                <ul className="text-sm tt-text-secondary space-y-1 text-left">
+                  {isDemo ? (
+                    <>
+                      <li>• Sample wallet data</li>
+                      <li>• Simulated analytics</li>
+                      <li>• All UI components</li>
+                      <li>• No API rate limits</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>• Live position data</li>
+                      <li>• Real-time price feeds</li>
+                      <li>• Protocol integrations</li>
+                      <li>• Production analytics</li>
+                    </>
+                  )}
+                </ul>
+              </div>
+              
+              <div className="p-4 rounded-lg border bg-gray-500/5 border-gray-500/10">
+                <h3 className="font-semibold mb-2">📊 Supported Protocols</h3>
+                <ul className="text-sm tt-text-secondary space-y-1 text-left">
+                  <li>• Uniswap V2/V3</li>
+                  <li>• Raydium CLMM</li>
+                  <li>• Orca Whirlpools</li>
+                  <li>• And many more...</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Transition Loading State */}
+        {isTransitioning && (
+          <div className="tt-card p-12 text-center">
+            <Loader2 className="h-16 w-16 tt-text-tertiary mx-auto mb-6 animate-spin" />
+            <h2 className="tt-heading-2 mb-4">
+              Switching Modes...
+            </h2>
             <p className="tt-text-secondary max-w-2xl mx-auto">
-              Enter a wallet address above to scan across all major DEXs and protocols. 
-              We support Ethereum, Solana, and major L2 networks with real-time position tracking.
+              {isDemo ? 'Activating production features and connecting to live data sources.' : 'Loading demo data and sample positions.'}
             </p>
           </div>
         )}
