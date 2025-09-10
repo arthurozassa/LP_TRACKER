@@ -358,7 +358,7 @@ export class V3Calculator {
    */
   private tickToSqrtPrice(tick: number): number {
     const sqrtPrice = Math.sqrt(Math.pow(1.0001, tick));
-    return number.from(Math.floor(sqrtPrice * Math.pow(2, 96)));
+    return Math.floor(sqrtPrice * Math.pow(2, 96));
   }
 
   /**
@@ -449,7 +449,7 @@ export class V3Calculator {
  * Calculates the current tick from sqrt price
  */
 export function sqrtPriceToTick(sqrtPriceX96: number): number {
-  const sqrtPrice = sqrtPriceX96.div(number.from(2).pow(96)).toNumber();
+  const sqrtPrice = sqrtPriceX96.div(Number(2).pow(96)).toNumber();
   return Math.floor(Math.log(sqrtPrice * sqrtPrice) / Math.log(1.0001));
 }
 
@@ -457,7 +457,7 @@ export function sqrtPriceToTick(sqrtPriceX96: number): number {
  * Calculates price from sqrt price
  */
 export function sqrtPriceX96ToPrice(sqrtPriceX96: number, token0Decimals: number, token1Decimals: number): number {
-  const Q96 = number.from(2).pow(96);
+  const Q96 = Number(2).pow(96);
   const price = sqrtPriceX96.div(Q96).pow(2);
   return price.toNumber() * Math.pow(10, token0Decimals - token1Decimals);
 }
@@ -495,19 +495,19 @@ export function calculateMaxLiquidity(
     // Current price below range - only token0 needed
     return amount0.mul(sqrtPriceLowerX96).mul(sqrtPriceUpperX96).div(
       sqrtPriceUpperX96.sub(sqrtPriceLowerX96)
-    ).div(number.from(2).pow(96));
+    ).div(Number(2).pow(96));
   } else if (sqrtPriceX96.gte(sqrtPriceUpperX96)) {
     // Current price above range - only token1 needed
-    return amount1.mul(number.from(2).pow(96)).div(
+    return amount1.mul(Number(2).pow(96)).div(
       sqrtPriceUpperX96.sub(sqrtPriceLowerX96)
     );
   } else {
     // Current price in range - need both tokens
     const liquidity0 = amount0.mul(sqrtPriceX96).mul(sqrtPriceUpperX96).div(
       sqrtPriceUpperX96.sub(sqrtPriceX96)
-    ).div(number.from(2).pow(96));
+    ).div(Number(2).pow(96));
 
-    const liquidity1 = amount1.mul(number.from(2).pow(96)).div(
+    const liquidity1 = amount1.mul(Number(2).pow(96)).div(
       sqrtPriceX96.sub(sqrtPriceLowerX96)
     );
 
