@@ -306,7 +306,7 @@ export class OrcaSDKWrapper {
       if (prices.rewards) {
         for (const [index, rewardInfo] of Array.from(position.rewardInfos.entries())) {
           if (rewardInfo.amountOwed && pool.rewardInfos[index]) {
-            const rewardPrice = prices.rewards.get(pool.rewardInfos[index].mint) || 0;
+            const rewardPrice = prices.rewards.get(pool.rewardInfos[index].address) || 0;
             const rewardAmount = tokenAmountToUi(rewardInfo.amountOwed, 9);
             rewardsEarned += rewardAmount * rewardPrice;
           }
