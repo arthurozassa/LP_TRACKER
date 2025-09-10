@@ -164,7 +164,7 @@ export class JupiterAPIClient {
   constructor(config?: Partial<SolanaAPIConfig>) {
     this.baseUrl = config?.rpcUrl || JUPITER_API_CONFIG.baseUrl;
     this.perpsUrl = JUPITER_PERPS_API_CONFIG.baseUrl;
-    this.rateLimitConfig = config?.rateLimits || JUPITER_API_CONFIG.rateLimits;
+    this.rateLimitConfig = config?.rateLimits || JUPITER_API_CONFIG.rateLimits as any;
   }
 
   private async checkRateLimit(): Promise<void> {
@@ -177,7 +177,7 @@ export class JupiterAPIClient {
     }
     
     // Check if we're over the limit
-    if (this.requestsThisMinute >= this.rateLimitConfig.requestsPerMinute) {
+    if (this.requestsThisMinute >= (this.rateLimitConfig as any).requestsPerMinute) {
       const waitTime = 60000 - (now - this.lastResetTime);
       await new Promise(resolve => setTimeout(resolve, waitTime));
       this.requestsThisMinute = 0;
@@ -359,7 +359,7 @@ export class JupiterAPIClient {
     
     return {
       id: `jupiter-${apiPosition.pool}-${apiPosition.owner}`,
-      protocol: ProtocolType.JUPITER,
+      protocol: 'jupiter',
       chain: 'solana' as any,
       pool: apiPosition.pool,
       
@@ -373,13 +373,13 @@ export class JupiterAPIClient {
       // Tokens
       tokens: {
         token0: {
-          mint: apiPosition.collateral.mint,
+          address: apiPosition.collateral.mint,
           symbol: 'USDC', // Most Jupiter positions use USDC
           amount: parseFloat(apiPosition.collateral.amount),
           decimals: 6
         },
         token1: {
-          mint: '',
+          address: '',
           symbol: '',
           amount: 0,
           decimals: 0
@@ -415,8 +415,8 @@ export class JupiterAPIClient {
       
       // Metadata
       lastSlot: 0,
-      createdAt: currentTime,
-      updatedAt: currentTime
+      createdAt: currentTime.toString(),
+      updatedAt: currentTime.toString()
     };
   }
 }
@@ -440,7 +440,7 @@ export async function getEnhancedJupiterPositions(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get enhanced Jupiter positions for ${walletAddress}`,
-      ProtocolType.JUPITER,
+      'jupiter',
       'ENHANCEMENT_ERROR',
       error as Error
     );
@@ -484,7 +484,7 @@ export async function getJupiterMarketData(
   } catch (error) {
     throw new SolanaIntegrationError(
       'Failed to get Jupiter market data',
-      ProtocolType.JUPITER,
+      'jupiter',
       'MARKET_DATA_ERROR',
       error as Error
     );

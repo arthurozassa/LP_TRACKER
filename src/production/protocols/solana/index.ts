@@ -15,7 +15,6 @@ import {
   isValidSolanaAddress
 } from './common/types';
 import {
-  createSolanaContext,
   retryWithBackoff,
   handleRpcError
 } from './common/utils';
@@ -75,25 +74,25 @@ export class SolanaDEXService {
       walletAddress: '',
       protocols: [
         {
-          name: ProtocolType.METEORA,
+          name: 'meteora-dlmm',
           programIds: [METEORA_PROGRAM_ID],
           enabled: true,
           scanDepth: 100
         },
         {
-          name: ProtocolType.RAYDIUM,
+          name: 'raydium-clmm',
           programIds: [RAYDIUM_CLMM_PROGRAM_ID],
           enabled: true,
           scanDepth: 100
         },
         {
-          name: ProtocolType.ORCA,
+          name: 'orca-whirlpools',
           programIds: [ORCA_WHIRLPOOL_PROGRAM_ID],
           enabled: true,
           scanDepth: 100
         },
         {
-          name: ProtocolType.JUPITER,
+          name: 'jupiter',
           programIds: [JUPITER_PERP_PROGRAM_ID],
           enabled: true,
           scanDepth: 50
@@ -147,16 +146,16 @@ export class SolanaDEXService {
       // Scan each enabled protocol
       for (const protocolConfig of enabledProtocols) {
         switch (protocolConfig.name) {
-          case ProtocolType.METEORA:
+          case 'meteora-dlmm':
             scanPromises.push(this.scanMeteoraProtocol(walletAddress));
             break;
-          case ProtocolType.RAYDIUM:
+          case 'raydium-clmm':
             scanPromises.push(this.scanRaydiumProtocol(walletAddress));
             break;
-          case ProtocolType.ORCA:
+          case 'orca-whirlpools':
             scanPromises.push(this.scanOrcaProtocol(walletAddress));
             break;
-          case ProtocolType.JUPITER:
+          case 'jupiter':
             scanPromises.push(this.scanJupiterProtocol(walletAddress));
             break;
         }
@@ -223,8 +222,8 @@ export class SolanaDEXService {
       if (includePrices) {
         const allMints = new Set<string>();
         positions.forEach(pos => {
-          if (pos.tokens.token0?.mint) allMints.add(pos.tokens.token0.mint);
-          if (pos.tokens.token1?.mint) allMints.add(pos.tokens.token1.mint);
+          if (pos.tokens.token0?.address) allMints.add(pos.tokens.token0.address);
+          if (pos.tokens.token1?.address) allMints.add(pos.tokens.token1.address);
         });
         
         priceFeeds = await this.fetchTokenPrices(Array.from(allMints));
@@ -236,17 +235,17 @@ export class SolanaDEXService {
           let enhanced = position;
           
           switch (position.protocol) {
-            case ProtocolType.METEORA:
+            case 'meteora-dlmm':
               enhanced = await enrichMeteoraPosition(this.context, position as any, priceFeeds);
               break;
-            case ProtocolType.RAYDIUM:
+            case 'raydium-clmm':
               enhanced = await enrichRaydiumPosition(this.context, position as any, priceFeeds);
               break;
-            case ProtocolType.ORCA:
+            case 'orca-whirlpools':
               enhanced = await enrichOrcaPosition(this.context, position as any, priceFeeds);
               break;
             // Jupiter positions don't need enrichment as they're already complete
-            case ProtocolType.JUPITER:
+            case 'jupiter':
             default:
               break;
           }
@@ -281,7 +280,7 @@ export class SolanaDEXService {
       
       // Get prices if not provided
       const priceFeeds = prices || await this.fetchTokenPrices(
-        positions.flatMap(p => [p.tokens.token0?.mint, p.tokens.token1?.mint]).filter(Boolean) as string[]
+        positions.flatMap(p => [p.tokens.token0?.address, p.tokens.token1?.address]).filter(Boolean) as string[]
       );
 
       // Get reward token prices
@@ -297,8 +296,8 @@ export class SolanaDEXService {
       for (const position of positions) {
         try {
           const prices = {
-            token0: priceFeeds.get(position.tokens.token0?.mint || '') || 0,
-            token1: priceFeeds.get(position.tokens.token1?.mint || '') || 0,
+            token0: priceFeeds.get(position.tokens.token0?.address || '') || 0,
+            token1: priceFeeds.get(position.tokens.token1?.address || '') || 0,
             rewards: rewardPrices
           };
 
@@ -306,19 +305,19 @@ export class SolanaDEXService {
 
           // Calculate protocol-specific metrics
           switch (position.protocol) {
-            case ProtocolType.METEORA:
+            case 'meteora-dlmm':
               // Would need to fetch pool data for complete metrics
               positionMetrics = this.calculateBasicMetrics(position, prices);
               break;
-            case ProtocolType.RAYDIUM:
+            case 'raydium-clmm':
               // Would need pool data for complete metrics
               positionMetrics = this.calculateBasicMetrics(position, prices);
               break;
-            case ProtocolType.ORCA:
+            case 'orca-whirlpools':
               // Would need pool data for complete metrics
               positionMetrics = this.calculateBasicMetrics(position, prices);
               break;
-            case ProtocolType.JUPITER:
+            case 'jupiter':
               positionMetrics = this.calculateJupiterMetrics(position as any, prices);
               break;
             default:
@@ -366,7 +365,7 @@ export class SolanaDEXService {
 
       return {
         walletAddress,
-        protocol: ProtocolType.METEORA,
+        protocol: 'meteora-dlmm',
         positions,
         pools,
         totalValue,
@@ -379,7 +378,7 @@ export class SolanaDEXService {
     } catch (error) {
       return {
         walletAddress,
-        protocol: ProtocolType.METEORA,
+        protocol: 'meteora-dlmm',
         positions: [],
         pools: [],
         totalValue: 0,
@@ -403,7 +402,7 @@ export class SolanaDEXService {
 
       return {
         walletAddress,
-        protocol: ProtocolType.RAYDIUM,
+        protocol: 'raydium-clmm',
         positions,
         pools,
         totalValue,
@@ -416,7 +415,7 @@ export class SolanaDEXService {
     } catch (error) {
       return {
         walletAddress,
-        protocol: ProtocolType.RAYDIUM,
+        protocol: 'raydium-clmm',
         positions: [],
         pools: [],
         totalValue: 0,
@@ -440,7 +439,7 @@ export class SolanaDEXService {
 
       return {
         walletAddress,
-        protocol: ProtocolType.ORCA,
+        protocol: 'orca-whirlpools',
         positions,
         pools,
         totalValue,
@@ -453,7 +452,7 @@ export class SolanaDEXService {
     } catch (error) {
       return {
         walletAddress,
-        protocol: ProtocolType.ORCA,
+        protocol: 'orca-whirlpools',
         positions: [],
         pools: [],
         totalValue: 0,
@@ -473,7 +472,7 @@ export class SolanaDEXService {
 
       return {
         walletAddress,
-        protocol: ProtocolType.JUPITER,
+        protocol: 'jupiter',
         positions,
         pools: [], // Jupiter perps don't have traditional pools
         totalValue,
@@ -486,7 +485,7 @@ export class SolanaDEXService {
     } catch (error) {
       return {
         walletAddress,
-        protocol: ProtocolType.JUPITER,
+        protocol: 'jupiter',
         positions: [],
         pools: [],
         totalValue: 0,
@@ -536,7 +535,7 @@ export class SolanaDEXService {
       const jupiterPrices = await this.jupiterAPI.fetchPrices(mints);
       
       // Cache prices
-      for (const [mint, price] of jupiterPrices) {
+      for (const [mint, price] of Array.from(jupiterPrices.entries())) {
         this.priceCache.set(mint, {
           price,
           timestamp: Date.now()
@@ -563,7 +562,7 @@ export class SolanaDEXService {
     position: SolanaPosition,
     prices: { token0: number; token1: number; rewards: Map<string, number> }
   ): SolanaPositionMetrics {
-    const ageInDays = (Date.now() - position.createdAt) / (1000 * 60 * 60 * 24);
+    const ageInDays = (Date.now() - new Date(position.createdAt || '').getTime()) / (1000 * 60 * 60 * 24);
     
     return {
       totalValue: position.value || 0,
@@ -588,7 +587,7 @@ export class SolanaDEXService {
       },
       ageInDays,
       lastActiveSlot: position.lastSlot,
-      lastRewardClaim: position.updatedAt
+      lastRewardClaim: position.updatedAt ? new Date(position.updatedAt).getTime() : 0
     };
   }
 
@@ -703,10 +702,10 @@ export async function scanSolanaWallet(
   metrics?: Array<SolanaPositionMetrics & { position: SolanaPosition }>;
 }> {
   const enabledProtocols = options?.protocols || [
-    ProtocolType.METEORA,
-    ProtocolType.RAYDIUM,
-    ProtocolType.ORCA,
-    ProtocolType.JUPITER
+    'meteora-dlmm',
+    'raydium-clmm',
+    'orca-whirlpools',
+    'jupiter'
   ];
 
   const service = createSolanaDEXService(connection, {
@@ -769,9 +768,5 @@ export default {
   JUPITER_PERP_PROGRAM_ID,
 };
 
-// Export all protocol integrations
+// Export common types
 export * from './common/types';
-export * from './meteora/dlmm';
-export * from './raydium/clmm';
-export * from './orca/whirlpools';
-export * from './jupiter/perp';

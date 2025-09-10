@@ -48,7 +48,7 @@ export function calculateBinPrice(binId: number, binStep: number = 1): number {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate bin price for binId ${binId}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -72,7 +72,7 @@ export function calculateBinIdFromPrice(price: number, binStep: number = 1): num
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate bin ID from price ${price}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -104,7 +104,7 @@ export function calculatePositionPriceRange(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate price range for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -129,7 +129,7 @@ export function calculateTotalLiquidity(position: MeteoraPosition): string {
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate total liquidity for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -158,7 +158,7 @@ export function calculateLiquidityDistribution(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate liquidity distribution for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -184,8 +184,8 @@ export function calculatePositionValue(
 } {
   try {
     const binValues = position.binPositions.map(bin => {
-      const tokenXValueUi = tokenAmountToUi(bin.xAmount, position.tokens.token0.decimals);
-      const tokenYValueUi = tokenAmountToUi(bin.yAmount, position.tokens.token1.decimals);
+      const tokenXValueUi = tokenAmountToUi(bin.xAmount, position.tokens.token0.decimals || 9);
+      const tokenYValueUi = tokenAmountToUi(bin.yAmount, position.tokens.token1.decimals || 9);
       
       const tokenXValue = tokenXValueUi * tokenXPrice;
       const tokenYValue = tokenYValueUi * tokenYPrice;
@@ -212,7 +212,7 @@ export function calculatePositionValue(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate position value for ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -236,11 +236,11 @@ export function calculateImpermanentLoss(
     // Calculate what the tokens would be worth if held
     const tokenXAmountUi = tokenAmountToUi(
       position.tokens.token0.amount.toString(),
-      position.tokens.token0.decimals
+      position.tokens.token0.decimals || 9
     );
     const tokenYAmountUi = tokenAmountToUi(
       position.tokens.token1.amount.toString(),
-      position.tokens.token1.decimals
+      position.tokens.token1.decimals || 9
     );
 
     const holdValue = (tokenXAmountUi * currentPrices.tokenX) + (tokenYAmountUi * currentPrices.tokenY);
@@ -264,7 +264,7 @@ export function calculateImpermanentLoss(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate impermanent loss for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -297,8 +297,8 @@ export function calculateBinFees(
 } {
   try {
     const binFees = position.binPositions.map(bin => {
-      const feesXUi = tokenAmountToUi(bin.feeX, position.tokens.token0.decimals);
-      const feesYUi = tokenAmountToUi(bin.feeY, position.tokens.token1.decimals);
+      const feesXUi = tokenAmountToUi(bin.feeX, position.tokens.token0.decimals || 9);
+      const feesYUi = tokenAmountToUi(bin.feeY, position.tokens.token1.decimals || 9);
       
       const feesX = feesXUi * tokenXPrice;
       const feesY = feesYUi * tokenYPrice;
@@ -317,11 +317,11 @@ export function calculateBinFees(
     // Add unclaimed fees
     const unclaimedFeesXUi = tokenAmountToUi(
       position.unclaimedFees.tokenX,
-      position.tokens.token0.decimals
+      position.tokens.token0.decimals || 9
     );
     const unclaimedFeesYUi = tokenAmountToUi(
       position.unclaimedFees.tokenY,
-      position.tokens.token1.decimals
+      position.tokens.token1.decimals || 9
     );
 
     const totalFeesX = binFees.reduce((sum, bin) => sum + bin.feesX, 0) + 
@@ -339,7 +339,7 @@ export function calculateBinFees(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate bin fees for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -362,7 +362,7 @@ export function calculateFeeAPR(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate fee APR for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -412,7 +412,7 @@ export function calculateRewards(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate rewards for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -482,7 +482,7 @@ export function calculateRiskMetrics(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate risk metrics for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -554,7 +554,10 @@ export function calculateMeteoraPositionMetrics(
     const liquidityDistribution = calculateLiquidityDistribution(position);
     
     // Calculate age in days
-    const ageInDays = (Date.now() - position.createdAt) / (1000 * 60 * 60 * 24);
+    const createdTimestamp = typeof position.createdAt === 'string' 
+      ? new Date(position.createdAt).getTime() 
+      : (position.createdAt || Date.now());
+    const ageInDays = (Date.now() - createdTimestamp) / (1000 * 60 * 60 * 24);
 
     return {
       // Standard metrics
@@ -580,7 +583,7 @@ export function calculateMeteoraPositionMetrics(
       },
       ageInDays,
       lastActiveSlot: position.lastSlot,
-      lastRewardClaim: position.updatedAt,
+      lastRewardClaim: position.updatedAt ? new Date(position.updatedAt).getTime() : 0,
 
       // Meteora-specific metrics
       meteora: {
@@ -603,7 +606,7 @@ export function calculateMeteoraPositionMetrics(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate comprehensive metrics for position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -635,8 +638,8 @@ export function formatMeteoraPosition(
       { label: 'Fee APR', value: `${metrics.feeAPR.toFixed(2)}%` },
       { label: 'Bin Count', value: metrics.meteora.binCount.toString() },
       { label: 'Risk Level', value: metrics.meteora.risk.overallRisk },
-      { label: 'Unclaimed Fees X', value: formatTokenAmount(position.unclaimedFees.tokenX, position.tokens.token0.decimals) },
-      { label: 'Unclaimed Fees Y', value: formatTokenAmount(position.unclaimedFees.tokenY, position.tokens.token1.decimals) },
+      { label: 'Unclaimed Fees X', value: formatTokenAmount(position.unclaimedFees.tokenX, position.tokens.token0.decimals || 9) },
+      { label: 'Unclaimed Fees Y', value: formatTokenAmount(position.unclaimedFees.tokenY, position.tokens.token1.decimals || 9) },
     ];
 
     const binBreakdown = position.binPositions.map(bin => ({
@@ -644,9 +647,9 @@ export function formatMeteoraPosition(
       price: formatPrice(bin.price),
       liquidity: formatTokenAmount(bin.liquidity, 18), // Liquidity typically has 18 decimals
       value: formatPrice(
-        tokenAmountToUi(bin.xAmount, position.tokens.token0.decimals) * 
+        tokenAmountToUi(bin.xAmount, position.tokens.token0.decimals || 9) * 
         (metrics.meteora.priceRange.currentPrice || 1) +
-        tokenAmountToUi(bin.yAmount, position.tokens.token1.decimals)
+        tokenAmountToUi(bin.yAmount, position.tokens.token1.decimals || 9)
       )
     }));
 
@@ -658,7 +661,7 @@ export function formatMeteoraPosition(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to format position ${position.id}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'FORMAT_ERROR',
       error as Error
     );

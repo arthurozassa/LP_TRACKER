@@ -420,7 +420,7 @@ export function calculatePositionMetrics(
     },
     ageInDays: (Date.now() - new Date(position.createdAt || '').getTime()) / (1000 * 60 * 60 * 24),
     lastActiveSlot: position.lastSlot,
-    lastRewardClaim: position.updatedAt
+    lastRewardClaim: position.updatedAt ? new Date(position.updatedAt).getTime() : 0
   };
 }
 

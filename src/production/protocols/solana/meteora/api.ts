@@ -120,7 +120,7 @@ export class MeteoraAPIClient {
 
   constructor(config?: Partial<SolanaAPIConfig>) {
     this.baseUrl = config?.rpcUrl || METEORA_API_CONFIG.baseUrl;
-    this.rateLimitConfig = config?.rateLimits || METEORA_API_CONFIG.rateLimits;
+    this.rateLimitConfig = config?.rateLimits || METEORA_API_CONFIG.rateLimits as any;
   }
 
   private async checkRateLimit(): Promise<void> {
@@ -187,7 +187,7 @@ export class MeteoraAPIClient {
     } catch (error) {
       throw new SolanaIntegrationError(
         'Failed to fetch Meteora pools from API',
-        ProtocolType.METEORA,
+        'meteora-dlmm',
         'API_ERROR',
         error as Error
       );
@@ -208,7 +208,7 @@ export class MeteoraAPIClient {
     } catch (error) {
       throw new SolanaIntegrationError(
         `Failed to fetch pool stats for ${poolAddress}`,
-        ProtocolType.METEORA,
+        'meteora-dlmm',
         'API_ERROR',
         error as Error
       );
@@ -229,7 +229,7 @@ export class MeteoraAPIClient {
     } catch (error) {
       throw new SolanaIntegrationError(
         `Failed to fetch pool price for ${poolAddress}`,
-        ProtocolType.METEORA,
+        'meteora-dlmm',
         'API_ERROR',
         error as Error
       );
@@ -328,7 +328,7 @@ export class MeteoraAPIClient {
 
     return {
       id: `meteora-${position.lb_pair}-${position.owner}`,
-      protocol: ProtocolType.METEORA,
+      protocol: 'meteora-dlmm',
       chain: 'solana' as any,
       pool: position.lb_pair,
       
@@ -342,13 +342,13 @@ export class MeteoraAPIClient {
       // Tokens
       tokens: {
         token0: {
-          mint: '', // Would get from pool
+          address: '', // Would get from pool
           symbol: 'UNKNOWN',
           amount: Number(position.total_x_amount),
           decimals: 9
         },
         token1: {
-          mint: '', // Would get from pool
+          address: '', // Would get from pool
           symbol: 'UNKNOWN',
           amount: Number(position.total_y_amount),
           decimals: 9
@@ -384,8 +384,8 @@ export class MeteoraAPIClient {
       
       // Metadata
       lastSlot: 0,
-      createdAt: currentTime,
-      updatedAt: currentTime
+      createdAt: currentTime.toString(),
+      updatedAt: currentTime.toString()
     };
   }
 }
@@ -418,7 +418,7 @@ export async function getMeteoraPoolData(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get pool data for ${poolAddress}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'POOL_DATA_ERROR',
       error as Error
     );
@@ -449,8 +449,8 @@ export async function getEnhancedMeteoraPositions(
       if (pool) {
         position.binStep = pool.binStep;
         position.activeId = pool.activeId;
-        position.tokens.token0.mint = pool.tokenA.mint;
-        position.tokens.token1.mint = pool.tokenB.mint;
+        position.tokens.token0.address = pool.tokenA.mint;
+        position.tokens.token1.address = pool.tokenB.mint;
         position.accounts.mint0 = pool.tokenA.mint;
         position.accounts.mint1 = pool.tokenB.mint;
       }
@@ -459,7 +459,7 @@ export async function getEnhancedMeteoraPositions(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get enhanced positions for ${walletAddress}`,
-      ProtocolType.METEORA,
+      'meteora-dlmm',
       'POSITION_ENHANCEMENT_ERROR',
       error as Error
     );

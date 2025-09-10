@@ -133,7 +133,7 @@ export function parsePerpetualsAccount(data: Buffer): {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Jupiter Perpetuals account',
-      ProtocolType.JUPITER,
+      'jupiter',
       data,
       error as Error
     );
@@ -220,8 +220,8 @@ export function parseJupiterPositionAccount(data: Buffer): JupiterPosition {
 
     return {
       id: `jupiter-${pool.toString('hex')}-${owner.toString('hex')}`,
-      protocol: ProtocolType.JUPITER,
-      chain: ChainType.SOLANA,
+      protocol: 'jupiter',
+      chain: 'solana' as any,
       pool: pool.toString('hex'),
       
       // Position data (Jupiter perps don't have traditional liquidity)
@@ -234,13 +234,13 @@ export function parseJupiterPositionAccount(data: Buffer): JupiterPosition {
       // Tokens (for Jupiter perps, we show collateral)
       tokens: {
         token0: {
-          mint: collateralMint.toString('hex'),
+          address: collateralMint.toString('hex'),
           symbol: 'UNKNOWN',
           amount: Number(collateralAmount),
           decimals: 6 // Assume USDC
         },
         token1: {
-          mint: '', // No second token for perps
+          address: '', // No second token for perps
           symbol: '',
           amount: 0,
           decimals: 0
@@ -276,13 +276,13 @@ export function parseJupiterPositionAccount(data: Buffer): JupiterPosition {
       
       // Metadata
       lastSlot: 0,
-      createdAt: currentTime,
-      updatedAt: currentTime
+      createdAt: currentTime.toString(),
+      updatedAt: currentTime.toString()
     };
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Jupiter position account',
-      ProtocolType.JUPITER,
+      'jupiter',
       data,
       error as Error
     );
@@ -541,7 +541,7 @@ export function parseCustodyAccount(data: Buffer): {
   } catch (error) {
     throw new SolanaParsingError(
       'Failed to parse Jupiter Custody account',
-      ProtocolType.JUPITER,
+      'jupiter',
       data,
       error as Error
     );
@@ -563,7 +563,7 @@ export async function scanJupiterPositions(
     if (!isValidSolanaAddress(walletAddress)) {
       throw new SolanaIntegrationError(
         `Invalid wallet address: ${walletAddress}`,
-        ProtocolType.JUPITER,
+        'jupiter',
         'INVALID_ADDRESS'
       );
     }
@@ -614,7 +614,7 @@ export async function scanJupiterPositions(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to scan Jupiter positions for wallet ${walletAddress}`,
-      ProtocolType.JUPITER,
+      'jupiter',
       'SCAN_FAILED',
       error as Error
     );
@@ -687,7 +687,7 @@ export async function getJupiterPoolInfo(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get Jupiter pool info for ${poolAddress}`,
-      ProtocolType.JUPITER,
+      'jupiter',
       'POOL_INFO_ERROR',
       error as Error
     );
@@ -763,7 +763,7 @@ export function calculateJupiterPositionMetrics(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to calculate metrics for Jupiter position ${position.id}`,
-      ProtocolType.JUPITER,
+      'jupiter',
       'CALCULATION_ERROR',
       error as Error
     );
@@ -818,7 +818,7 @@ export function formatJupiterPosition(
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to format Jupiter position ${position.id}`,
-      ProtocolType.JUPITER,
+      'jupiter',
       'FORMAT_ERROR',
       error as Error
     );
