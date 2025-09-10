@@ -478,7 +478,10 @@ export class OrcaSDKWrapper {
       positionMint: positionData.positionMint,
       tickLowerIndex: positionData.tickLowerIndex,
       tickUpperIndex: positionData.tickUpperIndex,
-      rewardInfos: poolData.rewardInfos || [],
+      rewardInfos: (poolData.rewardInfos || []).map(reward => ({
+        ...reward,
+        amountOwed: '0' // Default to 0, will be updated from position data
+      })),
       
       // Metadata
       lastSlot: 0,
