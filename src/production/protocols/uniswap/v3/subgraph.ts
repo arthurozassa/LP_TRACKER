@@ -10,7 +10,7 @@ import {
   PoolV3, 
   UniswapError, 
   UniswapErrorCodes,
-  getNetworkConfig 
+  NetworkConfig 
 } from '../common/types';
 import { 
   normalizeAddress, 

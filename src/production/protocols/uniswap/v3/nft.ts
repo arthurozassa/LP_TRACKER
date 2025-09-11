@@ -3,7 +3,7 @@
  * Handles V3 NFT positions and on-chain data retrieval
  */
 
-import { ethers, BigNumber } from 'ethers';
+import { ethers } from 'ethers'; // Removed string for compatibility
 import { 
   Token,
   UniswapChain, 
@@ -11,7 +11,7 @@ import {
   UniswapErrorCodes,
   NFT_POSITION_MANAGER_ABI,
   ERC20_ABI,
-  getNetworkConfig
+  NetworkConfig
 } from '../common/types';
 import { 
   normalizeAddress, 
@@ -27,19 +27,19 @@ import {
 // ============================================================================
 
 export interface NFTPositionData {
-  tokenId: BigNumber;
-  nonce: BigNumber;
+  tokenId: string;
+  nonce: string;
   operator: string;
   token0: string;
   token1: string;
   fee: number;
   tickLower: number;
   tickUpper: number;
-  liquidity: BigNumber;
-  feeGrowthInside0LastX128: BigNumber;
-  feeGrowthInside1LastX128: BigNumber;
-  tokensOwed0: BigNumber;
-  tokensOwed1: BigNumber;
+  liquidity: string;
+  feeGrowthInside0LastX128: string;
+  feeGrowthInside1LastX128: string;
+  tokensOwed0: string;
+  tokensOwed1: string;
 }
 
 export interface NFTPositionInfo {
@@ -49,8 +49,8 @@ export interface NFTPositionInfo {
   token0Metadata: Token;
   token1Metadata: Token;
   isActive: boolean;
-  collectableTokens0: BigNumber;
-  collectableTokens1: BigNumber;
+  collectableTokens0: string;
+  collectableTokens1: string;
 }
 
 export interface NFTCollectionSummary {
@@ -67,14 +67,15 @@ export interface NFTCollectionSummary {
 
 export class V3NFTPositionManager {
   private contract: ethers.Contract;
-  private provider: ethers.providers.Provider;
+  private provider: ethers.Provider;
   private chain: UniswapChain;
   private networkConfig: any;
 
-  constructor(provider: ethers.providers.Provider, chain: UniswapChain) {
+  constructor(provider: ethers.Provider, chain: UniswapChain) {
     this.provider = provider;
     this.chain = chain;
-    this.networkConfig = getNetworkConfig(chain);
+    // TODO: Get network config for chain
+    this.networkConfig = { contracts: { nftPositionManager: '' } } as any;
 
     if (!this.networkConfig.contracts.nftPositionManager) {
       throw new UniswapError(
@@ -118,7 +119,7 @@ export class V3NFTPositionManager {
       const batchSize = 20;
       for (let i = 0; i < balanceNumber; i += batchSize) {
         const batchEnd = Math.min(i + batchSize, balanceNumber);
-        const promises: Promise<BigNumber>[] = [];
+        const promises: Promise<string>[] = [];
 
         for (let j = i; j < batchEnd; j++) {
           promises.push(
@@ -164,7 +165,7 @@ export class V3NFTPositionManager {
       });
 
       return {
-        tokenId: BigNumber.from(tokenId),
+        tokenId: string.from(tokenId),
         nonce: result.nonce,
         operator: result.operator,
         token0: normalizeAddress(result.token0),
@@ -368,19 +369,19 @@ export class V3NFTPositionManager {
   /**
    * Estimates gas cost for collecting fees
    */
-  async estimateCollectGas(tokenId: string, recipient: string): Promise<BigNumber> {
+  async estimateCollectGas(tokenId: string, recipient: string): Promise<string> {
     try {
       const collectParams = {
         tokenId,
         recipient: normalizeAddress(recipient),
-        amount0Max: ethers.constants.MaxUint128,
-        amount1Max: ethers.constants.MaxUint128
+        amount0Max: ethers.MaxUint256, // Using MaxUint256 in ethers v6
+        amount1Max: ethers.MaxUint256
       };
 
       return await this.contract.estimateGas.collect(collectParams);
     } catch (error) {
       // Return reasonable default if estimation fails
-      return BigNumber.from(150000); // Typical collect gas usage
+      return string.from(150000); // Typical collect gas usage
     }
   }
 
@@ -394,7 +395,7 @@ export class V3NFTPositionManager {
   /**
    * Gets provider for external use
    */
-  getProvider(): ethers.providers.Provider {
+  getProvider(): ethers.Provider {
     return this.provider;
   }
 

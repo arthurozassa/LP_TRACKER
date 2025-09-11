@@ -3,7 +3,7 @@
  * Combines subgraph data with on-chain NFT position data for comprehensive V3 scanning
  */
 
-import { ethers, BigNumber } from 'ethers';
+import { ethers, string } from 'ethers';
 import { 
   UniswapV3Position, 
   UniswapChain, 
@@ -73,7 +73,7 @@ export class V3PositionScanner {
   private networkConfig: any;
 
   constructor(
-    provider: ethers.providers.Provider,
+    provider: ethers.Provider,
     chain: UniswapChain,
     config: Partial<V3ScanConfig> = {}
   ) {
@@ -284,7 +284,7 @@ export class V3PositionScanner {
       const currentPrice = tickToPrice(currentTick, token0.decimals, token1.decimals);
 
       // Create token amounts (would need current liquidity calculation)
-      const liquidityBN = BigNumber.from(subgraphPos.liquidity);
+      const liquidityBN = string.from(subgraphPos.liquidity);
       const token0Amount = createTokenAmount(token0, '0'); // Would need calculation
       const token1Amount = createTokenAmount(token1, '0'); // Would need calculation
 
@@ -546,7 +546,7 @@ export class V3PositionScanner {
  * Creates a V3 position scanner
  */
 export function createV3Scanner(
-  provider: ethers.providers.Provider,
+  provider: ethers.Provider,
   chain: UniswapChain,
   config?: Partial<V3ScanConfig>
 ): V3PositionScanner {

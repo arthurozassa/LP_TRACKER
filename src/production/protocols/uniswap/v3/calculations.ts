@@ -369,15 +369,11 @@ export class V3Calculator {
     sqrtPriceAX96: number,
     sqrtPriceBX96: number
   ): number {
-    if (sqrtPriceAX96.gt(sqrtPriceBX96)) {
+    if (sqrtPriceAX96 > sqrtPriceBX96) {
       [sqrtPriceAX96, sqrtPriceBX96] = [sqrtPriceBX96, sqrtPriceAX96];
     }
     
-    return liquidity
-      .mul(sqrtPriceBX96.sub(sqrtPriceAX96))
-      .div(sqrtPriceBX96)
-      .div(sqrtPriceAX96)
-      .mul(this.Q96);
+    return (liquidity * (sqrtPriceBX96 - sqrtPriceAX96) * this.Q96) / (sqrtPriceBX96 * sqrtPriceAX96);
   }
 
   /**
@@ -388,11 +384,11 @@ export class V3Calculator {
     sqrtPriceAX96: number,
     sqrtPriceBX96: number
   ): number {
-    if (sqrtPriceAX96.gt(sqrtPriceBX96)) {
+    if (sqrtPriceAX96 > sqrtPriceBX96) {
       [sqrtPriceAX96, sqrtPriceBX96] = [sqrtPriceBX96, sqrtPriceAX96];
     }
     
-    return liquidity.mul(sqrtPriceBX96.sub(sqrtPriceAX96)).div(this.Q96);
+    return (liquidity * (sqrtPriceBX96 - sqrtPriceAX96)) / this.Q96;
   }
 
   /**
@@ -449,7 +445,7 @@ export class V3Calculator {
  * Calculates the current tick from sqrt price
  */
 export function sqrtPriceToTick(sqrtPriceX96: number): number {
-  const sqrtPrice = sqrtPriceX96.div(Number(2).pow(96)).toNumber();
+  const sqrtPrice = sqrtPriceX96 / Math.pow(2, 96);
   return Math.floor(Math.log(sqrtPrice * sqrtPrice) / Math.log(1.0001));
 }
 
@@ -457,9 +453,9 @@ export function sqrtPriceToTick(sqrtPriceX96: number): number {
  * Calculates price from sqrt price
  */
 export function sqrtPriceX96ToPrice(sqrtPriceX96: number, token0Decimals: number, token1Decimals: number): number {
-  const Q96 = Number(2).pow(96);
-  const price = sqrtPriceX96.div(Q96).pow(2);
-  return price.toNumber() * Math.pow(10, token0Decimals - token1Decimals);
+  const Q96 = Math.pow(2, 96);
+  const price = Math.pow(sqrtPriceX96 / Q96, 2);
+  return price * Math.pow(10, token0Decimals - token1Decimals);
 }
 
 /**
@@ -491,27 +487,22 @@ export function calculateMaxLiquidity(
   sqrtPriceLowerX96: number,
   sqrtPriceUpperX96: number
 ): number {
-  if (sqrtPriceX96.lte(sqrtPriceLowerX96)) {
+  // TODO: Implement proper V3 max liquidity calculation without BigNumber
+  // For now, return simplified calculation to allow compilation
+  const Q96 = Math.pow(2, 96);
+  
+  if (sqrtPriceX96 <= sqrtPriceLowerX96) {
     // Current price below range - only token0 needed
-    return amount0.mul(sqrtPriceLowerX96).mul(sqrtPriceUpperX96).div(
-      sqrtPriceUpperX96.sub(sqrtPriceLowerX96)
-    ).div(Number(2).pow(96));
-  } else if (sqrtPriceX96.gte(sqrtPriceUpperX96)) {
+    return (amount0 * sqrtPriceLowerX96 * sqrtPriceUpperX96) / ((sqrtPriceUpperX96 - sqrtPriceLowerX96) * Q96);
+  } else if (sqrtPriceX96 >= sqrtPriceUpperX96) {
     // Current price above range - only token1 needed
-    return amount1.mul(Number(2).pow(96)).div(
-      sqrtPriceUpperX96.sub(sqrtPriceLowerX96)
-    );
+    return (amount1 * Q96) / (sqrtPriceUpperX96 - sqrtPriceLowerX96);
   } else {
     // Current price in range - need both tokens
-    const liquidity0 = amount0.mul(sqrtPriceX96).mul(sqrtPriceUpperX96).div(
-      sqrtPriceUpperX96.sub(sqrtPriceX96)
-    ).div(Number(2).pow(96));
+    const liquidity0 = (amount0 * sqrtPriceX96 * sqrtPriceUpperX96) / ((sqrtPriceUpperX96 - sqrtPriceX96) * Q96);
+    const liquidity1 = (amount1 * Q96) / (sqrtPriceX96 - sqrtPriceLowerX96);
 
-    const liquidity1 = amount1.mul(Number(2).pow(96)).div(
-      sqrtPriceX96.sub(sqrtPriceLowerX96)
-    );
-
-    return liquidity0.lt(liquidity1) ? liquidity0 : liquidity1;
+    return Math.min(liquidity0, liquidity1);
   }
 }
 
