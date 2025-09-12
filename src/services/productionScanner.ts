@@ -375,7 +375,7 @@ export class ProductionScannerService extends BaseService {
     `;
 
     try {
-      const response = await fetch('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
+      const response = await fetch('/api/subgraph?subgraph=uniswap-v3', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
