@@ -329,8 +329,8 @@ export class ProductionScannerService extends BaseService {
       console.warn('Uniswap V2 scan failed:', error);
     }
 
-    const baseResult = {
-      chain: 'ethereum',
+    const baseResult: ScanResults = {
+      chain: 'ethereum' as ChainType,
       walletAddress: address,
       totalValue,
       totalPositions,
@@ -387,8 +387,8 @@ export class ProductionScannerService extends BaseService {
       console.warn('Orca scan failed:', error);
     }
 
-    const baseResult = {
-      chain: 'solana',
+    const baseResult: ScanResults = {
+      chain: 'solana' as ChainType,
       walletAddress: address,
       totalValue,
       totalPositions,
