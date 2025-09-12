@@ -73,13 +73,13 @@ class ScanJobProcessor {
     const startTime = Date.now();
     const { walletAddress, chain, protocols, options = {}, requestId } = job.data;
 
-    logger.info('Processing wallet scan job', { 
+    logger.info({ 
       walletAddress, 
       chain, 
       protocols: protocols?.length,
       requestId,
       jobId: job.id 
-    });
+    }, 'Processing wallet scan job');
 
     try {
       // Update job progress
@@ -100,7 +100,7 @@ class ScanJobProcessor {
         
         if (scanResults) {
           cached = true;
-          logger.info('Wallet scan cache hit', { walletAddress, chain });
+          logger.info({ walletAddress, chain }, 'Wallet scan cache hit');
         }
       }
 
@@ -128,24 +128,24 @@ class ScanJobProcessor {
         protocolsScanned: Object.keys(scanResults.protocols).length
       };
 
-      logger.info('Wallet scan job completed', {
+      logger.info({
         walletAddress,
         chain,
         duration: result.duration,
         cached,
         positionsFound: result.positionsFound,
         jobId: job.id
-      });
+      }, 'Wallet scan job completed');
 
       return result;
 
     } catch (error) {
-      logger.error('Wallet scan job failed', {
+      logger.error({
         walletAddress,
         chain,
         error,
         jobId: job.id
-      });
+      }, 'Wallet scan job failed');
       throw error;
     }
   }
@@ -155,13 +155,13 @@ class ScanJobProcessor {
     const startTime = Date.now();
     const { walletAddress, protocol, chain, parentJobId } = job.data;
 
-    logger.info('Processing protocol scan job', {
+    logger.info({
       walletAddress,
       protocol,
       chain,
       parentJobId,
       jobId: job.id
-    });
+    }, 'Processing protocol scan job');
 
     try {
       await job.updateProgress(0);
@@ -198,14 +198,14 @@ class ScanJobProcessor {
         duration: Date.now() - startTime
       };
 
-      logger.info('Protocol scan job completed', {
+      logger.info({
         walletAddress,
         protocol,
         chain,
         positionsFound: positions.length,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Protocol scan job completed');
 
       return result;
 
@@ -220,13 +220,13 @@ class ScanJobProcessor {
         duration: Date.now() - startTime
       };
 
-      logger.error('Protocol scan job failed', {
+      logger.error({
         walletAddress,
         protocol,
         chain,
         error,
         jobId: job.id
-      });
+      }, 'Protocol scan job failed');
 
       return result;
     }
@@ -237,13 +237,13 @@ class ScanJobProcessor {
     const startTime = Date.now();
     const { walletAddress, chain, maxDuration, topProtocols = 3 } = job.data;
 
-    logger.info('Processing quick scan job', {
+    logger.info({
       walletAddress,
       chain,
       maxDuration,
       topProtocols,
       jobId: job.id
-    });
+    }, 'Processing quick scan job');
 
     try {
       await job.updateProgress(0);
@@ -283,23 +283,23 @@ class ScanJobProcessor {
         protocolsScanned: protocols.length
       };
 
-      logger.info('Quick scan job completed', {
+      logger.info({
         walletAddress,
         chain,
         duration: result.duration,
         positionsFound: result.positionsFound,
         jobId: job.id
-      });
+      }, 'Quick scan job completed');
 
       return result;
 
     } catch (error) {
-      logger.error('Quick scan job failed', {
+      logger.error({
         walletAddress,
         chain,
         error,
         jobId: job.id
-      });
+      }, 'Quick scan job failed');
       throw error;
     }
   }
@@ -308,13 +308,13 @@ class ScanJobProcessor {
   async processBulkScan(job: Job<BulkScanJobData>): Promise<WalletScanJobResult[]> {
     const { walletAddresses, chain, batchSize = 5, concurrency = 3 } = job.data;
 
-    logger.info('Processing bulk scan job', {
+    logger.info({
       walletCount: walletAddresses.length,
       chain,
       batchSize,
       concurrency,
       jobId: job.id
-    });
+    }, 'Processing bulk scan job');
 
     try {
       const results: WalletScanJobResult[] = [];
@@ -340,11 +340,11 @@ class ScanJobProcessor {
               data: scanJobData,
               id: `bulk-${job.id}-${walletAddress}`,
               updateProgress: async () => {}
-            } as Job<WalletScanJobData>;
+            } as unknown as Job<WalletScanJobData>;
 
             return await this.processWalletScan(childJob);
           } catch (error) {
-            logger.error('Bulk scan wallet failed', { walletAddress, error });
+            logger.error({ walletAddress, error }, 'Bulk scan wallet failed');
             return null;
           }
         });
@@ -362,31 +362,31 @@ class ScanJobProcessor {
         const progress = (processedWallets / totalWallets) * 100;
         await job.updateProgress(progress);
 
-        logger.debug('Bulk scan batch completed', {
+        logger.debug({
           batchStart: i,
           batchSize: batch.length,
           processed: processedWallets,
           total: totalWallets,
           progress
-        });
+        }, 'Bulk scan batch completed');
       }
 
-      logger.info('Bulk scan job completed', {
+      logger.info({
         totalWallets: walletAddresses.length,
         successful: results.length,
         failed: walletAddresses.length - results.length,
         jobId: job.id
-      });
+      }, 'Bulk scan job completed');
 
       return results;
 
     } catch (error) {
-      logger.error('Bulk scan job failed', {
+      logger.error({
         walletCount: walletAddresses.length,
         chain,
         error,
         jobId: job.id
-      });
+      }, 'Bulk scan job failed');
       throw error;
     }
   }
@@ -448,12 +448,12 @@ class ScanJobProcessor {
           scanResults.totalFeesEarned += protocolFees;
         }
       } catch (error) {
-        logger.warn('Protocol scan failed in wallet scan', {
+        logger.warn({
           walletAddress,
           protocol,
           chain,
           error
-        });
+        }, 'Protocol scan failed in wallet scan');
       }
     }
 
@@ -655,7 +655,7 @@ export const ScanJobOptions: Record<string, JobsOptions> = {
     removeOnComplete: 20,
     removeOnFail: 10,
     attempts: 1,
-    jobId: (job) => `quick-scan-${job.data.walletAddress}-${job.data.chain}`
+    // jobId: (job) => `quick-scan-${job.data.walletAddress}-${job.data.chain}`
   },
   
   BULK_SCAN: {

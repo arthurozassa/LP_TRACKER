@@ -1,5 +1,5 @@
-import { getQueueManager, QueueManager, QueueStats, WorkerStats } from './processors';
-import { getJobScheduler, JobScheduler, ScheduledJob } from './scheduler';
+import { getQueueManager, QueueStats, WorkerStats } from './processors';
+import { getJobScheduler, ScheduledJob } from './scheduler';
 import { getMultiLevelCache, CacheLayerStats } from '../cache/strategies';
 import { getCacheInvalidationManager, InvalidationStats } from '../cache/invalidation';
 import { getMemoryCache } from '../cache/memory';
@@ -87,8 +87,8 @@ export interface MonitoringConfig {
 }
 
 class QueueMonitoring {
-  private queueManager: QueueManager;
-  private scheduler: JobScheduler;
+  private queueManager: any;
+  private scheduler: any;
   private cache = getMultiLevelCache();
   private memoryCache = getMemoryCache();
   private invalidationManager = getCacheInvalidationManager();
@@ -207,7 +207,7 @@ class QueueMonitoring {
       enabled: true
     });
 
-    logger.info('Default alert rules set up', { ruleCount: this.alertRules.length });
+    logger.info({ ruleCount: this.alertRules.length }, 'Default alert rules set up');
   }
 
   async collectMetrics(): Promise<SystemMetrics> {
