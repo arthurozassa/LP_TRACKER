@@ -65,9 +65,9 @@ export const DEFAULT_V3_SCAN_CONFIG: V3ScanConfig = {
 // ============================================================================
 
 export class V3PositionScanner {
-  private subgraphClient: V3SubgraphClient;
-  private nftManager: V3NFTPositionManager;
-  private calculator: V3Calculator;
+  private subgraphClient?: V3SubgraphClient;
+  private nftManager?: V3NFTPositionManager;
+  private calculator?: V3Calculator;
   private chain: UniswapChain;
   private config: V3ScanConfig;
   private networkConfig: any;
@@ -183,6 +183,10 @@ export class V3PositionScanner {
   private async scanWithSubgraph(address: string, onProgress?: (progress: PositionScanProgress) => void): Promise<UniswapV3Position[]> {
     const positions: UniswapV3Position[] = [];
     
+    if (!this.subgraphClient) {
+      throw new UniswapError('Subgraph client not initialized', UniswapErrorCodes.CONFIGURATION_ERROR, this.chain, 'v3');
+    }
+    
     // Get all positions from subgraph
     const subgraphPositions = await this.subgraphClient.getAllPositions(address);
     
@@ -217,6 +221,10 @@ export class V3PositionScanner {
    */
   private async scanWithOnChain(address: string, onProgress?: (progress: PositionScanProgress) => void): Promise<UniswapV3Position[]> {
     const positions: UniswapV3Position[] = [];
+    
+    if (!this.nftManager) {
+      throw new UniswapError('NFT manager not initialized', UniswapErrorCodes.CONFIGURATION_ERROR, this.chain, 'v3');
+    }
     
     // Get NFT token IDs owned by address
     const tokenIds = await this.nftManager.getTokenIds(address);
