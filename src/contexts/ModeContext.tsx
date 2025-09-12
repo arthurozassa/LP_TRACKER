@@ -17,7 +17,7 @@ import AppMode, {
 
 interface ModeContextType {
   // Current mode state
-  mode: typeof AppMode;
+  mode: 'demo' | 'production';
   isDemo: boolean;
   isProduction: boolean;
   
@@ -27,7 +27,7 @@ interface ModeContextType {
   
   // Mode switching
   toggleMode: () => void;
-  setMode: (mode: typeof AppMode) => void;
+  setMode: (mode: 'demo' | 'production') => void;
   
   // Transition states
   isTransitioning: boolean;
@@ -48,27 +48,27 @@ const MODE_OVERRIDE_KEY = 'LP_TRACKER_MODE_OVERRIDE';
 
 interface ModeProviderProps {
   children: ReactNode;
-  defaultMode?: typeof AppMode;
+  defaultMode?: 'demo' | 'production';
 }
 
 export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
-  const [mode, setModeState] = useState<typeof AppMode>(() => {
+  const [mode, setModeState] = useState<'demo' | 'production'>(() => {
     // Check for override first (development utility)
     if (typeof window !== 'undefined' && window.localStorage) {
       const override = localStorage.getItem(MODE_OVERRIDE_KEY);
       if (override === 'demo' || override === 'production') {
-        return override as any;
+        return override as 'demo' | 'production';
       }
       
       // Check for user preference
       const stored = localStorage.getItem(MODE_STORAGE_KEY);
       if (stored === 'demo' || stored === 'production') {
-        return stored as any;
+        return stored as 'demo' | 'production';
       }
     }
     
     // Fall back to environment or default
-    return defaultMode || (checkIsDemoMode() ? 'demo' : 'production');
+    return (defaultMode as 'demo' | 'production') || (checkIsDemoMode() ? 'demo' : 'production');
   });
 
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -78,8 +78,8 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
   const [hasPersistedMode, setHasPersistedMode] = useState(false);
 
   // Derived state
-  const isDemo = checkIsDemoMode();
-  const isProduction = checkIsProductionMode();
+  const isDemo = mode === 'demo';
+  const isProduction = mode === 'production';
   const dataSource = isDemo ? 'mock' : 'live';
 
   // Initialize configuration
@@ -109,7 +109,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
         // Don't persist if there's an override (development utility)
         const hasOverride = localStorage.getItem(MODE_OVERRIDE_KEY);
         if (!hasOverride) {
-          localStorage.setItem(MODE_STORAGE_KEY, isDemo ? 'demo' : 'production');
+          localStorage.setItem(MODE_STORAGE_KEY, mode);
         }
         setHasPersistedMode(true);
       } catch (error) {
@@ -118,7 +118,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
     }
   }, [mode]);
 
-  const setMode = async (newMode: typeof AppMode) => {
+  const setMode = async (newMode: 'demo' | 'production') => {
     if (newMode === mode) return;
 
     setIsTransitioning(true);
@@ -129,7 +129,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
       await new Promise(resolve => setTimeout(resolve, 300));
 
       // Validate mode change is possible
-      if ((newMode as unknown as string) === 'production') {
+      if (newMode === 'production') {
         // Check if production mode is properly configured
         const testConfig = getModeConfig();
         if (!testConfig) {
@@ -155,7 +155,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
 
   const toggleMode = () => {
     const newMode = isDemo ? 'production' : 'demo';
-    setMode(newMode as any);
+    setMode(newMode);
   };
 
   const clearPersistedMode = () => {
@@ -167,7 +167,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
         
         // Reset to environment default
         const envDefault = checkIsDemoMode() ? 'demo' : 'production';
-        setMode(envDefault as any);
+        setMode(envDefault);
       } catch (error) {
         console.warn('Failed to clear persisted mode:', error);
       }
@@ -227,7 +227,7 @@ export function useDataSource(): 'mock' | 'cache' | 'live' {
 
 // HOC for mode-aware components
 export function withMode<P extends object>(
-  Component: React.ComponentType<P & { mode: typeof AppMode; isDemo: boolean; isProduction: boolean }>
+  Component: React.ComponentType<P & { mode: 'demo' | 'production'; isDemo: boolean; isProduction: boolean }>
 ) {
   return function ModeAwareComponent(props: P) {
     const { mode, isDemo, isProduction } = useMode();
