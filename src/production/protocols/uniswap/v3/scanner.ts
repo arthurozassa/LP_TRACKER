@@ -229,7 +229,7 @@ export class V3PositionScanner {
     const nftPositions = await this.nftManager.getPositions(tokenIds);
     
     let processed = 0;
-    for (const [tokenId, nftPosition] of nftPositions) {
+    for (const [tokenId, nftPosition] of nftPositions.entries()) {
       try {
         const positionInfo = await this.nftManager.getPositionInfo(tokenId, address);
         const position = await this.convertNFTPosition(positionInfo);

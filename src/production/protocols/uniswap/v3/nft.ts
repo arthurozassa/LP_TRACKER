@@ -323,7 +323,7 @@ export class V3NFTPositionManager {
       let totalValueUSD = 0;
       let totalFeesCollectable = 0;
 
-      for (const [tokenId, position] of positions) {
+      for (const [tokenId, position] of positions.entries()) {
         if (position.liquidity !== '0') {
           activePositions++;
         }
