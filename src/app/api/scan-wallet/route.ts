@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductionScanner } from '@/services/productionScanner';
+import { getRealProductionScanner } from '@/services/realProductionScanner';
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,11 +28,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Use the production scanner
-    const productionScanner = getProductionScanner();
-    console.log('Using production scanner...');
+    // Determine which scanner to use based on API keys
+    const hasRealApiKeys = process.env.THE_GRAPH_API_KEY && process.env.THE_GRAPH_API_KEY !== 'your_the_graph_api_key_here';
     
-    const scanResponse = await productionScanner.scanWallet(address, chain as any, {
+    let scanner;
+    if (hasRealApiKeys) {
+      scanner = getRealProductionScanner();
+      console.log('🔍 Using REAL production scanner with live APIs...');
+    } else {
+      scanner = getProductionScanner();
+      console.log('🎭 Using demo production scanner (no API keys configured)...');
+    }
+    
+    const scanResponse = await scanner.scanWallet(address, chain as any, {
       includeHistoricalData: true,
       includeFees: true,
       timeframe: '30d'

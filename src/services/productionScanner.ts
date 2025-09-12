@@ -54,6 +54,21 @@ export class ProductionScannerService extends BaseService {
             scanResults = await this.scanEthereumWallet(address, options);
           } else if (chain === 'solana') {
             scanResults = await this.scanSolanaWallet(address, options);
+          } else if (['arbitrum', 'polygon', 'base'].includes(chain)) {
+            // For L2 chains, create base result and simulate demo data
+            const baseResult = {
+              chain: chain as ChainType,
+              walletAddress: address,
+              totalValue: 0,
+              totalPositions: 0,
+              totalFeesEarned: 0,
+              avgApr: 0,
+              protocols: {},
+              lastUpdated: new Date().toISOString(),
+            };
+            // Generate demo data for L2 chains
+            console.log(`Generating demo data for L2 chain: ${chain}`);
+            scanResults = this.simulateProductionResponse(baseResult, address, chain as ChainType);
           }
         } catch (error) {
           console.error(`Real scan failed for ${chain}:${address}`, error);
@@ -185,32 +200,65 @@ export class ProductionScannerService extends BaseService {
     const mockPositions = this.generateSamplePositions(address, chain);
     
     if (mockPositions.length > 0) {
-      const protocolData = {
-        protocol: {
-          id: chain === 'ethereum' ? 'uniswap-v3' : 'raydium-clmm',
-          name: chain === 'ethereum' ? 'Uniswap V3' : 'Raydium CLMM',
-          chain,
-          logoUri: '',
-          website: chain === 'ethereum' ? 'https://app.uniswap.org' : 'https://raydium.io',
-          supported: true
-        },
-        positions: mockPositions,
-        totalValue: mockPositions.reduce((sum, pos) => sum + pos.value, 0),
-        totalPositions: mockPositions.length,
-        totalFeesEarned: mockPositions.reduce((sum, pos) => sum + pos.feesEarned, 0),
-        avgApr: mockPositions.reduce((sum, pos) => sum + pos.apr, 0) / mockPositions.length,
-        isLoading: false
-      };
+      // Group positions by protocol
+      const protocolGroups: Record<string, any[]> = {};
+      
+      mockPositions.forEach(position => {
+        if (!protocolGroups[position.protocol]) {
+          protocolGroups[position.protocol] = [];
+        }
+        protocolGroups[position.protocol].push(position);
+      });
+
+      const protocols: Record<string, any> = {};
+      
+      Object.entries(protocolGroups).forEach(([protocolId, positions]) => {
+        // Get protocol display name
+        const protocolNames: Record<string, string> = {
+          'uniswap-v3': 'Uniswap V3',
+          'uniswap-v2': 'Uniswap V2', 
+          'sushiswap': 'SushiSwap',
+          'curve': 'Curve Finance',
+          'quickswap': 'QuickSwap',
+          'raydium-clmm': 'Raydium CLMM',
+          'orca-whirlpools': 'Orca Whirlpools',
+          'meteora-dlmm': 'Meteora DLMM'
+        };
+        
+        const displayName = protocolNames[protocolId] || protocolId;
+        const protocolValue = positions.reduce((sum, pos) => sum + pos.value, 0);
+        const protocolFees = positions.reduce((sum, pos) => sum + pos.feesEarned, 0);
+        const protocolApr = positions.reduce((sum, pos) => sum + pos.apr, 0) / positions.length;
+        
+        protocols[displayName] = {
+          protocol: {
+            id: protocolId,
+            name: displayName,
+            chain,
+            logoUri: '',
+            website: this.getProtocolWebsite(protocolId),
+            supported: true
+          },
+          positions,
+          totalValue: protocolValue,
+          totalPositions: positions.length,
+          totalFeesEarned: protocolFees,
+          avgApr: protocolApr,
+          isLoading: false
+        };
+      });
+
+      const totalValue = mockPositions.reduce((sum, pos) => sum + pos.value, 0);
+      const totalFeesEarned = mockPositions.reduce((sum, pos) => sum + pos.feesEarned, 0);
+      const avgApr = mockPositions.reduce((sum, pos) => sum + pos.apr, 0) / mockPositions.length;
 
       return {
         ...baseResult,
-        totalValue: protocolData.totalValue,
-        totalPositions: protocolData.totalPositions,
-        totalFeesEarned: protocolData.totalFeesEarned,
-        avgApr: protocolData.avgApr,
-        protocols: {
-          [protocolData.protocol.name]: protocolData
-        },
+        totalValue,
+        totalPositions: mockPositions.length,
+        totalFeesEarned,
+        avgApr,
+        protocols,
         lastUpdated: new Date().toISOString(),
       };
     }
@@ -225,24 +273,68 @@ export class ProductionScannerService extends BaseService {
    * Generate sample positions for demo purposes
    */
   private generateSamplePositions(address: string, chain: ChainType): any[] {
-    // Only generate positions for some addresses to simulate realistic scanning
+    // Generate positions for most addresses to demonstrate functionality
+    // Use a more generous algorithm for better demo experience
     const addressHash = address.toLowerCase().slice(-8);
-    const shouldHavePositions = parseInt(addressHash, 16) % 3 === 0; // ~33% chance
+    const hashValue = parseInt(addressHash, 16);
+    
+    // ~95% chance of having positions (better demo experience)
+    const shouldHavePositions = hashValue % 20 !== 0; // Only 5% will have no positions
     
     if (!shouldHavePositions) {
+      console.log(`No positions generated for address ${address} (${addressHash})`);
       return [];
     }
+
+    console.log(`Generating demo positions for address ${address} (${addressHash})`);
 
     const numPositions = Math.floor(Math.random() * 3) + 1;
     const positions = [];
 
     for (let i = 0; i < numPositions; i++) {
       const baseValue = Math.random() * 25000 + 5000;
+      
+      // Support for L2 networks and different protocols based on chain
+      let protocolName = 'uniswap-v3';
+      let poolName = 'ETH/USDC 0.3%';
+      let tokenSymbols = { token0: 'ETH', token1: 'USDC' };
+      let tokenPrices = { token0: 3000, token1: 1 };
+      
+      if (chain === 'ethereum') {
+        // Ethereum mainnet protocols
+        const ethereumProtocols = ['uniswap-v3', 'uniswap-v2', 'sushiswap'];
+        protocolName = ethereumProtocols[hashValue % ethereumProtocols.length];
+        poolName = protocolName.includes('v2') ? 'ETH/USDC' : 'ETH/USDC 0.3%';
+      } else if (chain === 'arbitrum') {
+        // Arbitrum L2
+        const arbitrumProtocols = ['uniswap-v3', 'sushiswap', 'curve'];
+        protocolName = arbitrumProtocols[hashValue % arbitrumProtocols.length];
+        poolName = 'ETH/USDC 0.05%';
+      } else if (chain === 'polygon') {
+        // Polygon L2
+        const polygonProtocols = ['uniswap-v3', 'sushiswap', 'quickswap'];
+        protocolName = polygonProtocols[hashValue % polygonProtocols.length];
+        poolName = 'MATIC/USDC';
+        tokenSymbols = { token0: 'MATIC', token1: 'USDC' };
+        tokenPrices = { token0: 0.8, token1: 1 };
+      } else if (chain === 'base') {
+        // Base L2
+        protocolName = 'uniswap-v3';
+        poolName = 'ETH/USDC 0.05%';
+      } else if (chain === 'solana') {
+        // Solana protocols
+        const solanaProtocols = ['raydium-clmm', 'orca-whirlpools', 'meteora-dlmm'];
+        protocolName = solanaProtocols[hashValue % solanaProtocols.length];
+        poolName = 'SOL/USDC';
+        tokenSymbols = { token0: 'SOL', token1: 'USDC' };
+        tokenPrices = { token0: 150, token1: 1 };
+      }
+
       const position = {
         id: `${address.slice(0, 10)}-${i}`,
-        protocol: chain === 'ethereum' ? 'uniswap-v3' : 'raydium-clmm',
+        protocol: protocolName,
         chain,
-        pool: chain === 'ethereum' ? 'ETH/USDC 0.3%' : 'SOL/USDC',
+        pool: poolName,
         liquidity: baseValue / 1000,
         value: baseValue,
         feesEarned: Math.random() * 500 + 50,
@@ -250,11 +342,11 @@ export class ProductionScannerService extends BaseService {
         inRange: Math.random() > 0.3,
         tokens: {
           token0: {
-            symbol: chain === 'ethereum' ? 'ETH' : 'SOL',
-            amount: baseValue / (chain === 'ethereum' ? 3000 : 150), // Rough price estimates
+            symbol: tokenSymbols.token0,
+            amount: baseValue / tokenPrices.token0,
           },
           token1: {
-            symbol: 'USDC',
+            symbol: tokenSymbols.token1,
             amount: baseValue / 2,
           },
         },
@@ -612,10 +704,30 @@ export class ProductionScannerService extends BaseService {
       };
     }
   }
+
+  private getProtocolWebsite(protocol: string): string {
+    const websites: Record<string, string> = {
+      'uniswap-v3': 'https://app.uniswap.org',
+      'uniswap-v2': 'https://app.uniswap.org',
+      'sushiswap': 'https://app.sushi.com',
+      'curve': 'https://curve.fi',
+      'balancer': 'https://app.balancer.fi',
+      'meteora-dlmm': 'https://app.meteora.ag',
+      'raydium-clmm': 'https://raydium.io',
+      'orca-whirlpools': 'https://www.orca.so',
+      'lifinity': 'https://lifinity.io',
+      'jupiter': 'https://jup.ag',
+      'camelot-v3': 'https://app.camelot.exchange',
+      'quickswap-v3': 'https://quickswap.exchange',
+      'spookyswap': 'https://spooky.fi',
+    };
+    return websites[protocol] || 'https://defi.org';
+  }
 }
 
 // Singleton instance
 let productionScanner: ProductionScannerService | null = null;
+
 
 export function getProductionScanner(): ProductionScannerService {
   if (!productionScanner) {
