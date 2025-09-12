@@ -323,7 +323,7 @@ export class V3NFTPositionManager {
       let totalValueUSD = 0;
       let totalFeesCollectable = 0;
 
-      for (const [tokenId, position] of positions.entries()) {
+      positions.forEach((position, tokenId) => {
         if (position.liquidity !== '0') {
           activePositions++;
         }
@@ -333,7 +333,7 @@ export class V3NFTPositionManager {
         const feesCollectable = parseFloat(formatTokenAmount(position.tokensOwed0, 18)) +
                               parseFloat(formatTokenAmount(position.tokensOwed1, 18));
         totalFeesCollectable += feesCollectable;
-      }
+      });
 
       return {
         totalPositions: tokenIds.length,
