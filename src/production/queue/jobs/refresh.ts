@@ -216,7 +216,7 @@ class RefreshJobProcessor {
         } catch (error) {
           const errorMsg = `Failed to refresh ${protocol} positions: ${error}`;
           errors.push(errorMsg);
-          logger.error(errorMsg, { error });
+          logger.error({ error }, errorMsg);
         }
       }
 
@@ -517,7 +517,7 @@ class RefreshJobProcessor {
     if (updated > 0) {
       await this.cache.set(cacheKey, currentPositions, {
         strategy: CacheStrategies.FAST_ACCESS
-      });
+      }, 'Logger message');
     }
 
     return { refreshed, updated };
