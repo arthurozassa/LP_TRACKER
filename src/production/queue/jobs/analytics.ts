@@ -125,14 +125,14 @@ class AnalyticsJobProcessor {
       includeBenchmarks = false 
     } = job.data;
 
-    logger.info('Processing portfolio analytics job', {
+    logger.info({
       walletAddress,
       chain,
       timeframes,
       includeHodlComparison,
       includeBenchmarks,
       jobId: job.id
-    });
+    }, 'Processing portfolio analytics job');
 
     try {
       await job.updateProgress(0);
@@ -195,12 +195,12 @@ class AnalyticsJobProcessor {
         strategy: CacheStrategies.PERSISTENT
       });
 
-      logger.info('Portfolio analytics job completed', {
+      logger.info({
         walletAddress,
         chain,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Portfolio analytics job completed');
 
       return result;
 
@@ -215,13 +215,13 @@ class AnalyticsJobProcessor {
     const startTime = Date.now();
     const { protocols, chains, metrics, timeframe } = job.data;
 
-    logger.info('Processing protocol analytics job', {
+    logger.info({
       protocolCount: protocols.length,
       chains: chains.length,
       metrics,
       timeframe,
       jobId: job.id
-    });
+    }, 'Processing protocol analytics job');
 
     try {
       await job.updateProgress(0);
@@ -261,11 +261,11 @@ class AnalyticsJobProcessor {
         duration: Date.now() - startTime
       };
 
-      logger.info('Protocol analytics job completed', {
+      logger.info({
         protocolCount: Object.keys(protocolMetrics).length,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Protocol analytics job completed');
 
       return result;
 
@@ -280,14 +280,14 @@ class AnalyticsJobProcessor {
     const startTime = Date.now();
     const { walletAddress, chain, riskTolerance, minAmount = 1000, protocols } = job.data;
 
-    logger.info('Processing yield optimization job', {
+    logger.info({
       walletAddress,
       chain,
       riskTolerance,
       minAmount,
       protocols: protocols?.length,
       jobId: job.id
-    });
+    }, 'Processing yield optimization job');
 
     try {
       await job.updateProgress(0);
@@ -342,14 +342,13 @@ class AnalyticsJobProcessor {
         strategy: CacheStrategies.FAST_ACCESS
       });
 
-      logger.info('Yield optimization job completed', {
+      logger.info({
         walletAddress,
         currentYield,
         recommendations: recommendations.length,
-        potentialIncrease,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Yield optimization job completed');
 
       return result;
 
@@ -370,14 +369,13 @@ class AnalyticsJobProcessor {
       includeCorrelation = true 
     } = job.data;
 
-    logger.info('Processing risk analysis job', {
+    logger.info({
       walletAddress,
       chain,
       analysisDepth,
-      includeImpermanentLoss,
       includeCorrelation,
       jobId: job.id
-    });
+    }, 'Processing risk analysis job');
 
     try {
       await job.updateProgress(0);
@@ -451,13 +449,13 @@ class AnalyticsJobProcessor {
         strategy: CacheStrategies.PERSISTENT
       });
 
-      logger.info('Risk analysis job completed', {
+      logger.info({
         walletAddress,
         overallRiskScore,
         riskLevel,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Risk analysis job completed');
 
       return result;
 
@@ -472,7 +470,7 @@ class AnalyticsJobProcessor {
     const startTime = Date.now();
     const { walletAddress, chain, startDate, endDate, granularity, includeBenchmarks = false } = job.data;
 
-    logger.info('Processing historical performance job', {
+    logger.info({
       walletAddress,
       chain,
       startDate,
@@ -480,7 +478,7 @@ class AnalyticsJobProcessor {
       granularity,
       includeBenchmarks,
       jobId: job.id
-    });
+    }, 'Processing historical performance job');
 
     try {
       await job.updateProgress(0);
@@ -523,12 +521,12 @@ class AnalyticsJobProcessor {
         strategy: CacheStrategies.PERSISTENT
       });
 
-      logger.info('Historical performance job completed', {
+      logger.info({
         walletAddress,
         dataPoints: performanceData.length,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Historical performance job completed');
 
       return result;
 
