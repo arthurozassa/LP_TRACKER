@@ -205,7 +205,7 @@ class AnalyticsJobProcessor {
       return result;
 
     } catch (error) {
-      logger.error('Portfolio analytics job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Portfolio analytics job failed');
       throw error;
     }
   }
@@ -240,7 +240,7 @@ class AnalyticsJobProcessor {
             protocolMetrics[protocolKey] = protocolData;
 
           } catch (error) {
-            logger.error('Protocol analysis failed', { protocol, chain, error });
+            logger.error({ protocol, chain, error }, 'Protocol analysis failed');
             protocolMetrics[`${protocol}:${chain}`] = {
               tvl: 0,
               volume24h: 0,
@@ -270,7 +270,7 @@ class AnalyticsJobProcessor {
       return result;
 
     } catch (error) {
-      logger.error('Protocol analytics job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Protocol analytics job failed');
       throw error;
     }
   }
@@ -353,7 +353,7 @@ class AnalyticsJobProcessor {
       return result;
 
     } catch (error) {
-      logger.error('Yield optimization job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Yield optimization job failed');
       throw error;
     }
   }
@@ -460,7 +460,7 @@ class AnalyticsJobProcessor {
       return result;
 
     } catch (error) {
-      logger.error('Risk analysis job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Risk analysis job failed');
       throw error;
     }
   }
@@ -531,7 +531,7 @@ class AnalyticsJobProcessor {
       return result;
 
     } catch (error) {
-      logger.error('Historical performance job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Historical performance job failed');
       throw error;
     }
   }
