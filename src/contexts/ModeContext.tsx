@@ -39,6 +39,9 @@ interface ModeContextType {
   // Mode persistence
   hasPersistedMode: boolean;
   clearPersistedMode: () => void;
+  
+  // Hydration state
+  isHydrated: boolean;
 }
 
 const ModeContext = createContext<ModeContextType | undefined>(undefined);
@@ -52,22 +55,9 @@ interface ModeProviderProps {
 }
 
 export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
+  // Initialize with server-safe default to prevent hydration mismatch
   const [mode, setModeState] = useState<'demo' | 'production'>(() => {
-    // Check for override first (development utility)
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const override = localStorage.getItem(MODE_OVERRIDE_KEY);
-      if (override === 'demo' || override === 'production') {
-        return override as 'demo' | 'production';
-      }
-      
-      // Check for user preference
-      const stored = localStorage.getItem(MODE_STORAGE_KEY);
-      if (stored === 'demo' || stored === 'production') {
-        return stored as 'demo' | 'production';
-      }
-    }
-    
-    // Fall back to environment or default
+    // Only use environment/default on server, never localStorage
     return (defaultMode as 'demo' | 'production') || (checkIsDemoMode() ? 'demo' : 'production');
   });
 
@@ -76,6 +66,30 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
   const [config, setConfig] = useState<ModeConfig | null>(null);
   const [environment, setEnvironment] = useState<EnvironmentDetection | null>(null);
   const [hasPersistedMode, setHasPersistedMode] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Load persisted mode after hydration to prevent server/client mismatch
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Check for override first (development utility)
+      const override = localStorage.getItem(MODE_OVERRIDE_KEY);
+      if (override === 'demo' || override === 'production') {
+        setModeState(override as 'demo' | 'production');
+        setIsHydrated(true);
+        return;
+      }
+      
+      // Check for user preference
+      const stored = localStorage.getItem(MODE_STORAGE_KEY);
+      if (stored === 'demo' || stored === 'production') {
+        setModeState(stored as 'demo' | 'production');
+        setIsHydrated(true);
+        return;
+      }
+    }
+    
+    setIsHydrated(true);
+  }, []);
 
   // Derived state
   const isDemo = mode === 'demo';
@@ -102,9 +116,9 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
     }
   }, [mode]);
 
-  // Persist mode changes to localStorage
+  // Persist mode changes to localStorage (only after hydration)
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (isHydrated && typeof window !== 'undefined' && window.localStorage) {
       try {
         // Don't persist if there's an override (development utility)
         const hasOverride = localStorage.getItem(MODE_OVERRIDE_KEY);
@@ -116,7 +130,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
         console.warn('Failed to persist mode to localStorage:', error);
       }
     }
-  }, [mode]);
+  }, [mode, isHydrated]);
 
   const setMode = async (newMode: 'demo' | 'production') => {
     if (newMode === mode) return;
@@ -187,6 +201,7 @@ export function ModeProvider({ children, defaultMode }: ModeProviderProps) {
     dataSource,
     hasPersistedMode,
     clearPersistedMode,
+    isHydrated,
   };
 
   return (

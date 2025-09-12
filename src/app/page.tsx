@@ -187,7 +187,7 @@ const SimpleSearchBar: React.FC<{
 };
 
 export default function Home() {
-  const { mode, isDemo, isProduction, isTransitioning, dataSource } = useMode();
+  const { mode, isDemo, isProduction, isTransitioning, dataSource, isHydrated } = useMode();
   const [scanResults, setScanResults] = useState<ScanResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingState, setLoadingState] = useState<LoadingState>({
@@ -464,18 +464,20 @@ export default function Home() {
           </p>
           
           {/* Current mode indicator */}
-          <div className="flex justify-center mt-4">
-            <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${
-              isDemo 
-                ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300'
-                : 'bg-green-500/10 border border-green-500/20 text-green-300'
-            }`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${
-                isDemo ? 'bg-blue-400' : 'bg-green-400'
-              }`}></div>
-              <span>Currently in {isDemo ? 'demo' : 'production'} mode {isDemo ? '(Sample Data)' : '(Live Data)'}</span>
+          {isHydrated && (
+            <div className="flex justify-center mt-4">
+              <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${
+                isDemo 
+                  ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300'
+                  : 'bg-green-500/10 border border-green-500/20 text-green-300'
+              }`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${
+                  isDemo ? 'bg-blue-400' : 'bg-green-400'
+                }`}></div>
+                <span>Currently in {isDemo ? 'demo' : 'production'} mode {isDemo ? '(Sample Data)' : '(Live Data)'}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Header with Mode Toggle */}
@@ -485,7 +487,11 @@ export default function Home() {
 
         {/* Search Bar */}
         <div className="mb-6 sm:mb-8 lg:mb-12">
-          <SimpleSearchBar onScan={handleScan} isLoading={isLoading || isTransitioning} isDemo={isDemo} />
+          {isHydrated ? (
+            <SimpleSearchBar onScan={handleScan} isLoading={isLoading || isTransitioning} isDemo={isDemo} />
+          ) : (
+            <SimpleSearchBar onScan={handleScan} isLoading={isLoading || isTransitioning} isDemo={false} />
+          )}
         </div>
         
         {/* Error Display */}
@@ -613,7 +619,7 @@ export default function Home() {
                 <div className="tt-text-secondary text-lg">
                   No liquidity positions found for this address
                 </div>
-                {isProduction && (
+                {isHydrated && isProduction && (
                   <div className="tt-text-tertiary text-sm mt-2">
                     Data sourced from live protocols - this address may not have active LP positions
                   </div>
@@ -631,30 +637,33 @@ export default function Home() {
               Ready to Track Your LP Positions
             </h2>
             <p className="tt-text-secondary max-w-2xl mx-auto mb-6">
-              {isDemo 
-                ? 'Currently in Demo Mode - explore with sample data and try the demo addresses below.'
-                : 'Currently in Production Mode - enter any wallet address to scan for live LP positions across supported protocols.'
+              {isHydrated 
+                ? (isDemo 
+                  ? 'Currently in Demo Mode - explore with sample data and try the demo addresses below.'
+                  : 'Currently in Production Mode - enter any wallet address to scan for live LP positions across supported protocols.')
+                : 'Enter any wallet address to scan for LP positions across supported protocols.'
               }
             </p>
             
             {/* Mode-specific features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-6">
-              <div className={`p-4 rounded-lg border ${isDemo ? 'bg-blue-500/10 border-blue-500/20' : 'bg-gray-500/10 border-gray-500/20'}`}>
-                <h3 className="font-semibold mb-2">{isDemo ? '🧪 Demo Features' : '🚀 Production Features'}</h3>
-                <ul className="text-sm tt-text-secondary space-y-1 text-left">
-                  {isDemo ? (
-                    <>
-                      <li>• Sample wallet data</li>
-                      <li>• Simulated analytics</li>
-                      <li>• All UI components</li>
-                      <li>• No API rate limits</li>
-                    </>
-                  ) : (
-                    <>
-                      <li>• Live position data</li>
-                      <li>• Real-time price feeds</li>
-                      <li>• Protocol integrations</li>
-                      <li>• Production analytics</li>
+            {isHydrated && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-6">
+                <div className={`p-4 rounded-lg border ${isDemo ? 'bg-blue-500/10 border-blue-500/20' : 'bg-gray-500/10 border-gray-500/20'}`}>
+                  <h3 className="font-semibold mb-2">{isDemo ? '🧪 Demo Features' : '🚀 Production Features'}</h3>
+                  <ul className="text-sm tt-text-secondary space-y-1 text-left">
+                    {isDemo ? (
+                      <>
+                        <li>• Sample wallet data</li>
+                        <li>• Simulated analytics</li>
+                        <li>• All UI components</li>
+                        <li>• No API rate limits</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>• Live position data</li>
+                        <li>• Real-time price feeds</li>
+                        <li>• Protocol integrations</li>
+                        <li>• Production analytics</li>
                     </>
                   )}
                 </ul>
@@ -670,6 +679,7 @@ export default function Home() {
                 </ul>
               </div>
             </div>
+            )}
           </div>
         )}
         
@@ -681,7 +691,10 @@ export default function Home() {
               Switching Modes...
             </h2>
             <p className="tt-text-secondary max-w-2xl mx-auto">
-              {isDemo ? 'Activating production features and connecting to live data sources.' : 'Loading demo data and sample positions.'}
+              {isHydrated 
+                ? (isDemo ? 'Activating production features and connecting to live data sources.' : 'Loading demo data and sample positions.')
+                : 'Switching between demo and production modes...'
+              }
             </p>
           </div>
         )}
