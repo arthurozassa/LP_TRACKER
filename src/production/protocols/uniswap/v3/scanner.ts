@@ -184,7 +184,7 @@ export class V3PositionScanner {
     const positions: UniswapV3Position[] = [];
     
     if (!this.subgraphClient) {
-      throw new UniswapError('Subgraph client not initialized', UniswapErrorCodes.CONFIGURATION_ERROR, this.chain, 'v3');
+      throw new UniswapError('Subgraph client not initialized', UniswapErrorCodes.CONTRACT_ERROR, this.chain, 'v3');
     }
     
     // Get all positions from subgraph
@@ -223,7 +223,7 @@ export class V3PositionScanner {
     const positions: UniswapV3Position[] = [];
     
     if (!this.nftManager) {
-      throw new UniswapError('NFT manager not initialized', UniswapErrorCodes.CONFIGURATION_ERROR, this.chain, 'v3');
+      throw new UniswapError('NFT manager not initialized', UniswapErrorCodes.CONTRACT_ERROR, this.chain, 'v3');
     }
     
     // Get NFT token IDs owned by address
