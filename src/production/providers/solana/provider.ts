@@ -51,7 +51,7 @@ export class SolanaProvider extends AbstractBaseProvider {
       await this.testConnection();
       this.logger.info(`Successfully connected to Solana ${this.config.cluster}`);
     } catch (error) {
-      this.logger.warn({ error }, 'Initial Solana connection test failed');
+      this.logger.warn({ error: error instanceof Error ? error.message : String(error) }, 'Initial Solana connection test failed');
     }
   }
 

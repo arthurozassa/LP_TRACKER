@@ -43,7 +43,7 @@ export class EthereumProvider extends AbstractBaseProvider {
       await this.testConnection();
       this.logger.info(`Successfully connected to Ethereum ${this.config.networkName}`);
     } catch (error) {
-      this.logger.warn({ error }, 'Initial connection test failed');
+      this.logger.warn({ error: error instanceof Error ? error.message : String(error) }, 'Initial connection test failed');
     }
   }
 
