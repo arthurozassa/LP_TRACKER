@@ -355,6 +355,7 @@ export class V3Calculator {
 
   /**
    * Helper: Convert tick to sqrt price
+   * Fixed for ethers v6 compatibility
    */
   private tickToSqrtPrice(tick: number): number {
     const sqrtPrice = Math.sqrt(Math.pow(1.0001, tick));
