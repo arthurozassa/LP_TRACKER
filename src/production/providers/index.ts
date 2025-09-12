@@ -9,14 +9,17 @@ export * from './base/provider';
 // Ethereum provider
 export * from './ethereum/config';
 export * from './ethereum/provider';
-export { 
+export type { 
   JsonRpcRequest,
   JsonRpcResponse,
   JsonRpcError,
   EthereumBlock,
   EthereumTransaction,
   EthereumLog,
-  EthereumProviderError,
+  EthereumProviderError
+} from './ethereum/utils';
+
+export { 
   ERROR_CODES,
   isValidEthereumAddress,
   isValidEthereumHash,
@@ -30,7 +33,7 @@ export {
 // Solana provider  
 export * from './solana/config';
 export * from './solana/provider';
-export {
+export type {
   SolanaJsonRpcRequest,
   SolanaJsonRpcResponse,
   SolanaJsonRpcError,
@@ -39,7 +42,10 @@ export {
   SolanaBlock,
   SolanaSignatureStatus,
   SolanaTokenAccount,
-  SolanaProviderError,
+  SolanaProviderError
+} from './solana/utils';
+
+export {
   SOLANA_ERROR_CODES,
   isValidSolanaAddress,
   isValidSolanaSignature,
