@@ -3,7 +3,7 @@
  * Combines subgraph data with on-chain NFT position data for comprehensive V3 scanning
  */
 
-import { ethers, string } from 'ethers';
+import { ethers } from 'ethers';
 import { 
   UniswapV3Position, 
   UniswapChain, 
