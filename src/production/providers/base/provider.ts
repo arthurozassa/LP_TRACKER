@@ -180,7 +180,7 @@ export abstract class AbstractBaseProvider extends BaseProvider {
         lastChecked: new Date(),
         errorRate: 0,
         consecutiveErrors: 0
-      });
+      }, 'Logger message');
     }
 
     this.logger.info(`Provider initialized with ${this.config.endpoints.length} endpoints`);
@@ -241,7 +241,7 @@ export abstract class AbstractBaseProvider extends BaseProvider {
         
         // Secondary sort: latency (lower = better)
         return (a.health?.latency || Infinity) - (b.health?.latency || Infinity);
-      });
+      }, 'Logger message');
 
     return sortedEndpoints[0]?.endpoint || null;
   }
@@ -287,7 +287,7 @@ export abstract class AbstractBaseProvider extends BaseProvider {
           endpoint: endpoint.id,
           attempt,
           error: providerError.message
-        });
+        }, 'Logger message');
         
         await this.delay(delay);
       }
@@ -318,7 +318,7 @@ export abstract class AbstractBaseProvider extends BaseProvider {
         averageLatency: 0,
         requestsPerSecond: 0,
         lastRequestTime: new Date()
-      });
+      }, 'Logger message');
     }
   }
 

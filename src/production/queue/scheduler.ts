@@ -57,7 +57,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     // Protocol TVL refresh - every 5 minutes
     this.addScheduledJob({
@@ -76,7 +76,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     // Protocol analytics - every 30 minutes
     this.addScheduledJob({
@@ -96,7 +96,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     // Cache warmup - every hour
     this.addScheduledJob({
@@ -112,7 +112,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     this.addScheduledJob({
       name: 'cache-warmup-protocols',
@@ -127,7 +127,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     this.addScheduledJob({
       name: 'cache-warmup-tokens',
@@ -142,7 +142,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     // Stale data cleanup - daily at 3 AM
     this.addScheduledJob({
@@ -158,7 +158,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     // Deep cleanup - weekly on Sunday at 2 AM
     this.addScheduledJob({
@@ -174,7 +174,7 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     // Position refresh for active wallets - every 15 minutes
     this.addScheduledJob({
@@ -190,7 +190,7 @@ class JobScheduler {
         removeOnComplete: 5,
         removeOnFail: 3
       }
-    });
+    }, 'Logger message');
 
     // Market hours price updates - more frequent during active trading
     this.addScheduledJob({
@@ -207,7 +207,7 @@ class JobScheduler {
       enabled: false, // Will be enabled during market hours
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     // Weekend maintenance - less frequent updates
     this.addScheduledJob({
@@ -223,11 +223,11 @@ class JobScheduler {
       enabled: true,
       runCount: 0,
       failCount: 0
-    });
+    }, 'Logger message');
 
     logger.info('Default scheduled jobs set up', { 
       jobCount: this.scheduledJobs.size 
-    });
+    }, 'Logger message');
   }
 
   addScheduledJob(jobConfig: Omit<ScheduledJob, 'lastRun' | 'nextRun'>): void {
@@ -248,7 +248,7 @@ class JobScheduler {
       queue: job.queue,
       enabled: job.enabled,
       nextRun: job.nextRun
-    });
+    }, 'Logger message');
   }
 
   private scheduleJob(job: ScheduledJob): void {
@@ -257,7 +257,7 @@ class JobScheduler {
     }, {
       scheduled: true,
       timezone: this.config.timezone
-    });
+    }, 'Logger message');
 
     this.cronJobs.set(job.name, task);
     
@@ -265,7 +265,7 @@ class JobScheduler {
       name: job.name,
       schedule: job.schedule,
       timezone: this.config.timezone
-    });
+    }, 'Logger message');
   }
 
   private async executeScheduledJob(job: ScheduledJob): Promise<void> {
@@ -276,7 +276,7 @@ class JobScheduler {
       queue: job.queue,
       jobName: job.jobName,
       runCount: job.runCount + 1
-    });
+    }, 'Logger message');
 
     try {
       // Dynamic data generation for some jobs
@@ -310,7 +310,7 @@ class JobScheduler {
         duration,
         runCount: job.runCount,
         nextRun: job.nextRun
-      });
+      }, 'Logger message');
 
     } catch (error) {
       job.failCount++;
@@ -322,7 +322,7 @@ class JobScheduler {
         duration,
         runCount: job.runCount,
         failCount: job.failCount
-      });
+      }, 'Logger message');
 
       // Disable job if it fails too many times
       if (job.failCount >= 5) {
@@ -330,7 +330,7 @@ class JobScheduler {
         logger.warn('Scheduled job disabled due to repeated failures', {
           name: job.name,
           failCount: job.failCount
-        });
+        }, 'Logger message');
       }
     }
   }
@@ -599,7 +599,7 @@ class JobScheduler {
       jobCount: this.scheduledJobs.size,
       enabledJobs: this.getEnabledJobs().length,
       timezone: this.config.timezone
-    });
+    }, 'Logger message');
 
     // Start automatic mode detection
     this.startAutomaticModeDetection();

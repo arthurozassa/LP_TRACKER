@@ -117,7 +117,7 @@ class QueueMonitoring {
       message: 'Cache hit rate has dropped below threshold',
       cooldown: 5 * 60 * 1000, // 5 minutes
       enabled: true
-    });
+    }, 'Logger message');
 
     // Queue depth alerts
     this.addAlertRule({
@@ -131,7 +131,7 @@ class QueueMonitoring {
       message: 'Queue depth exceeds threshold',
       cooldown: 2 * 60 * 1000, // 2 minutes
       enabled: true
-    });
+    }, 'Logger message');
 
     // Error rate alerts
     this.addAlertRule({
@@ -145,7 +145,7 @@ class QueueMonitoring {
       message: 'Job error rate exceeds threshold',
       cooldown: 3 * 60 * 1000, // 3 minutes
       enabled: true
-    });
+    }, 'Logger message');
 
     // Processing time alerts
     this.addAlertRule({
@@ -159,7 +159,7 @@ class QueueMonitoring {
       message: 'Average job processing time exceeds threshold',
       cooldown: 10 * 60 * 1000, // 10 minutes
       enabled: true
-    });
+    }, 'Logger message');
 
     // Memory usage alerts
     this.addAlertRule({
@@ -172,7 +172,7 @@ class QueueMonitoring {
       message: 'System memory usage is high',
       cooldown: 5 * 60 * 1000, // 5 minutes
       enabled: true
-    });
+    }, 'Logger message');
 
     // Redis connection alerts
     this.addAlertRule({
@@ -182,7 +182,7 @@ class QueueMonitoring {
       message: 'Redis connection lost',
       cooldown: 1 * 60 * 1000, // 1 minute
       enabled: true
-    });
+    }, 'Logger message');
 
     // Scheduler failure alerts
     this.addAlertRule({
@@ -192,7 +192,7 @@ class QueueMonitoring {
       message: 'Scheduled job failure rate is high',
       cooldown: 15 * 60 * 1000, // 15 minutes
       enabled: true
-    });
+    }, 'Logger message');
 
     // Cache invalidation alerts
     this.addAlertRule({
@@ -205,7 +205,7 @@ class QueueMonitoring {
       message: 'Cache invalidation rate is unusually high',
       cooldown: 10 * 60 * 1000, // 10 minutes
       enabled: true
-    });
+    }, 'Logger message');
 
     logger.info('Default alert rules set up', { ruleCount: this.alertRules.length });
   }
@@ -352,7 +352,7 @@ class QueueMonitoring {
           entries: stats.size || 0,
           hitRate: stats.hits / (stats.hits + stats.misses) || 0
         };
-      });
+      }, 'Logger message');
     }
     
     return namespaceMetrics;
@@ -423,7 +423,7 @@ class QueueMonitoring {
         logger.error('Alert rule evaluation failed', { 
           rule: rule.name, 
           error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        }, 'Logger message');
       }
     }
   }
@@ -446,7 +446,7 @@ class QueueMonitoring {
       rule: rule.name,
       severity: rule.severity,
       message: rule.message
-    });
+    }, 'Logger message');
 
     // Clean up old alerts
     this.cleanupOldAlerts();
@@ -607,7 +607,7 @@ class QueueMonitoring {
       metricsInterval: this.config.metricsInterval,
       alertsEnabled: this.config.alertsEnabled,
       retentionPeriod: this.config.retentionPeriod
-    });
+    }, 'Logger message');
 
     // Collect initial metrics
     this.collectMetrics();

@@ -45,7 +45,7 @@ class RedisCache {
           lazyConnect: true,
           connectTimeout: 10000,
           family: 4, // IPv4
-        });
+        }, 'Logger message');
 
         await this.redis.ping();
         logger.info('Connected to Redis');
@@ -53,7 +53,7 @@ class RedisCache {
         throw new Error('No Redis URL provided');
       }
     } catch (error) {
-      logger.warn('Redis connection failed, falling back to Vercel KV', { error } as any);
+      logger.warn({ error } as any, 'Redis connection failed, falling back to Vercel KV');
       this.useVercelKV = true;
       this.redis = null;
       
@@ -62,7 +62,7 @@ class RedisCache {
         await kv.ping();
         logger.info('Connected to Vercel KV');
       } catch (kvError) {
-        logger.error('Both Redis and Vercel KV connections failed', { kvError } as any);
+        logger.error({ kvError } as any, 'Both Redis and Vercel KV connections failed');
       }
     }
   }
@@ -89,7 +89,7 @@ class RedisCache {
       const decompressed = LZString.decompressFromUTF16(compressed);
       return decompressed ? JSON.parse(decompressed) : null;
     } catch (error) {
-      logger.error('Failed to decompress data', { error } as any);
+      logger.error({ error } as any, 'Failed to decompress data');
       return null;
     }
   }
@@ -121,7 +121,7 @@ class RedisCache {
       return JSON.parse(data);
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache get error', { key: cacheKey, error } as any);
+      logger.error({ key: cacheKey, error } as any, 'Cache get error');
       return null;
     }
   }
@@ -148,7 +148,7 @@ class RedisCache {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache set error', { key: cacheKey, error } as any);
+      logger.error({ key: cacheKey, error } as any, 'Cache set error');
       return false;
     }
   }
@@ -166,7 +166,7 @@ class RedisCache {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache delete error', { key: cacheKey, error } as any);
+      logger.error({ key: cacheKey, error } as any, 'Cache delete error');
       return false;
     }
   }
@@ -186,7 +186,7 @@ class RedisCache {
       return false;
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache exists error', { key: cacheKey, error } as any);
+      logger.error({ key: cacheKey, error } as any, 'Cache exists error');
       return false;
     }
   }
@@ -220,13 +220,13 @@ class RedisCache {
           }
           return JSON.parse(data);
         } catch (error) {
-          logger.error('Failed to parse cached data', { key: cacheKeys[index], error } as any);
+          logger.error({ key: cacheKeys[index], error } as any, 'Failed to parse cached data');
           return null;
         }
-      });
+      }, 'Logger message');
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache mget error', { keys: cacheKeys, error } as any);
+      logger.error({ keys: cacheKeys, error } as any, 'Cache mget error');
       return keys.map(() => null);
     }
   }
@@ -258,7 +258,7 @@ class RedisCache {
           }
           
           pipeline.setex(cacheKey, ttl, dataToStore);
-        });
+        }, 'Logger message');
         
         await pipeline.exec();
       }
@@ -266,7 +266,7 @@ class RedisCache {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache mset error', { error } as any);
+      logger.error({ error } as any, 'Cache mset error');
       return false;
     }
   }
@@ -290,7 +290,7 @@ class RedisCache {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache clear error', { pattern, error } as any);
+      logger.error({ pattern, error } as any, 'Cache clear error');
       return false;
     }
   }
@@ -309,7 +309,7 @@ class RedisCache {
       return -1;
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache TTL error', { key: cacheKey, error } as any);
+      logger.error({ key: cacheKey, error } as any, 'Cache TTL error');
       return -1;
     }
   }
@@ -334,7 +334,7 @@ class RedisCache {
       return false;
     } catch (error) {
       this.stats.errors++;
-      logger.error('Cache expire error', { key: cacheKey, error } as any);
+      logger.error({ key: cacheKey, error } as any, 'Cache expire error');
       return false;
     }
   }

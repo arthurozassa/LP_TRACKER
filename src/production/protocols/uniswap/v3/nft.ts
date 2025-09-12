@@ -105,7 +105,7 @@ export class V3NFTPositionManager {
           this.contract.balanceOf(ownerAddress),
           10000
         );
-      });
+      }, 'Logger message');
 
       if (balance === '0') {
         return [];
@@ -162,7 +162,7 @@ export class V3NFTPositionManager {
           this.contract.positions(tokenId),
           10000
         );
-      });
+      }, 'Logger message');
 
       return {
         tokenId: tokenId.toString(),
@@ -207,7 +207,7 @@ export class V3NFTPositionManager {
           console.warn(`Failed to get position for token ID ${tokenId}:`, error);
           return null;
         }
-      });
+      }, 'Logger message');
 
       const results = await Promise.all(promises);
       
@@ -333,7 +333,7 @@ export class V3NFTPositionManager {
         const feesCollectable = parseFloat(formatTokenAmount(position.tokensOwed0, 18)) +
                               parseFloat(formatTokenAmount(position.tokensOwed1, 18));
         totalFeesCollectable += feesCollectable;
-      });
+      }, 'Logger message');
 
       return {
         totalPositions: tokenIds.length,

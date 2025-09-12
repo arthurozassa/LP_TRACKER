@@ -160,7 +160,7 @@ export class MeteoraAPIClient {
           'Content-Type': 'application/json',
           'User-Agent': 'LP-Tracker/1.0'
         }
-      });
+      }, 'Logger message');
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -455,7 +455,7 @@ export async function getEnhancedMeteoraPositions(
         position.accounts.mint1 = pool.tokenB.address;
       }
       return position;
-    });
+    }, 'Logger message');
   } catch (error) {
     throw new SolanaIntegrationError(
       `Failed to get enhanced positions for ${walletAddress}`,
@@ -490,7 +490,7 @@ export async function getMeteoraPoolPrices(
         console.warn(`Failed to fetch price for pool ${poolAddress}:`, error);
         return { poolAddress, price: 0 };
       }
-    });
+    }, 'Logger message');
     
     const results = await Promise.allSettled(batchPromises);
     

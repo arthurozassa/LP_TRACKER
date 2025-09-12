@@ -170,7 +170,7 @@ export class QueueWebSocketIntegration {
         attempts: options.attempts || 3,
         removeOnComplete: 10, // Keep last 10 completed jobs
         removeOnFail: 5,      // Keep last 5 failed jobs
-      });
+      }, 'Logger message');
 
       // Send job started message
       await this.broadcastJobStarted(job, queueName);
@@ -218,7 +218,7 @@ export class QueueWebSocketIntegration {
           error: error instanceof Error ? error.message : 'Unknown error',
         }, 'Error handling job completed event');
       }
-    });
+    }, 'Logger message');
 
     queueEvents.on('failed', async ({ jobId, failedReason }) => {
       try {
@@ -237,7 +237,7 @@ export class QueueWebSocketIntegration {
           error: error instanceof Error ? error.message : 'Unknown error',
         }, 'Error handling job failed event');
       }
-    });
+    }, 'Logger message');
 
     queueEvents.on('progress', async ({ jobId, data }) => {
       try {
@@ -256,25 +256,25 @@ export class QueueWebSocketIntegration {
           error: error instanceof Error ? error.message : 'Unknown error',
         }, 'Error handling job progress event');
       }
-    });
+    }, 'Logger message');
   }
 
   private setupWorkerEventHandlers(queueName: string, worker: Worker): void {
     worker.on('active', async (job: Job) => {
       await this.broadcastJobStarted(job, queueName);
-    });
+    }, 'Logger message');
 
     worker.on('progress', async (job: Job, progress: any) => {
       await this.broadcastJobProgress(job, queueName, progress);
-    });
+    }, 'Logger message');
 
     worker.on('completed', async (job: Job, result: any) => {
       await this.broadcastJobCompleted(job, queueName, result);
-    });
+    }, 'Logger message');
 
     worker.on('failed', async (job: Job, error: Error) => {
       await this.broadcastJobFailed(job, queueName, error.message);
-    });
+    }, 'Logger message');
   }
 
   // ============================================================================
@@ -292,7 +292,7 @@ export class QueueWebSocketIntegration {
     }, {
       userId: websocketConfig?.userId,
       walletAddress: websocketConfig?.walletAddress,
-    });
+    }, 'Logger message');
 
     await this.broadcastJobMessage(message, websocketConfig);
 
@@ -320,7 +320,7 @@ export class QueueWebSocketIntegration {
     }, {
       userId: websocketConfig?.userId,
       walletAddress: websocketConfig?.walletAddress,
-    });
+    }, 'Logger message');
 
     await this.broadcastJobMessage(message, websocketConfig);
 
@@ -343,7 +343,7 @@ export class QueueWebSocketIntegration {
     }, {
       userId: websocketConfig?.userId,
       walletAddress: websocketConfig?.walletAddress,
-    });
+    }, 'Logger message');
 
     await this.broadcastJobMessage(message, websocketConfig);
 
@@ -366,7 +366,7 @@ export class QueueWebSocketIntegration {
     }, {
       userId: websocketConfig?.userId,
       walletAddress: websocketConfig?.walletAddress,
-    });
+    }, 'Logger message');
 
     await this.broadcastJobMessage(message, websocketConfig);
 
@@ -508,7 +508,7 @@ export class QueueWebSocketIntegration {
       const metricsMessage = createMessage('queue_metrics', {
         queues: allMetrics,
         timestamp: new Date(),
-      });
+      }, 'Logger message');
 
       this.webSocketServer.broadcast(metricsMessage, 'analytics:global');
 

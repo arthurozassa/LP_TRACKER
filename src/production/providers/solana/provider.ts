@@ -51,7 +51,7 @@ export class SolanaProvider extends AbstractBaseProvider {
       await this.testConnection();
       this.logger.info(`Successfully connected to Solana ${this.config.cluster}`);
     } catch (error) {
-      this.logger.warn('Initial Solana connection test failed', { error });
+      this.logger.warn({ error }, 'Initial Solana connection test failed');
     }
   }
 
@@ -78,7 +78,7 @@ export class SolanaProvider extends AbstractBaseProvider {
         },
         body: JSON.stringify(request),
         signal: abortController.signal
-      });
+      }, 'Logger message');
 
       clearTimeout(timeoutId);
 
@@ -196,7 +196,7 @@ export class SolanaProvider extends AbstractBaseProvider {
       commitment: options.commitment || this.config.commitment,
       encoding: options.encoding || ENCODING_TYPES.BASE64,
       dataSlice: options.dataSlice
-    });
+    }, 'Logger message');
 
     const result = await this.request<{ value: SolanaAccount | null }>(
       SOLANA_METHODS.GET_ACCOUNT_INFO,
@@ -316,7 +316,7 @@ export class SolanaProvider extends AbstractBaseProvider {
       commitment: options.commitment || this.config.commitment,
       encoding: options.encoding || 'json',
       maxSupportedTransactionVersion: options.maxSupportedTransactionVersion
-    });
+    }, 'Logger message');
 
     return this.request(SOLANA_METHODS.GET_TRANSACTION, params);
   }
@@ -349,7 +349,7 @@ export class SolanaProvider extends AbstractBaseProvider {
       before: options.before,
       until: options.until,
       commitment: options.commitment || this.config.commitment
-    });
+    }, 'Logger message');
 
     return this.request(SOLANA_METHODS.GET_SIGNATURES_FOR_ADDRESS, params);
   }
@@ -374,7 +374,7 @@ export class SolanaProvider extends AbstractBaseProvider {
       ...filter,
       commitment: options.commitment || this.config.commitment,
       encoding: options.encoding || ENCODING_TYPES.JSON_PARSED
-    });
+    }, 'Logger message');
 
     return this.request(SOLANA_METHODS.GET_TOKEN_ACCOUNTS_BY_OWNER, params);
   }
@@ -568,7 +568,7 @@ export class SolanaProvider extends AbstractBaseProvider {
         },
         body: JSON.stringify(jsonRpcRequests),
         signal: abortController.signal
-      });
+      }, 'Logger message');
 
       clearTimeout(timeoutId);
 
@@ -588,11 +588,11 @@ export class SolanaProvider extends AbstractBaseProvider {
           return parseSolanaJsonRpcResponse(resp, {
             ...context,
             method: requests[index].method
-          });
+          }, 'Logger message');
         } catch (error) {
           return { error: (error as Error).message };
         }
-      });
+      }, 'Logger message');
 
     } catch (error) {
       if (abortController.signal.aborted) {

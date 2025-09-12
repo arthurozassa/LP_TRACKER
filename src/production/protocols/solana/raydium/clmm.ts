@@ -282,7 +282,7 @@ export function parsePersonalPositionAccount(data: Buffer): RaydiumPosition {
         rewardVault: '',
         rewardGrowthGlobalX64: '0',
         rewardAmountOwed
-      });
+      }, 'Logger message');
     }
 
     // Calculate prices from ticks

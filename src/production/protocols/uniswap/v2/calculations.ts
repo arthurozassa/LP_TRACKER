@@ -212,12 +212,12 @@ export class V2Calculator {
       const currentValue = this.calculatePositionValueUSD(position, {
         token0PriceUSD: currentSnapshot.token0PriceUSD,
         token1PriceUSD: currentSnapshot.token1PriceUSD
-      });
+      }, 'Logger message');
 
       const originalValue = this.calculatePositionValueUSD(position, {
         token0PriceUSD: entrySnapshot.token0PriceUSD,
         token1PriceUSD: entrySnapshot.token1PriceUSD
-      });
+      }, 'Logger message');
 
       // Calculate P&L
       const pnl = currentValue - originalValue;

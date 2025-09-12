@@ -141,7 +141,7 @@ class AnalyticsJobProcessor {
       const scanCacheKey = `scan:${walletAddress}:${chain}`;
       const scanResults = await this.cache.get(scanCacheKey, { 
         strategy: CacheStrategies.READ_HEAVY 
-      });
+      }, 'Logger message');
 
       if (!scanResults) {
         throw new Error(`No portfolio data found for ${walletAddress} on ${chain}`);
@@ -193,7 +193,7 @@ class AnalyticsJobProcessor {
       const analyticsCacheKey = `analytics:${walletAddress}:${chain}`;
       await this.cache.set(analyticsCacheKey, result, {
         strategy: CacheStrategies.PERSISTENT
-      });
+      }, 'Logger message');
 
       logger.info({
         walletAddress,
@@ -296,7 +296,7 @@ class AnalyticsJobProcessor {
       const scanCacheKey = `scan:${walletAddress}:${chain}`;
       const scanResults = await this.cache.get(scanCacheKey, { 
         strategy: CacheStrategies.READ_HEAVY 
-      });
+      }, 'Logger message');
 
       if (!scanResults) {
         throw new Error(`No portfolio data found for ${walletAddress} on ${chain}`);
@@ -340,7 +340,7 @@ class AnalyticsJobProcessor {
       const optimizationKey = `optimization:${walletAddress}:${chain}`;
       await this.cache.set(optimizationKey, result, {
         strategy: CacheStrategies.FAST_ACCESS
-      });
+      }, 'Logger message');
 
       logger.info({
         walletAddress,
@@ -384,7 +384,7 @@ class AnalyticsJobProcessor {
       const scanCacheKey = `scan:${walletAddress}:${chain}`;
       const scanResults = await this.cache.get(scanCacheKey, { 
         strategy: CacheStrategies.READ_HEAVY 
-      });
+      }, 'Logger message');
 
       if (!scanResults) {
         throw new Error(`No portfolio data found for ${walletAddress} on ${chain}`);
@@ -447,7 +447,7 @@ class AnalyticsJobProcessor {
       const riskKey = `risk:${walletAddress}:${chain}`;
       await this.cache.set(riskKey, result, {
         strategy: CacheStrategies.PERSISTENT
-      });
+      }, 'Logger message');
 
       logger.info({
         walletAddress,
@@ -519,7 +519,7 @@ class AnalyticsJobProcessor {
       const historyKey = `history:${walletAddress}:${chain}:${startDate}:${endDate}`;
       await this.cache.set(historyKey, result, {
         strategy: CacheStrategies.PERSISTENT
-      });
+      }, 'Logger message');
 
       logger.info({
         walletAddress,
@@ -632,7 +632,7 @@ class AnalyticsJobProcessor {
         fees: Math.random() * 100,
         apr: Math.random() * 50,
         impermanentLoss: Math.random() * 100
-      });
+      }, 'Logger message');
     }
     
     return data;
@@ -748,7 +748,7 @@ class AnalyticsJobProcessor {
         value: Math.random() * 100000,
         fees: Math.random() * 100,
         apr: Math.random() * 50
-      });
+      }, 'Logger message');
     }
     
     return data;

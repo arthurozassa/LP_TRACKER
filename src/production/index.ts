@@ -263,14 +263,14 @@ class ProductionInfrastructure {
         type: 'popular_wallets' as const,
         limit: 50,
         chains: ['ethereum', 'solana']
-      });
+      }, 'Logger message');
 
       // Warm up top protocols cache
       await this.queueManager.addJob('cache-warmup', 'initial-warmup-protocols', {
         type: 'top_protocols' as const,
         limit: 20,
         chains: ['ethereum', 'solana']
-      });
+      }, 'Logger message');
 
       logger.info('Cache warmup jobs queued');
 

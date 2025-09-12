@@ -167,7 +167,7 @@ export function parseWhirlpoolAccount(data: Buffer): OrcaPool {
         emissionsPerSecondX64,
         growthGlobalX64,
         amountOwed: '0' // Not stored at pool level
-      });
+      }, 'Logger message');
     }
 
     // Parse tick arrays (up to 3 tick arrays)
@@ -300,7 +300,7 @@ export function parsePositionAccount(data: Buffer): OrcaPosition {
         emissionsPerSecondX64: '0',
         growthGlobalX64: growthInsideCheckpoint,
         amountOwed
-      });
+      }, 'Logger message');
     }
 
     // Calculate prices from ticks

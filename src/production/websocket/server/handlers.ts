@@ -120,7 +120,7 @@ export class MessageHandler {
       connectionId,
       serverTime: new Date(),
       features: ['real-time-updates', 'subscriptions', 'rooms', 'authentication'],
-    });
+    }, 'Logger message');
 
     socket.emit('message', message);
   }
@@ -130,7 +130,7 @@ export class MessageHandler {
       error,
       code,
       retryable: this.isRetryableError(code),
-    });
+    }, 'Logger message');
 
     socket.emit('message', message);
   }
@@ -143,7 +143,7 @@ export class MessageHandler {
         requestsPerMinute: 100,
         remaining: 100,
       },
-    });
+    }, 'Logger message');
 
     socket.emit('message', message);
   }
@@ -152,7 +152,7 @@ export class MessageHandler {
     const message = createMessage<AuthenticationFailedMessage>('authentication_failed', {
       error,
       code,
-    });
+    }, 'Logger message');
 
     socket.emit('message', message);
   }
@@ -160,7 +160,7 @@ export class MessageHandler {
   public sendSubscriptionConfirmed(socket: Socket, subscriptions: { id: string; status: 'active' | 'failed'; error?: string }[]): void {
     const message = createMessage<SubscriptionConfirmedMessage>('subscription_confirmed', {
       subscriptions,
-    });
+    }, 'Logger message');
 
     socket.emit('message', message);
   }
@@ -245,7 +245,7 @@ export class MessageHandler {
             id: subscription.id,
             status: 'failed',
             error: validationResult.error,
-          });
+          }, 'Logger message');
           continue;
         }
 
@@ -260,7 +260,7 @@ export class MessageHandler {
             id: subscription.id,
             status: 'failed',
             error: 'Failed to join room',
-          });
+          }, 'Logger message');
           continue;
         }
 
@@ -271,7 +271,7 @@ export class MessageHandler {
             id: subscription.id,
             status: 'failed',
             error: 'Failed to add subscription',
-          });
+          }, 'Logger message');
           continue;
         }
 
@@ -281,7 +281,7 @@ export class MessageHandler {
         subscriptionResults.push({
           id: subscription.id,
           status: 'active',
-        });
+        }, 'Logger message');
 
         this.logger.debug({
           connectionId: connection.id,
@@ -295,7 +295,7 @@ export class MessageHandler {
           id: subscription.id,
           status: 'failed',
           error: error instanceof Error ? error.message : 'Unknown error',
-        });
+        }, 'Logger message');
 
         this.logger.error({
           connectionId: connection.id,
@@ -320,7 +320,7 @@ export class MessageHandler {
         unsubscribeResults.push({
           id: subscriptionId,
           status: 'removed',
-        });
+        }, 'Logger message');
 
         this.logger.debug({
           connectionId: connection.id,
@@ -330,7 +330,7 @@ export class MessageHandler {
         unsubscribeResults.push({
           id: subscriptionId,
           status: 'not_found',
-        });
+        }, 'Logger message');
       }
     }
 
@@ -341,7 +341,7 @@ export class MessageHandler {
         status: r.status === 'removed' ? 'active' : 'failed' as 'active' | 'failed',
         error: r.status === 'not_found' ? 'Subscription not found' : undefined,
       }))
-    });
+    }, 'Logger message');
 
     connection.socket.emit('message', confirmationMessage);
   }
@@ -369,7 +369,7 @@ export class MessageHandler {
           roomId: message.data.roomId,
           members: this.roomManager.getRoomMembers(message.data.roomId).length,
           permissions: [], // TODO: Implement room-specific permissions
-        });
+        }, 'Logger message');
 
         connection.socket.emit('message', roomJoinedMessage);
 
@@ -400,7 +400,7 @@ export class MessageHandler {
       // Send success response
       const roomLeftMessage = createMessage('room_left', {
         roomId: message.data.roomId,
-      });
+      }, 'Logger message');
 
       connection.socket.emit('message', roomLeftMessage);
 
@@ -421,7 +421,7 @@ export class MessageHandler {
     const heartbeatResponse = createMessage('heartbeat', {
       serverTime: new Date(),
       connectionId: connection.id,
-    });
+    }, 'Logger message');
 
     connection.socket.emit('message', heartbeatResponse);
   }

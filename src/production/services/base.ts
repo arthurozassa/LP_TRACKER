@@ -254,7 +254,7 @@ export abstract class BaseService {
       data,
       timestamp: Date.now(),
       ttl,
-    });
+    }, 'Logger message');
   }
 
   /**
@@ -297,7 +297,7 @@ export abstract class BaseService {
       timestamp: new Date().toISOString(),
       service: this.config.name,
       version: this.config.version,
-    });
+    }, 'Logger message');
   }
 
   /**
@@ -377,7 +377,7 @@ export abstract class BaseBlockchainService extends BaseService {
     super({
       name: `${chain}Service`,
       ...config,
-    });
+    }, 'Logger message');
     
     this.chain = chain;
     this.chainConfig = getChainConfig(chain);
@@ -444,7 +444,7 @@ export abstract class BaseProtocolService extends BaseService {
     super({
       name: `${protocol}Service`,
       ...config,
-    });
+    }, 'Logger message');
     
     this.protocol = protocol;
     this.protocolConfig = getProtocolConfig(protocol);
@@ -474,7 +474,7 @@ export abstract class BaseProtocolService extends BaseService {
         'User-Agent': 'LP-Tracker/1.0',
         ...options.headers,
       },
-    });
+    }, 'Logger message');
 
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);

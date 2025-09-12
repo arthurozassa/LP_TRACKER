@@ -363,7 +363,7 @@ export async function findWalletPositions(
                 pool,
                 nftMint,
                 nftAccount: pubkey.toString()
-              });
+              }, 'Logger message');
             }
           }
         }
@@ -418,7 +418,7 @@ export async function getPoolTickArrays(
       tickArrayAddresses.push({
         address: tickArrayAddress,
         startTickIndex: i
-      });
+      }, 'Logger message');
     }
 
     // Fetch tick array accounts
@@ -437,7 +437,7 @@ export async function getPoolTickArrays(
             address: tickArrayAddresses[i].address,
             startTickIndex: tickArrayAddresses[i].startTickIndex,
             ticks: tickArray.ticks
-          });
+          }, 'Logger message');
         } catch (error) {
           console.warn(`Failed to parse tick array at ${tickArrayAddresses[i].address}:`, error);
         }
@@ -507,7 +507,7 @@ export function parseTickArrayAccount(data: Buffer): {
         feeGrowthOutside0,
         feeGrowthOutside1,
         rewardGrowthsOutside
-      });
+      }, 'Logger message');
     }
 
     return {

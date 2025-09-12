@@ -46,9 +46,9 @@ class MemoryCache {
           return JSON.stringify(value.value).length;
         },
         dispose: (value, key, reason) => {
-          logger.debug('Cache entry disposed', { namespace, key, reason } as any);
+          logger.debug({ namespace, key, reason } as any, 'Cache entry disposed');
         }
-      });
+      }, 'Logger message');
 
       this.caches.set(namespace, cache);
       this.stats.set(namespace, {
@@ -59,7 +59,7 @@ class MemoryCache {
         size: 0,
         calculatedSize: 0,
         maxSize: maxSize
-      });
+      }, 'Logger message');
     }
 
     return this.caches.get(namespace)!;
@@ -88,11 +88,11 @@ class MemoryCache {
       stats.hits++;
       this.updateStats(namespace);
       
-      logger.debug('Memory cache hit', { namespace, key, accessCount: entry.accessCount } as any);
+      logger.debug({ namespace, key, accessCount: entry.accessCount } as any, 'Memory cache hit');
       return entry.value;
     } else {
       stats.misses++;
-      logger.debug('Memory cache miss', { namespace, key } as any);
+      logger.debug({ namespace, key } as any, 'Memory cache miss');
       return null;
     }
   }
@@ -115,10 +115,10 @@ class MemoryCache {
       stats.sets++;
       this.updateStats(namespace);
       
-      logger.debug('Memory cache set', { namespace, key, size: JSON.stringify(value).length } as any);
+      logger.debug({ namespace, key, size: JSON.stringify(value).length } as any, 'Memory cache set');
       return true;
     } catch (error) {
-      logger.error('Memory cache set error', { namespace, key, error } as any);
+      logger.error({ namespace, key, error } as any, 'Memory cache set error');
       return false;
     }
   }
@@ -140,7 +140,7 @@ class MemoryCache {
     if (result) {
       stats.deletes++;
       this.updateStats(namespace);
-      logger.debug('Memory cache delete', { namespace, key } as any);
+      logger.debug({ namespace, key } as any, 'Memory cache delete');
     }
 
     return result;
@@ -154,7 +154,7 @@ class MemoryCache {
       const size = cache.size;
       cache.clear();
       this.updateStats(namespace);
-      logger.info('Memory cache cleared', { namespace, entriesCleared: size } as any);
+      logger.info({ namespace, entriesCleared: size } as any, 'Memory cache cleared');
     }
   }
 
@@ -309,7 +309,7 @@ class MemoryCache {
     const pruned = initialSize - finalSize;
 
     this.updateStats(namespace);
-    logger.info('Memory cache pruned', { namespace, entriesPruned: pruned } as any);
+    logger.info({ namespace, entriesPruned: pruned } as any, 'Memory cache pruned');
 
     return pruned;
   }
@@ -325,7 +325,7 @@ class MemoryCache {
       this.caches.delete(namespace);
       this.stats.delete(namespace);
       
-      logger.info('Memory cache namespace deleted', { namespace, entriesDeleted: size } as any);
+      logger.info({ namespace, entriesDeleted: size } as any, 'Memory cache namespace deleted');
       return true;
     }
     

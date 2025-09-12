@@ -110,7 +110,7 @@ export function useRealTimePositions(options: PositionsOptions) {
         lastUpdate: new Date(),
         ...totals,
       };
-    });
+    }, 'Logger message');
   }, []);
 
   const removePosition = useCallback((positionId: string) => {
@@ -124,7 +124,7 @@ export function useRealTimePositions(options: PositionsOptions) {
         lastUpdate: new Date(),
         ...totals,
       };
-    });
+    }, 'Logger message');
   }, []);
 
   const updatePositionsBatch = useCallback((positions: RealTimePosition[]) => {
@@ -138,7 +138,7 @@ export function useRealTimePositions(options: PositionsOptions) {
         lastUpdate: new Date(),
         ...totals,
       };
-    });
+    }, 'Logger message');
   }, []);
 
   const addPositionUpdate = useCallback((update: PositionUpdate) => {
@@ -151,7 +151,7 @@ export function useRealTimePositions(options: PositionsOptions) {
       }
       
       return newUpdates;
-    });
+    }, 'Logger message');
   }, []);
 
   // ============================================================================
@@ -175,8 +175,8 @@ export function useRealTimePositions(options: PositionsOptions) {
           oldValue: change.oldValue,
           newValue: change.newValue,
           timestamp: change.timestamp,
-        });
-      });
+        }, 'Logger message');
+      }, 'Logger message');
     };
 
     // Position created handler
@@ -272,14 +272,14 @@ export function useRealTimePositions(options: PositionsOptions) {
       }, {
         updateFrequency: refreshInterval,
         includeHistorical: true,
-      });
+      }, 'Logger message');
 
       // Also subscribe to portfolio updates
       webSocket.subscribe('portfolio', {
         walletAddress,
       }, {
         updateFrequency: refreshInterval,
-      });
+      }, 'Logger message');
 
       console.log('Subscribed to real-time positions for:', walletAddress);
 
@@ -401,7 +401,7 @@ export function useRealTimePositions(options: PositionsOptions) {
       }
 
       return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
-    });
+    }, 'Logger message');
   }, [getFilteredPositions]);
 
   // ============================================================================

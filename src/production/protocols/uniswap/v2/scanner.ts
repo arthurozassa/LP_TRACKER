@@ -184,7 +184,7 @@ export class V2PositionScanner {
           protocol: 'v2',
           status: 'scanning',
           positionsFound: positions.length
-        });
+        }, 'Logger message');
       }
     }
 
@@ -219,7 +219,7 @@ export class V2PositionScanner {
           protocol: 'v2',
           status: 'scanning',
           positionsFound: positions.length
-        });
+        }, 'Logger message');
       }
 
       // Early exit if we found enough positions

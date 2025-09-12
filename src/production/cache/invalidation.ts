@@ -79,7 +79,7 @@ class CacheInvalidationManager {
         `analytics:${event.scope.chain}:*`
       ],
       batch: true
-    });
+    }, 'Logger message');
 
     // Position change invalidation
     this.addRule({
@@ -97,7 +97,7 @@ class CacheInvalidationManager {
         }
         return keys;
       }
-    });
+    }, 'Logger message');
 
     // Price update invalidation
     this.addRule({
@@ -113,7 +113,7 @@ class CacheInvalidationManager {
       },
       delay: 2000, // Delay price updates to avoid thrashing
       batch: true
-    });
+    }, 'Logger message');
 
     // Protocol update invalidation
     this.addRule({
@@ -127,7 +127,7 @@ class CacheInvalidationManager {
         }
         return keys;
       }
-    });
+    }, 'Logger message');
 
     // Wallet activity invalidation
     this.addRule({
@@ -143,7 +143,7 @@ class CacheInvalidationManager {
         }
         return keys;
       }
-    });
+    }, 'Logger message');
 
     // Global invalidation
     this.addRule({
@@ -151,7 +151,7 @@ class CacheInvalidationManager {
       matcher: (event) => event.type === 'manual' && !!event.scope.global,
       keys: () => ['*'], // Invalidate everything
       delay: 0
-    });
+    }, 'Logger message');
 
     logger.info('Default invalidation rules set up');
   }
@@ -271,11 +271,11 @@ class CacheInvalidationManager {
     // Update stats
     this.updateStats(event, Date.now() - startTime);
 
-    logger.debug('Invalidation event processed', {
+    logger.debug({
       type: event.type,
       keysInvalidated: allKeys.size,
       processingTime: Date.now() - startTime
-    } as any);
+    }, 'Invalidation event processed');
   }
 
   private async processBatchedEvents(events: InvalidationEvent[]): Promise<void> {
@@ -308,11 +308,11 @@ class CacheInvalidationManager {
       this.updateStats(event, processingTime / events.length);
     }
 
-    logger.info('Batched invalidation processed', {
+    logger.info({
       eventCount: events.length,
       keysInvalidated: allKeys.size,
       processingTime
-    } as any);
+    }, 'Batched invalidation processed');
   }
 
   private async invalidateKeys(keys: string[], strategies: CacheStrategy[]): Promise<void> {
@@ -343,11 +343,11 @@ class CacheInvalidationManager {
     const failures = results.filter(result => result.status === 'rejected' || !result.value).length;
     
     if (failures > 0) {
-      logger.warn('Some cache invalidations failed', { 
+      logger.warn({ 
         total: promises.length, 
         failures,
         keys: keys.slice(0, 10) // Log first 10 keys for debugging
-      } as any);
+      }, 'Some cache invalidations failed');
     }
   }
 
@@ -389,7 +389,7 @@ class CacheInvalidationManager {
       data: { chain },
       timestamp: Date.now(),
       source
-    });
+    }, 'Logger message');
   }
 
   async invalidateWalletData(wallet: string, chain?: ChainType, source: string = 'system'): Promise<void> {
@@ -399,7 +399,7 @@ class CacheInvalidationManager {
       data: { wallet, chain },
       timestamp: Date.now(),
       source
-    });
+    }, 'Logger message');
   }
 
   async invalidatePositionData(positionId: string, wallet?: string, source: string = 'system'): Promise<void> {
@@ -409,7 +409,7 @@ class CacheInvalidationManager {
       data: { positionId, wallet },
       timestamp: Date.now(),
       source
-    });
+    }, 'Logger message');
   }
 
   async invalidateProtocolData(protocol: ProtocolType, chain?: ChainType, source: string = 'system'): Promise<void> {
@@ -419,7 +419,7 @@ class CacheInvalidationManager {
       data: { protocol, chain },
       timestamp: Date.now(),
       source
-    });
+    }, 'Logger message');
   }
 
   async invalidatePriceData(token: string, chain?: ChainType, source: string = 'system'): Promise<void> {
@@ -429,7 +429,7 @@ class CacheInvalidationManager {
       data: { token, chain },
       timestamp: Date.now(),
       source
-    });
+    }, 'Logger message');
   }
 
   async invalidateAll(source: string = 'manual'): Promise<void> {
@@ -439,7 +439,7 @@ class CacheInvalidationManager {
       data: {},
       timestamp: Date.now(),
       source
-    });
+    }, 'Logger message');
   }
 
   // Time-based invalidation
@@ -452,11 +452,11 @@ class CacheInvalidationManager {
       });
     }, delay);
 
-    logger.debug('Scheduled invalidation', { 
+    logger.debug({ 
       type: event.type, 
       delay,
       executeAt: new Date(Date.now() + delay).toISOString()
-    } as any);
+    }, 'Scheduled invalidation');
   }
 
   // Dependency tracking
