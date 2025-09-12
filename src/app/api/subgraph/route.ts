@@ -13,11 +13,11 @@ export async function POST(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const subgraph = searchParams.get('subgraph') || 'uniswap-v3';
     
-    // Map subgraph names to URLs
+    // Map subgraph names to URLs (using free public endpoints)
     const subgraphUrls: Record<string, string> = {
       'uniswap-v3': 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
-      'uniswap-v2': 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2',
-      'sushiswap': 'https://api.thegraph.com/subgraphs/name/sushi-v2/sushiswap-ethereum',
+      'uniswap-v2': 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2', 
+      'sushiswap': 'https://api.thegraph.com/subgraphs/name/sushiswap/exchange',
     };
 
     const subgraphUrl = subgraphUrls[subgraph];
@@ -25,6 +25,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Unsupported subgraph: ${subgraph}` }, { status: 400 });
     }
 
+    console.log('Making request to subgraph:', subgraphUrl);
+    console.log('Query length:', body.query?.length || 0);
+    
     // Make request to The Graph
     const response = await fetch(subgraphUrl, {
       method: 'POST',
@@ -38,8 +41,12 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    console.log('Response status:', response.status, response.statusText);
+
     if (!response.ok) {
-      throw new Error(`The Graph API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('The Graph API error response:', errorText);
+      throw new Error(`The Graph API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -64,7 +71,23 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error proxying subgraph request:', error);
     
-    // Return mock data for development/fallback
+    // Return detailed error for debugging in development
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.json({
+        error: 'Subgraph request failed',
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      }, { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      });
+    }
+    
+    // Return mock data for production fallback
     const mockData = {
       data: {
         positions: []
