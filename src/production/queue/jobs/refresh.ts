@@ -84,12 +84,12 @@ class RefreshJobProcessor {
     const startTime = Date.now();
     const { tokens, chains, source = 'coingecko' } = job.data;
 
-    logger.info('Processing price refresh job', {
+    logger.info({
       tokenCount: tokens.length,
       chains: chains.length,
       source,
       jobId: job.id
-    });
+    }, 'Processing price refresh job');
 
     try {
       let pricesUpdated = 0;
@@ -124,7 +124,7 @@ class RefreshJobProcessor {
           } catch (error) {
             const errorMsg = `Failed to update price for ${token} on ${chain}: ${error}`;
             errors.push(errorMsg);
-            logger.error(errorMsg, { error });
+            logger.error({ error }, errorMsg);
           }
 
           completedTasks++;
@@ -140,17 +140,17 @@ class RefreshJobProcessor {
         errors
       };
 
-      logger.info('Price refresh job completed', {
+      logger.info({
         pricesUpdated,
         errors: errors.length,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Job completed');
 
       return result;
 
     } catch (error) {
-      logger.error('Price refresh job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Job failed');
       throw error;
     }
   }
@@ -160,14 +160,14 @@ class RefreshJobProcessor {
     const startTime = Date.now();
     const { walletAddress, chain, positionIds, protocols, force = false } = job.data;
 
-    logger.info('Processing position refresh job', {
+    logger.info({
       walletAddress,
       chain,
       positionCount: positionIds?.length,
       protocols: protocols?.length,
       force,
       jobId: job.id
-    });
+    }, 'Job completed');
 
     try {
       await job.updateProgress(0);
@@ -236,7 +236,7 @@ class RefreshJobProcessor {
         errors
       };
 
-      logger.info('Position refresh job completed', {
+      logger.info({
         walletAddress,
         chain,
         positionsRefreshed,
@@ -244,12 +244,12 @@ class RefreshJobProcessor {
         errors: errors.length,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Job completed');
 
       return result;
 
     } catch (error) {
-      logger.error('Position refresh job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Job failed');
       throw error;
     }
   }
@@ -259,12 +259,12 @@ class RefreshJobProcessor {
     const startTime = Date.now();
     const { protocols, chains, source = 'defillama' } = job.data;
 
-    logger.info('Processing protocol TVL refresh job', {
+    logger.info({
       protocolCount: protocols.length,
       chains: chains.length,
       source,
       jobId: job.id
-    });
+    }, 'Job completed');
 
     try {
       let protocolsUpdated = 0;
@@ -301,7 +301,7 @@ class RefreshJobProcessor {
           } catch (error) {
             const errorMsg = `Failed to update TVL for ${protocol} on ${chain}: ${error}`;
             errors.push(errorMsg);
-            logger.error(errorMsg, { error });
+            logger.error({ error }, errorMsg);
           }
 
           completedTasks++;
@@ -316,17 +316,17 @@ class RefreshJobProcessor {
         errors
       };
 
-      logger.info('Protocol TVL refresh job completed', {
+      logger.info({
         protocolsUpdated,
         errors: errors.length,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Job completed');
 
       return result;
 
     } catch (error) {
-      logger.error('Protocol TVL refresh job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Job failed');
       throw error;
     }
   }
@@ -336,12 +336,12 @@ class RefreshJobProcessor {
     const startTime = Date.now();
     const { type, limit = 100, chains } = job.data;
 
-    logger.info('Processing cache warmup job', {
+    logger.info({
       type,
       limit,
       chains: chains?.length,
       jobId: job.id
-    });
+    }, 'Job completed');
 
     try {
       await job.updateProgress(0);
@@ -375,18 +375,18 @@ class RefreshJobProcessor {
         duration: Date.now() - startTime
       };
 
-      logger.info('Cache warmup job completed', {
+      logger.info({
         type,
         itemsWarmed,
         cacheHits,
         duration: result.duration,
         jobId: job.id
-      });
+      }, 'Job completed');
 
       return result;
 
     } catch (error) {
-      logger.error('Cache warmup job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Job failed');
       throw error;
     }
   }
@@ -396,12 +396,12 @@ class RefreshJobProcessor {
     const startTime = Date.now();
     const { maxAge, patterns = ['*'], dryRun = false } = job.data;
 
-    logger.info('Processing stale data cleanup job', {
+    logger.info({
       maxAge,
       patterns,
       dryRun,
       jobId: job.id
-    });
+    }, 'Job completed');
 
     try {
       await job.updateProgress(0);
@@ -437,19 +437,19 @@ class RefreshJobProcessor {
         duration: Date.now() - startTime
       };
 
-      logger.info('Stale data cleanup job completed', {
+      logger.info({
         itemsChecked,
         itemsRemoved,
         spaceFreed,
         duration: result.duration,
         dryRun,
         jobId: job.id
-      });
+      }, 'Job completed');
 
       return result;
 
     } catch (error) {
-      logger.error('Stale data cleanup job failed', { error, jobId: job.id });
+      logger.error({ error, jobId: job.id }, 'Job failed');
       throw error;
     }
   }
