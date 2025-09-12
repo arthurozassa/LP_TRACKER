@@ -182,12 +182,36 @@ export const GET = asyncHandler(async (request: NextRequest, { params }: { param
     }
   }
 
-  // No scanId provided, return error
-  return errorResponse(
-    ERROR_CODES.MISSING_REQUIRED_FIELD,
-    'scanId parameter is required for GET requests',
-    HTTP_STATUS.BAD_REQUEST
-  );
+  // No scanId provided - do immediate scan
+  console.log(`Direct scan request for wallet: ${walletAddress}`);
+  
+  try {
+    // Get chain parameter
+    const chain = url.searchParams.get('chain') || 'ethereum';
+    console.log(`Scanning chain: ${chain}`);
+    
+    // Use production scanner directly for immediate response
+    const productionScanResponse = await productionScanner.scanWallet(walletAddress, chain as any);
+    console.log('Production scan response:', productionScanResponse);
+    
+    if (!productionScanResponse.success || !productionScanResponse.data) {
+      throw new Error(productionScanResponse.error || 'Production scan failed');
+    }
+    
+    const productionScanResults = productionScanResponse.data;
+    
+    // Return results immediately
+    const response = successResponse<ScanResults>(productionScanResults, 'Scan completed successfully');
+    return addRateLimitHeaders(setCorsHeaders(response, request), request, {});
+    
+  } catch (error) {
+    console.error('Direct scan failed:', error);
+    return errorResponse(
+      ERROR_CODES.SCAN_FAILED,
+      error instanceof Error ? error.message : 'Scan failed',
+      HTTP_STATUS.INTERNAL_SERVER_ERROR
+    );
+  }
 });
 
 // POST: Start new scan

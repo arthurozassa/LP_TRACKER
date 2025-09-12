@@ -17,7 +17,6 @@ import { getMockDataByAddress } from '../demo';
 import { historicalDataService } from '../services/historicalData';
 import { detectChainType, isEthereumAddress, isSolanaAddress } from '../types';
 import { useMode } from '../contexts/ModeContext';
-import { getProductionScanner } from '../services/productionScanner';
 import ModeToggle from '../components/ui/ModeToggle';
 
 // Demo addresses
@@ -413,19 +412,31 @@ export default function Home() {
           };
         }
       } else {
-        // Production Mode: Use production scanner
-        const productionScanner = getProductionScanner();
-        const response = await productionScanner.scanWallet(address, chain, {
-          includeHistoricalData: true,
-          includeFees: true,
-          timeframe: '30d'
+        // Production Mode: Call simplified API endpoint
+        console.log(`Production mode: scanning ${address} on ${chain}`);
+        
+        const response = await fetch(`/api/scan-wallet?address=${encodeURIComponent(address)}&chain=${chain}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
         
-        if (!response.success) {
-          throw new Error(response.error || 'Failed to scan wallet');
+        console.log(`API Response status: ${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
         }
         
-        scanResults = response.data!;
+        const apiResponse = await response.json();
+        console.log('Production scan response:', apiResponse);
+        
+        if (!apiResponse.success) {
+          throw new Error(apiResponse.error || 'Failed to scan wallet');
+        }
+        
+        scanResults = apiResponse.data;
       }
       
       setScanResults(scanResults);
