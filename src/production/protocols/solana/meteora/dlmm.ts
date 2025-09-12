@@ -227,7 +227,7 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
       feeInfos.push({
         feeGrowthInside,
         feeOwed
-      }, 'Logger message');
+      });
     }
 
     // Parse reward infos (up to 2 rewards)
@@ -258,7 +258,7 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
         emissions,
         growthGlobalX64,
         amountOwed
-      }, 'Logger message');
+      });
     }
 
     // Parse bin positions
@@ -296,7 +296,7 @@ export function parsePositionAccount(data: Buffer): MeteoraPosition {
         liquidity: binLiquidity,
         feeX,
         feeY
-      }, 'Logger message');
+      });
     }
 
     // Calculate total fees and amounts

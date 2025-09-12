@@ -243,7 +243,7 @@ export class UniswapService {
           protocol: 'v2',
           status: 'pending',
           positionsFound: 0
-        }, 'Logger message');
+        });
       }
       if (includeV3) {
         progressTracker.push({
@@ -251,7 +251,7 @@ export class UniswapService {
           protocol: 'v3',
           status: 'pending',
           positionsFound: 0
-        }, 'Logger message');
+        });
       }
     }
 
@@ -260,7 +260,7 @@ export class UniswapService {
         phase: 'initializing',
         progress: progressTracker,
         totalPositionsFound: 0
-      }, 'Logger message');
+      });
     }
 
     try {
@@ -282,7 +282,7 @@ export class UniswapService {
                 progress: updates,
                 totalPositionsFound: totalFound,
                 estimatedTimeRemaining: this.estimateRemainingTime(updates, startTime)
-              }, 'Logger message');
+              });
             }
           }
         )
@@ -298,7 +298,7 @@ export class UniswapService {
           phase: 'completed',
           progress: progressTracker,
           totalPositionsFound: (scanResults as any).totalPositions || 0
-        }, 'Logger message');
+        });
       }
 
       return scanResults;
@@ -310,7 +310,7 @@ export class UniswapService {
           progress: progressTracker,
           totalPositionsFound: 0,
           error: error instanceof Error ? error.message : 'Unknown error'
-        }, 'Logger message');
+        });
       }
       throw error;
     }
@@ -388,7 +388,7 @@ export class UniswapService {
             return { ...p, status: 'error', error: error instanceof Error ? error.message : 'Unknown error' };
           }
           return p;
-        }, 'Logger message');
+        });
       }
     }
 
@@ -526,7 +526,7 @@ export class UniswapService {
       data,
       timestamp: Date.now(),
       expiry: Date.now() + ttl * 1000
-    }, 'Logger message');
+    });
 
     // Clean up old entries if cache is too large
     const maxSize = this.config.cacheConfig?.maxSize || 1000;

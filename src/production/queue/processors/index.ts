@@ -88,7 +88,7 @@ class QueueManager {
         removeOnFail: 20,
         attempts: 3
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('protocol-scan', {
       ...ScanJobOptions.PROTOCOL_SCAN,
@@ -96,7 +96,7 @@ class QueueManager {
         removeOnComplete: 100,
         removeOnFail: 30
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('quick-scan', {
       ...ScanJobOptions.QUICK_SCAN,
@@ -104,7 +104,7 @@ class QueueManager {
         removeOnComplete: 20,
         removeOnFail: 10
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('bulk-scan', {
       ...ScanJobOptions.BULK_SCAN,
@@ -112,7 +112,7 @@ class QueueManager {
         removeOnComplete: 10,
         removeOnFail: 5
       }
-    }, 'Logger message');
+    });
 
     // Refresh queues
     this.createQueue('price-refresh', {
@@ -121,7 +121,7 @@ class QueueManager {
         removeOnComplete: 10,
         removeOnFail: 5
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('position-refresh', {
       ...RefreshJobOptions.POSITION_REFRESH,
@@ -129,7 +129,7 @@ class QueueManager {
         removeOnComplete: 20,
         removeOnFail: 10
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('protocol-tvl-refresh', {
       ...RefreshJobOptions.PROTOCOL_TVL_REFRESH,
@@ -137,7 +137,7 @@ class QueueManager {
         removeOnComplete: 5,
         removeOnFail: 3
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('cache-warmup', {
       ...RefreshJobOptions.CACHE_WARMUP,
@@ -145,7 +145,7 @@ class QueueManager {
         removeOnComplete: 3,
         removeOnFail: 2
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('stale-data-cleanup', {
       ...RefreshJobOptions.STALE_DATA_CLEANUP,
@@ -153,7 +153,7 @@ class QueueManager {
         removeOnComplete: 5,
         removeOnFail: 2
       }
-    }, 'Logger message');
+    });
 
     // Analytics queues
     this.createQueue('portfolio-analytics', {
@@ -162,7 +162,7 @@ class QueueManager {
         removeOnComplete: 20,
         removeOnFail: 10
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('protocol-analytics', {
       ...AnalyticsJobOptions.PROTOCOL_ANALYTICS,
@@ -170,7 +170,7 @@ class QueueManager {
         removeOnComplete: 10,
         removeOnFail: 5
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('yield-optimization', {
       ...AnalyticsJobOptions.YIELD_OPTIMIZATION,
@@ -178,7 +178,7 @@ class QueueManager {
         removeOnComplete: 15,
         removeOnFail: 8
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('risk-analysis', {
       ...AnalyticsJobOptions.RISK_ANALYSIS,
@@ -186,7 +186,7 @@ class QueueManager {
         removeOnComplete: 10,
         removeOnFail: 5
       }
-    }, 'Logger message');
+    });
 
     this.createQueue('historical-performance', {
       ...AnalyticsJobOptions.HISTORICAL_PERFORMANCE,
@@ -194,12 +194,12 @@ class QueueManager {
         removeOnComplete: 5,
         removeOnFail: 3
       }
-    }, 'Logger message');
+    });
 
     logger.info('Queue manager initialized', { 
       queueCount: this.queues.size,
       workerCount: this.workers.size 
-    }, 'Logger message');
+    });
   }
 
   private createQueue(name: string, options: any): void {
@@ -210,7 +210,7 @@ class QueueManager {
         ...this.config.defaultJobOptions,
         ...options.defaultJobOptions
       }
-    }, 'Logger message');
+    });
 
     // Create worker with appropriate processor
     const worker = new Worker(name, async (job: Job) => {
@@ -219,12 +219,12 @@ class QueueManager {
       connection: this.config.redis,
       concurrency: this.config.concurrency || 5,
       limiter: this.config.rateLimiter
-    }, 'Logger message');
+    });
 
     // Create queue events listener
     const queueEvents = new QueueEvents(name, {
       connection: this.config.redis
-    }, 'Logger message');
+    });
 
     // Set up event listeners
     this.setupWorkerEventListeners(worker, name);
@@ -247,7 +247,7 @@ class QueueManager {
       jobName: job.name,
       attempts: job.attemptsMade,
       data: this.sanitizeJobData(job.data)
-    }, 'Logger message');
+    });
 
     try {
       let result: any;
@@ -313,7 +313,7 @@ class QueueManager {
         jobId: job.id,
         duration,
         resultSize: JSON.stringify(result).length
-      }, 'Logger message');
+      });
 
       return result;
 
@@ -327,7 +327,7 @@ class QueueManager {
         attempts: job.attemptsMade,
         error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
-      }, 'Logger message');
+      });
 
       throw error;
     }
@@ -339,8 +339,8 @@ class QueueManager {
         queue: queueName,
         jobId: job.id,
         processingTime: job.processedOn ? Date.now() - job.processedOn : 0
-      }, 'Logger message');
-    }, 'Logger message');
+      });
+    });
 
     worker.on('failed', (job, error) => {
       logger.error('Worker job failed', {
@@ -349,56 +349,56 @@ class QueueManager {
         error: error.message,
         attempts: job?.attemptsMade,
         maxAttempts: job?.opts.attempts
-      }, 'Logger message');
-    }, 'Logger message');
+      });
+    });
 
     worker.on('stalled', (jobId) => {
       logger.warn('Worker job stalled', {
         queue: queueName,
         jobId
-      }, 'Logger message');
-    }, 'Logger message');
+      });
+    });
 
     worker.on('error', (error) => {
       logger.error('Worker error', {
         queue: queueName,
         error: error.message
-      }, 'Logger message');
-    }, 'Logger message');
+      });
+    });
 
     worker.on('ready', () => {
       logger.info('Worker ready', { queue: queueName });
-    }, 'Logger message');
+    });
 
     worker.on('closing', () => {
       logger.info('Worker closing', { queue: queueName });
-    }, 'Logger message');
+    });
   }
 
   private setupQueueEventListeners(queueEvents: QueueEvents, queueName: string): void {
     queueEvents.on('waiting', ({ jobId }) => {
       logger.debug('Job waiting', { queue: queueName, jobId });
-    }, 'Logger message');
+    });
 
     queueEvents.on('active', ({ jobId, prev }) => {
       logger.debug('Job active', { queue: queueName, jobId, prev });
-    }, 'Logger message');
+    });
 
     queueEvents.on('progress', ({ jobId, data }) => {
       logger.debug('Job progress', { queue: queueName, jobId, progress: data });
-    }, 'Logger message');
+    });
 
     queueEvents.on('completed', ({ jobId, returnvalue }) => {
       logger.debug('Job completed event', { queue: queueName, jobId });
-    }, 'Logger message');
+    });
 
     queueEvents.on('failed', ({ jobId, failedReason }) => {
       logger.error('Job failed event', { queue: queueName, jobId, reason: failedReason });
-    }, 'Logger message');
+    });
 
     queueEvents.on('removed', ({ jobId, prev }) => {
       logger.debug('Job removed', { queue: queueName, jobId, prev });
-    }, 'Logger message');
+    });
   }
 
   private sanitizeJobData(data: any): any {
@@ -417,7 +417,7 @@ class QueueManager {
       } else if (typeof sanitized[key] === 'string' && sanitized[key].length > 100) {
         sanitized[key] = sanitized[key].substring(0, 100) + '...';
       }
-    }, 'Logger message');
+    });
     
     return sanitized;
   }
@@ -438,7 +438,7 @@ class QueueManager {
       jobId: job.id,
       priority: options?.priority,
       delay: options?.delay
-    }, 'Logger message');
+    });
 
     return job;
   }

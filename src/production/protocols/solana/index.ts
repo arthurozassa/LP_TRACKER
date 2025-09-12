@@ -224,7 +224,7 @@ export class SolanaDEXService {
         positions.forEach(pos => {
           if (pos.tokens.token0?.address) allMints.add(pos.tokens.token0.address);
           if (pos.tokens.token1?.address) allMints.add(pos.tokens.token1.address);
-        }, 'Logger message');
+        });
         
         priceFeeds = await this.fetchTokenPrices(Array.from(allMints));
       }
@@ -288,8 +288,8 @@ export class SolanaDEXService {
       positions.forEach(pos => {
         pos.rewards?.forEach(reward => {
           if (reward.address) rewardMints.add(reward.address);
-        }, 'Logger message');
-      }, 'Logger message');
+        });
+      });
       const rewardPrices = await this.fetchTokenPrices(Array.from(rewardMints));
 
       // Calculate metrics for each position
@@ -327,7 +327,7 @@ export class SolanaDEXService {
           metrics.push({
             ...positionMetrics,
             position
-          }, 'Logger message');
+          });
         } catch (error) {
           console.warn(`Failed to calculate metrics for position ${position.id}:`, error);
           
@@ -335,7 +335,7 @@ export class SolanaDEXService {
           metrics.push({
             ...this.calculateBasicMetrics(position, { token0: 0, token1: 0, rewards: new Map() }),
             position
-          }, 'Logger message');
+          });
         }
       }
 
@@ -519,7 +519,7 @@ export class SolanaDEXService {
       this.poolCache.set(cacheKey, {
         pools,
         timestamp: Date.now()
-      }, 'Logger message');
+      });
       return pools;
     } catch (error) {
       console.warn(`Failed to fetch ${protocol} pools:`, error);
@@ -539,7 +539,7 @@ export class SolanaDEXService {
         this.priceCache.set(mint, {
           price,
           timestamp: Date.now()
-        }, 'Logger message');
+        });
       }
 
       return jupiterPrices;

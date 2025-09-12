@@ -148,7 +148,7 @@ export class WebSocketAuth {
       expiresIn: '24h',
       issuer: 'lp-tracker',
       audience: 'websocket-client',
-    }, 'Logger message');
+    });
   }
 
   public generateApiKey(userId: string, name: string, permissions: string[] = []): ApiKeyInfo {
@@ -450,7 +450,7 @@ export class WebSocketAuth {
           requestsPerDay: 10000,
         },
         isActive: true,
-      }, 'Logger message');
+      });
 
       this.logger.info({
         apiKey: demoKey,

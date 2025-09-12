@@ -171,7 +171,7 @@ export class V3PositionScanner {
       }
       
       return true;
-    }, 'Logger message');
+    });
 
     // Limit number of positions
     return filteredPositions.slice(0, this.config.maxPositions);
@@ -209,7 +209,7 @@ export class V3PositionScanner {
           protocol: 'v3',
           status: 'scanning',
           positionsFound: positions.length
-        }, 'Logger message');
+        });
       }
     }
 
@@ -259,7 +259,7 @@ export class V3PositionScanner {
           protocol: 'v3',
           status: 'scanning',
           positionsFound: positions.length
-        }, 'Logger message');
+        });
       }
     }
 

@@ -99,7 +99,7 @@ export class WebSocketServer implements EventEmitter {
     this.logger = pino({
       name: 'websocket-server',
       level: isProductionMode() ? 'info' : 'debug',
-    }, 'Logger message');
+    });
 
     // Initialize Socket.IO server
     this.io = new SocketIOServer(httpServer, {
@@ -108,7 +108,7 @@ export class WebSocketServer implements EventEmitter {
       pingInterval: this.config.heartbeat?.interval || 25000,
       maxHttpBufferSize: 1e6, // 1MB
       transports: ['websocket', 'polling'],
-    }, 'Logger message');
+    });
 
     // Initialize managers
     this.roomManager = new RoomManager(this.io, this.logger);
@@ -279,7 +279,7 @@ export class WebSocketServer implements EventEmitter {
         }, 'Event handler error');
         return null;
       }
-    }, 'Logger message');
+    });
 
     await Promise.allSettled(promises);
   }
@@ -326,7 +326,7 @@ export class WebSocketServer implements EventEmitter {
   private setupSocketHandlers(): void {
     this.io.on('connection', (socket: Socket) => {
       this.handleConnection(socket);
-    }, 'Logger message');
+    });
   }
 
   private handleConnection(socket: Socket): void {
@@ -376,18 +376,18 @@ export class WebSocketServer implements EventEmitter {
         
         this.messageHandler.sendError(socket, 'message_handling_error', 'Failed to process message');
       }
-    }, 'Logger message');
+    });
 
     // Heartbeat/ping handling
     socket.on('ping', () => {
       connection.lastActivity = new Date();
       socket.emit('pong', { timestamp: new Date() });
-    }, 'Logger message');
+    });
 
     // Disconnection handling
     socket.on('disconnect', (reason: string) => {
       this.handleDisconnection(connection, reason);
-    }, 'Logger message');
+    });
 
     // Error handling
     socket.on('error', (error: Error) => {
@@ -396,7 +396,7 @@ export class WebSocketServer implements EventEmitter {
         error: error.message,
         stack: error.stack,
       }, 'Socket error');
-    }, 'Logger message');
+    });
   }
 
   private async handleMessage(connection: ClientConnection, data: any): Promise<void> {

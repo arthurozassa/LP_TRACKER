@@ -100,7 +100,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
         reconnection: false, // We handle reconnection ourselves
         transports: ['websocket', 'polling'],
         timeout: 20000,
-      }, 'Logger message');
+      });
 
       socketRef.current = socket;
 
@@ -177,7 +177,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
         averageLatency: latencyMeasurementsRef.current.reduce((sum, lat) => sum + lat, 0) / 
                        latencyMeasurementsRef.current.length,
       }));
-    }, 'Logger message');
+    });
 
     if (debug) console.log('WebSocket message sent:', message);
   }, [debug]);
@@ -194,7 +194,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
         filters,
         options,
       }],
-    }, 'Logger message');
+    });
 
     sendMessage(subscriptionMessage);
   }, [sendMessage]);
@@ -202,7 +202,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
   const unsubscribe = useCallback((subscriptionId: string) => {
     const unsubscribeMessage = createMessage('unsubscribe', {
       subscriptions: [subscriptionId],
-    }, 'Logger message');
+    });
 
     sendMessage(unsubscribeMessage);
   }, [sendMessage]);
@@ -280,7 +280,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
       }
 
       if (debug) console.log('WebSocket connected');
-    }, 'Logger message');
+    });
 
     socket.on('disconnect', (reason) => {
       setState(prev => ({
@@ -295,7 +295,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
       }
 
       if (debug) console.log('WebSocket disconnected:', reason);
-    }, 'Logger message');
+    });
 
     socket.on('connect_error', (error) => {
       setState(prev => ({
@@ -305,7 +305,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
       }));
 
       if (debug) console.error('WebSocket connection error:', error);
-    }, 'Logger message');
+    });
 
     socket.on('message', (message: WebSocketMessage) => {
       // Update metrics
@@ -332,15 +332,15 @@ export function useWebSocket(options: WebSocketOptions = {}) {
           } catch (error) {
             if (debug) console.error('Message handler error:', error);
           }
-        }, 'Logger message');
+        });
       }
 
       if (debug) console.log('WebSocket message received:', message);
-    }, 'Logger message');
+    });
 
     socket.on('error', (error) => {
       if (debug) console.error('WebSocket error:', error);
-    }, 'Logger message');
+    });
   }, [auth, authenticate, debug]);
 
   // ============================================================================
@@ -352,7 +352,7 @@ export function useWebSocket(options: WebSocketOptions = {}) {
       const reconnectionManager = new ReconnectionManager({
         ...createDefaultReconnectionConfig(),
         ...reconnection,
-      }, 'Logger message');
+      });
 
       reconnectionManager.onReconnectCallback(async () => {
         try {
@@ -361,15 +361,15 @@ export function useWebSocket(options: WebSocketOptions = {}) {
         } catch {
           return false;
         }
-      }, 'Logger message');
+      });
 
       reconnectionManager.onConnectionLostCallback((reason) => {
         setState(prev => ({ ...prev, isReconnecting: true }));
-      }, 'Logger message');
+      });
 
       reconnectionManager.onReconnectFailedCallback((attempt) => {
         setState(prev => ({ ...prev, reconnectAttempts: attempt.attempt }));
-      }, 'Logger message');
+      });
 
       reconnectionManagerRef.current = reconnectionManager;
     }

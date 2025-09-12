@@ -79,7 +79,7 @@ class ScanJobProcessor {
       protocols: protocols?.length,
       requestId,
       jobId: job.id 
-    }, 'Logger message');
+    });
 
     try {
       // Update job progress
@@ -113,7 +113,7 @@ class ScanJobProcessor {
         await this.cache.set(cacheKey, scanResults, {
           strategy: CacheStrategies.READ_HEAVY,
           refreshThreshold: 0.7
-        }, 'Logger message');
+        });
       }
 
       await job.updateProgress(100);
@@ -135,7 +135,7 @@ class ScanJobProcessor {
         cached,
         positionsFound: result.positionsFound,
         jobId: job.id
-      }, 'Logger message');
+      });
 
       return result;
 
@@ -145,7 +145,7 @@ class ScanJobProcessor {
         chain,
         error,
         jobId: job.id
-      }, 'Logger message');
+      });
       throw error;
     }
   }
@@ -161,7 +161,7 @@ class ScanJobProcessor {
       chain,
       parentJobId,
       jobId: job.id
-    }, 'Logger message');
+    });
 
     try {
       await job.updateProgress(0);
@@ -183,7 +183,7 @@ class ScanJobProcessor {
         if (positions.length > 0) {
           await this.cache.set(cacheKey, positions, {
             strategy: CacheStrategies.FAST_ACCESS
-          }, 'Logger message');
+          });
         }
       }
 
@@ -205,7 +205,7 @@ class ScanJobProcessor {
         positionsFound: positions.length,
         duration: result.duration,
         jobId: job.id
-      }, 'Logger message');
+      });
 
       return result;
 
@@ -226,7 +226,7 @@ class ScanJobProcessor {
         chain,
         error,
         jobId: job.id
-      }, 'Logger message');
+      });
 
       return result;
     }
@@ -243,7 +243,7 @@ class ScanJobProcessor {
       maxDuration,
       topProtocols,
       jobId: job.id
-    }, 'Logger message');
+    });
 
     try {
       await job.updateProgress(0);
@@ -289,7 +289,7 @@ class ScanJobProcessor {
         duration: result.duration,
         positionsFound: result.positionsFound,
         jobId: job.id
-      }, 'Logger message');
+      });
 
       return result;
 
@@ -299,7 +299,7 @@ class ScanJobProcessor {
         chain,
         error,
         jobId: job.id
-      }, 'Logger message');
+      });
       throw error;
     }
   }
@@ -314,7 +314,7 @@ class ScanJobProcessor {
       batchSize,
       concurrency,
       jobId: job.id
-    }, 'Logger message');
+    });
 
     try {
       const results: WalletScanJobResult[] = [];
@@ -347,7 +347,7 @@ class ScanJobProcessor {
             logger.error('Bulk scan wallet failed', { walletAddress, error });
             return null;
           }
-        }, 'Logger message');
+        });
 
         const batchResults = await Promise.allSettled(batchPromises);
         
@@ -356,7 +356,7 @@ class ScanJobProcessor {
           if (result.status === 'fulfilled' && result.value) {
             results.push(result.value);
           }
-        }, 'Logger message');
+        });
 
         processedWallets += batch.length;
         const progress = (processedWallets / totalWallets) * 100;
@@ -368,7 +368,7 @@ class ScanJobProcessor {
           processed: processedWallets,
           total: totalWallets,
           progress
-        }, 'Logger message');
+        });
       }
 
       logger.info('Bulk scan job completed', {
@@ -376,7 +376,7 @@ class ScanJobProcessor {
         successful: results.length,
         failed: walletAddresses.length - results.length,
         jobId: job.id
-      }, 'Logger message');
+      });
 
       return results;
 
@@ -386,7 +386,7 @@ class ScanJobProcessor {
         chain,
         error,
         jobId: job.id
-      }, 'Logger message');
+      });
       throw error;
     }
   }
@@ -453,7 +453,7 @@ class ScanJobProcessor {
           protocol,
           chain,
           error
-        }, 'Logger message');
+        });
       }
     }
 
@@ -503,7 +503,7 @@ class ScanJobProcessor {
           }
         },
         createdAt: new Date().toISOString()
-      }, 'Logger message');
+      });
     }
     
     return mockPositions;
@@ -617,7 +617,7 @@ class ScanJobProcessor {
         scanResults.totalPositions += positions.length;
         scanResults.totalFeesEarned += protocolFees;
       }
-    }, 'Logger message');
+    });
 
     // Calculate average APR
     if (scanResults.totalPositions > 0) {

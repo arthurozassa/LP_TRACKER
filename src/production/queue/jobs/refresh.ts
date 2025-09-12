@@ -517,7 +517,7 @@ class RefreshJobProcessor {
     if (updated > 0) {
       await this.cache.set(cacheKey, currentPositions, {
         strategy: CacheStrategies.FAST_ACCESS
-      }, 'Logger message');
+      });
     }
 
     return { refreshed, updated };

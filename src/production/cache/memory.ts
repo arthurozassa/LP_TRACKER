@@ -48,7 +48,7 @@ class MemoryCache {
         dispose: (value, key, reason) => {
           logger.debug({ namespace, key, reason } as any, 'Cache entry disposed');
         }
-      }, 'Logger message');
+      });
 
       this.caches.set(namespace, cache);
       this.stats.set(namespace, {
@@ -59,7 +59,7 @@ class MemoryCache {
         size: 0,
         calculatedSize: 0,
         maxSize: maxSize
-      }, 'Logger message');
+      });
     }
 
     return this.caches.get(namespace)!;

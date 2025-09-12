@@ -102,7 +102,7 @@ export function useJobStatus(options: JobOptions = {}) {
         completedJobs,
         failedJobs,
       };
-    }, 'Logger message');
+    });
 
     // Add to history if tracking enabled
     if (trackHistory && (job.status === 'completed' || job.status === 'failed')) {
@@ -133,7 +133,7 @@ export function useJobStatus(options: JobOptions = {}) {
         completedJobs,
         failedJobs,
       };
-    }, 'Logger message');
+    });
   }, []);
 
   // ============================================================================
@@ -187,7 +187,7 @@ export function useJobStatus(options: JobOptions = {}) {
 
         updateJobStatus(updatedJob);
         return prev;
-      }, 'Logger message');
+      });
     };
 
     // Job completed handler
@@ -211,7 +211,7 @@ export function useJobStatus(options: JobOptions = {}) {
 
         updateJobStatus(updatedJob);
         return prev;
-      }, 'Logger message');
+      });
     };
 
     // Job failed handler
@@ -236,7 +236,7 @@ export function useJobStatus(options: JobOptions = {}) {
 
         updateJobStatus(updatedJob);
         return prev;
-      }, 'Logger message');
+      });
     };
 
     // Register message handlers
@@ -264,7 +264,7 @@ export function useJobStatus(options: JobOptions = {}) {
         jobIds, // If provided, only subscribe to specific jobs
       }, {
         updateFrequency: 1000, // Update every second for job progress
-      }, 'Logger message');
+      });
 
       console.log('Subscribed to job status updates');
 
@@ -352,7 +352,7 @@ export function useJobStatus(options: JobOptions = {}) {
       completedJobs: [],
       failedJobs: [],
       loading: false,
-    }, 'Logger message');
+    });
     
     jobHistoryRef.current = [];
   }, []);

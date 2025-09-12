@@ -45,7 +45,7 @@ class RedisCache {
           lazyConnect: true,
           connectTimeout: 10000,
           family: 4, // IPv4
-        }, 'Logger message');
+        });
 
         await this.redis.ping();
         logger.info('Connected to Redis');
@@ -223,7 +223,7 @@ class RedisCache {
           logger.error({ key: cacheKeys[index], error } as any, 'Failed to parse cached data');
           return null;
         }
-      }, 'Logger message');
+      });
     } catch (error) {
       this.stats.errors++;
       logger.error({ keys: cacheKeys, error } as any, 'Cache mget error');
@@ -258,7 +258,7 @@ class RedisCache {
           }
           
           pipeline.setex(cacheKey, ttl, dataToStore);
-        }, 'Logger message');
+        });
         
         await pipeline.exec();
       }

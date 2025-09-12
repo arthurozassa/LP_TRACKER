@@ -197,7 +197,7 @@ export function calculatePositionValue(
         tokenXValue,
         tokenYValue
       };
-    }, 'Logger message');
+    });
 
     const tokenXValue = binValues.reduce((sum, bin) => sum + bin.tokenXValue, 0);
     const tokenYValue = binValues.reduce((sum, bin) => sum + bin.tokenYValue, 0);
@@ -312,7 +312,7 @@ export function calculateBinFees(
         feesXUi,
         feesYUi
       };
-    }, 'Logger message');
+    });
 
     // Add unclaimed fees
     const unclaimedFeesXUi = tokenAmountToUi(
@@ -401,7 +401,7 @@ export function calculateRewards(
         // APR calculation would require emission rates and time data
         apr: undefined
       };
-    }, 'Logger message');
+    });
 
     const totalRewardValue = rewardBreakdown.reduce((sum, reward) => sum + reward.value, 0);
 

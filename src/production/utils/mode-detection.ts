@@ -371,7 +371,7 @@ export function initializeModeSettings(): {
         hasLocalStorage: environment.hasLocalStorage,
       },
       warnings: warnings.length > 0 ? warnings : undefined,
-    }, 'Logger message');
+    });
   }
 
   return {

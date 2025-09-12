@@ -220,7 +220,7 @@ export class JupiterAPIClient {
           'Content-Type': 'application/json',
           'User-Agent': 'LP-Tracker/1.0'
         }
-      }, 'Logger message');
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);

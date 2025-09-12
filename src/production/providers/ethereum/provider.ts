@@ -70,7 +70,7 @@ export class EthereumProvider extends AbstractBaseProvider {
         },
         body: JSON.stringify(request),
         signal: abortController.signal
-      }, 'Logger message');
+      });
 
       clearTimeout(timeoutId);
 
@@ -280,7 +280,7 @@ export class EthereumProvider extends AbstractBaseProvider {
         },
         body: JSON.stringify(jsonRpcRequests),
         signal: abortController.signal
-      }, 'Logger message');
+      });
 
       clearTimeout(timeoutId);
 
@@ -300,11 +300,11 @@ export class EthereumProvider extends AbstractBaseProvider {
           return parseJsonRpcResponse(resp, {
             ...context,
             method: requests[index].method
-          }, 'Logger message');
+          });
         } catch (error) {
           return { error: error instanceof Error ? error.message : 'Unknown error' };
         }
-      }, 'Logger message');
+      });
 
     } catch (error) {
       if (abortController.signal.aborted) {

@@ -63,7 +63,7 @@ export async function fetchAccountInfo(
         data: response.data,
         rentEpoch: response.rentEpoch
       };
-    }, 'Logger message');
+    });
   } catch (error) {
     handleRpcError(error, `fetchAccountInfo(${address})`);
   }
@@ -111,8 +111,8 @@ export async function fetchMultipleAccountInfos(
             data: account.data,
             rentEpoch: account.rentEpoch
           };
-        }, 'Logger message');
-      }, 'Logger message');
+        });
+      });
       
       results.push(...chunkResults);
     }
@@ -168,7 +168,7 @@ export async function fetchProgramAccounts(
           rentEpoch: account.rentEpoch
         }
       }));
-    }, 'Logger message');
+    });
   } catch (error) {
     handleRpcError(error, `fetchProgramAccounts(${programId})`);
   }
@@ -217,7 +217,7 @@ export async function fetchTokenAccountsByOwner(
         pubkey: pubkey.toString(),
         account: account.data.parsed.info
       }));
-    }, 'Logger message');
+    });
   } catch (error) {
     handleRpcError(error, `fetchTokenAccountsByOwner(${owner})`);
   }
@@ -328,7 +328,7 @@ export async function scanPositionAccounts(
             pubkey,
             account,
             programId
-          }, 'Logger message');
+          });
         }
       } catch (error) {
         console.warn(`Failed to scan program ${programId}:`, error);
@@ -369,7 +369,7 @@ export async function scanPoolAccounts(
               pubkey,
               account,
               programId
-            }, 'Logger message');
+            });
           }
         }
       } catch (error) {
@@ -526,7 +526,7 @@ class AccountCache {
     this.cache.set(address, {
       data,
       timestamp: Date.now()
-    }, 'Logger message');
+    });
   }
 
   get(address: string): SolanaAccountInfo | null {

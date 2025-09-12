@@ -50,7 +50,7 @@ export class UniswapProtocolAdapter {
       enableV3: this.config.enableV3,
       enableCaching: this.config.enableCaching,
       providerConfig: this.config.providerConfig
-    }, 'Logger message');
+    });
   }
 
   /**

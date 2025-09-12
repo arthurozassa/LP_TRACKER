@@ -151,7 +151,7 @@ export class V2ContractOperations {
           this.factoryContract.getPair(token0, token1),
           10000
         );
-      }, 'Logger message');
+      });
 
       // Check if pair exists (address is not zero)
       if (pairAddress === ethers.ZeroAddress) {
@@ -229,7 +229,7 @@ export class V2ContractOperations {
           this.factoryContract.allPairsLength(),
           10000
         );
-      }, 'Logger message');
+      });
       
       return count.toNumber();
     } catch (error) {
@@ -293,7 +293,7 @@ export class V2ContractOperations {
           pairContract.balanceOf(normalizeAddress(userAddress)),
           10000
         );
-      }, 'Logger message');
+      });
     } catch (error) {
       throw new UniswapError(
         `Failed to get LP balance for ${userAddress} in ${pairAddress}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -417,7 +417,7 @@ export class V2ContractOperations {
             hasPosition: false
           };
         }
-      }, 'Logger message');
+      });
 
       const batchResults = await Promise.all(promises);
       results.push(...batchResults);

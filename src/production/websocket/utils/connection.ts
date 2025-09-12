@@ -122,7 +122,7 @@ export class ConnectionManager {
     this.connectionEvents.push({
       timestamp: new Date(),
       type: 'connect',
-    }, 'Logger message');
+    });
 
     // Clean up old events (keep only last hour)
     this.cleanupOldEvents();
@@ -150,7 +150,7 @@ export class ConnectionManager {
     this.connectionEvents.push({
       timestamp: new Date(),
       type: 'disconnect',
-    }, 'Logger message');
+    });
 
     this.logger.debug({
       connectionId,

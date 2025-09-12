@@ -146,7 +146,7 @@ export async function testProviderFactory() {
       hasEthereum: !!stats.ethereum,
       hasSolana: !!stats.solana,
       overallHealth: stats.overallHealth
-    }, 'Logger message');
+    });
     
     // Cleanup
     await ProviderFactory.destroyAll();

@@ -79,7 +79,7 @@ class CacheInvalidationManager {
         `analytics:${event.scope.chain}:*`
       ],
       batch: true
-    }, 'Logger message');
+    });
 
     // Position change invalidation
     this.addRule({
@@ -97,7 +97,7 @@ class CacheInvalidationManager {
         }
         return keys;
       }
-    }, 'Logger message');
+    });
 
     // Price update invalidation
     this.addRule({
@@ -113,7 +113,7 @@ class CacheInvalidationManager {
       },
       delay: 2000, // Delay price updates to avoid thrashing
       batch: true
-    }, 'Logger message');
+    });
 
     // Protocol update invalidation
     this.addRule({
@@ -127,7 +127,7 @@ class CacheInvalidationManager {
         }
         return keys;
       }
-    }, 'Logger message');
+    });
 
     // Wallet activity invalidation
     this.addRule({
@@ -143,7 +143,7 @@ class CacheInvalidationManager {
         }
         return keys;
       }
-    }, 'Logger message');
+    });
 
     // Global invalidation
     this.addRule({
@@ -151,7 +151,7 @@ class CacheInvalidationManager {
       matcher: (event) => event.type === 'manual' && !!event.scope.global,
       keys: () => ['*'], // Invalidate everything
       delay: 0
-    }, 'Logger message');
+    });
 
     logger.info('Default invalidation rules set up');
   }
@@ -389,7 +389,7 @@ class CacheInvalidationManager {
       data: { chain },
       timestamp: Date.now(),
       source
-    }, 'Logger message');
+    });
   }
 
   async invalidateWalletData(wallet: string, chain?: ChainType, source: string = 'system'): Promise<void> {
@@ -399,7 +399,7 @@ class CacheInvalidationManager {
       data: { wallet, chain },
       timestamp: Date.now(),
       source
-    }, 'Logger message');
+    });
   }
 
   async invalidatePositionData(positionId: string, wallet?: string, source: string = 'system'): Promise<void> {
@@ -409,7 +409,7 @@ class CacheInvalidationManager {
       data: { positionId, wallet },
       timestamp: Date.now(),
       source
-    }, 'Logger message');
+    });
   }
 
   async invalidateProtocolData(protocol: ProtocolType, chain?: ChainType, source: string = 'system'): Promise<void> {
@@ -419,7 +419,7 @@ class CacheInvalidationManager {
       data: { protocol, chain },
       timestamp: Date.now(),
       source
-    }, 'Logger message');
+    });
   }
 
   async invalidatePriceData(token: string, chain?: ChainType, source: string = 'system'): Promise<void> {
@@ -429,7 +429,7 @@ class CacheInvalidationManager {
       data: { token, chain },
       timestamp: Date.now(),
       source
-    }, 'Logger message');
+    });
   }
 
   async invalidateAll(source: string = 'manual'): Promise<void> {
@@ -439,7 +439,7 @@ class CacheInvalidationManager {
       data: {},
       timestamp: Date.now(),
       source
-    }, 'Logger message');
+    });
   }
 
   // Time-based invalidation
