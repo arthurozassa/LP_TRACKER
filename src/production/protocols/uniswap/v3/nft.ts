@@ -439,17 +439,17 @@ export class V3NFTPositionManager {
         mints: mints.map(event => ({
           blockNumber: event.blockNumber,
           transactionHash: event.transactionHash,
-          args: event.args
+          args: 'args' in event ? event.args : undefined
         })),
         burns: burns.map(event => ({
           blockNumber: event.blockNumber,
           transactionHash: event.transactionHash,
-          args: event.args
+          args: 'args' in event ? event.args : undefined
         })),
         collects: collects.map(event => ({
           blockNumber: event.blockNumber,
           transactionHash: event.transactionHash,
-          args: event.args
+          args: 'args' in event ? event.args : undefined
         }))
       };
     } catch (error) {
