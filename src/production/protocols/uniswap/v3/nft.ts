@@ -107,7 +107,7 @@ export class V3NFTPositionManager {
         );
       });
 
-      if (balance.isZero()) {
+      if (balance === '0') {
         return [];
       }
 
@@ -238,7 +238,7 @@ export class V3NFTPositionManager {
       const collectableTokens0 = position.tokensOwed0;
       const collectableTokens1 = position.tokensOwed1;
 
-      const isActive = !position.liquidity.isZero();
+      const isActive = position.liquidity !== '0';
 
       return {
         tokenId,
@@ -324,7 +324,7 @@ export class V3NFTPositionManager {
       let totalFeesCollectable = 0;
 
       for (const [tokenId, position] of positions) {
-        if (!position.liquidity.isZero()) {
+        if (position.liquidity !== '0') {
           activePositions++;
         }
 

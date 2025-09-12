@@ -337,7 +337,7 @@ export class V3PositionScanner {
         // Metadata
         createdAt: new Date(parseInt(subgraphPos.transaction.timestamp) * 1000),
         lastUpdate: new Date(),
-        isActive: !liquidityBN.isZero()
+        isActive: liquidityBN !== '0'
       };
 
       return position;
