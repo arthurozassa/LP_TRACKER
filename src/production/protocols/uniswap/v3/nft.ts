@@ -510,7 +510,7 @@ export function calculateInRangePercentage(
  * Creates NFT Position Manager instance
  */
 export function createV3NFTPositionManager(
-  provider: ethers.providers.Provider,
+  provider: ethers.Provider,
   chain: UniswapChain
 ): V3NFTPositionManager {
   return new V3NFTPositionManager(provider, chain);
