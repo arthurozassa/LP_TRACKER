@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       console.log(`Using mock data for ${subgraph} - no API key or endpoint unavailable`);
       
       // Generate mock Uniswap V3 position data
-      const mockPositions = [];
+      const mockPositions: any[] = [];
       const mockData = {
         data: {
           positions: mockPositions
