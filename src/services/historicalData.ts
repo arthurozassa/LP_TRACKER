@@ -64,8 +64,8 @@ export class HistoricalDataService {
     }
 
     try {
-      const url = `${COINGECKO_API_BASE}/coins/${tokenId}/market_chart?vs_currency=${currency}&days=${days}&interval=${days > 7 ? 'daily' : 'hourly'}`;
-      const response = await rateLimitedFetch(url);
+      const url = `/api/market-data?coin=${tokenId}&vs_currency=${currency}&days=${days}&interval=${days > 7 ? 'daily' : 'hourly'}`;
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`CoinGecko API error: ${response.status}`);

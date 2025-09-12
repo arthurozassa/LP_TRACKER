@@ -6,10 +6,14 @@ import { validateWalletAddress, validateScanRequest, validateUrlParam } from '@/
 import type { ScanResults, ScanApiResponse, ProtocolData, Position } from '@/types';
 import type { ScanRequest, ScanJobResponse, ScanProgress } from '@/types/api';
 import { ERROR_CODES, HTTP_STATUS } from '@/types/api';
+import { getProductionScanner } from '@/services/productionScanner';
 
 // In-memory store for scan jobs (in production, use Redis or database)
 const scanJobs = new Map<string, ScanProgress>();
 const scanResults = new Map<string, ScanResults>();
+
+// Initialize production scanner
+const productionScanner = getProductionScanner();
 
 // Mock protocol scanner functions (replace with real implementations)
 async function scanProtocolPositions(
@@ -76,7 +80,7 @@ function getSupportedProtocols(chain: string): string[] {
   }
 }
 
-// Perform full wallet scan across all protocols
+// Perform full wallet scan using production scanner
 async function performWalletScan(
   walletAddress: string,
   chains: string[],
@@ -90,93 +94,31 @@ async function performWalletScan(
     scanProgress.status = 'scanning';
     scanProgress.progress = 0;
     
-    const allProtocolData: Record<string, ProtocolData> = {};
-    let completedCount = 0;
-    const totalProtocols = protocols.length;
-
-    for (const protocol of protocols) {
-      if ((scanProgress.status as string) === 'failed') break;
-
-      scanProgress.currentProtocol = protocol;
-      scanProgress.progress = Math.round((completedCount / totalProtocols) * 100);
-      
-      try {
-        // Determine chain for protocol
-        const chain = chains.find(c => getSupportedProtocols(c).includes(protocol)) || chains[0];
-        
-        const positions = await scanProtocolPositions(walletAddress, protocol, chain);
-        
-        const protocolData: ProtocolData = {
-          protocol: {
-            id: protocol,
-            name: protocol.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-            chain: chain as any,
-            logoUri: `https://example.com/logos/${protocol}.png`,
-            website: `https://${protocol.replace('-', '')}.com`,
-            supported: true,
-          },
-          positions,
-          totalValue: positions.reduce((sum, p) => sum + p.value, 0),
-          totalPositions: positions.length,
-          totalFeesEarned: positions.reduce((sum, p) => sum + p.feesEarned, 0),
-          avgApr: positions.length > 0 ? positions.reduce((sum, p) => sum + p.apr, 0) / positions.length : 0,
-          isLoading: false,
-        };
-
-        allProtocolData[protocol] = protocolData;
-        scanProgress.completedProtocols.push(protocol);
-      } catch (error) {
-        console.error(`Error scanning ${protocol}:`, error);
-        scanProgress.failedProtocols.push(protocol);
-        
-        // Add empty protocol data for failed scans
-        allProtocolData[protocol] = {
-          protocol: {
-            id: protocol,
-            name: protocol.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-            chain: chains[0] as any,
-            logoUri: `https://example.com/logos/${protocol}.png`,
-            website: `https://${protocol.replace('-', '')}.com`,
-            supported: true,
-          },
-          positions: [],
-          totalValue: 0,
-          totalPositions: 0,
-          totalFeesEarned: 0,
-          avgApr: 0,
-          isLoading: false,
-          error: 'Failed to scan protocol',
-        };
-      }
-
-      completedCount++;
+    // Use the production scanner to get real data
+    const primaryChain = chains[0] as 'ethereum' | 'solana';
+    scanProgress.currentProtocol = `Scanning ${primaryChain} protocols`;
+    scanProgress.progress = 50;
+    
+    const productionScanResponse = await productionScanner.scanWallet(walletAddress, primaryChain);
+    
+    // Check if the scan was successful
+    if (!productionScanResponse.success || !productionScanResponse.data) {
+      throw new Error(productionScanResponse.error || 'Production scan failed');
     }
-
-    // Compile final results
-    const finalScanResults: ScanResults = {
-      chain: chains[0] as any,
-      walletAddress,
-      totalValue: Object.values(allProtocolData).reduce((sum, pd) => sum + pd.totalValue, 0),
-      totalPositions: Object.values(allProtocolData).reduce((sum, pd) => sum + pd.totalPositions, 0),
-      totalFeesEarned: Object.values(allProtocolData).reduce((sum, pd) => sum + pd.totalFeesEarned, 0),
-      avgApr: Object.values(allProtocolData)
-        .filter(pd => pd.avgApr > 0)
-        .reduce((sum, pd, _, arr) => sum + pd.avgApr / arr.length, 0),
-      protocols: allProtocolData,
-      lastUpdated: new Date().toISOString(),
-      scanDuration: Date.now() - new Date(scanProgress.startedAt).getTime(),
-    };
-
-    // Update scan status
-    scanProgress.status = 'completed';
+    
+    const productionScanResults = productionScanResponse.data;
+    
+    // Update progress
     scanProgress.progress = 100;
+    scanProgress.status = 'completed';
     scanProgress.completedAt = new Date().toISOString();
+    scanProgress.completedProtocols = Object.keys(productionScanResults.protocols);
     
     // Store results
-    scanResults.set(scanId, finalScanResults);
+    scanResults.set(scanId, productionScanResults);
 
   } catch (error) {
-    console.error('Scan failed:', error);
+    console.error('Production scan failed:', error);
     scanProgress.status = 'failed';
     scanProgress.progress = 0;
   }
