@@ -284,7 +284,7 @@ export class V3PositionScanner {
       const currentPrice = tickToPrice(currentTick, token0.decimals, token1.decimals);
 
       // Create token amounts (would need current liquidity calculation)
-      const liquidityBN = string.from(subgraphPos.liquidity);
+      const liquidityBN = subgraphPos.liquidity;
       const token0Amount = createTokenAmount(token0, '0'); // Would need calculation
       const token1Amount = createTokenAmount(token1, '0'); // Would need calculation
 

@@ -165,7 +165,7 @@ export class V3NFTPositionManager {
       });
 
       return {
-        tokenId: string.from(tokenId),
+        tokenId: tokenId.toString(),
         nonce: result.nonce,
         operator: result.operator,
         token0: normalizeAddress(result.token0),
@@ -381,7 +381,7 @@ export class V3NFTPositionManager {
       return await this.contract.estimateGas.collect(collectParams);
     } catch (error) {
       // Return reasonable default if estimation fails
-      return string.from(150000); // Typical collect gas usage
+      return "150000"; // Typical collect gas usage
     }
   }
 
