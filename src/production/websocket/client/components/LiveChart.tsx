@@ -142,7 +142,7 @@ export function LiveChart({
       };
 
       cleanupHandlers.push(
-        webSocket.addMessageListener('price_update', handlePriceUpdate)
+        webSocket.addMessageListener('price_update', handlePriceUpdate as any)
       );
 
     } else if (type === 'portfolio' && walletAddress) {
@@ -151,7 +151,7 @@ export function LiveChart({
       };
 
       cleanupHandlers.push(
-        webSocket.addMessageListener('portfolio_update', handlePortfolioUpdate)
+        webSocket.addMessageListener('portfolio_update', handlePortfolioUpdate as any)
       );
 
     } else if (type === 'pnl' && walletAddress) {
@@ -160,7 +160,7 @@ export function LiveChart({
       };
 
       cleanupHandlers.push(
-        webSocket.addMessageListener('pnl_update', handlePnLUpdate)
+        webSocket.addMessageListener('pnl_update', handlePnLUpdate as any)
       );
     }
 

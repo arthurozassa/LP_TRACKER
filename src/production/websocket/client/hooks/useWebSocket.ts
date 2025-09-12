@@ -190,9 +190,9 @@ export function useWebSocket(options: WebSocketOptions = {}) {
     const subscriptionMessage = createMessage('subscribe', {
       subscriptions: [{
         id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        type,
-        filters,
-        options,
+        type: type as any,
+        filters: filters as any,
+        options: options as any,
       }],
     });
 

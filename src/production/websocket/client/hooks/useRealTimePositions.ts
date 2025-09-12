@@ -237,12 +237,12 @@ export function useRealTimePositions(options: PositionsOptions) {
 
     // Register message handlers
     const cleanupHandlers = [
-      webSocket.addMessageListener('position_update', handlePositionUpdate),
-      webSocket.addMessageListener('position_created', handlePositionCreated),
-      webSocket.addMessageListener('position_removed', handlePositionRemoved),
-      webSocket.addMessageListener('positions_batch_update', handlePositionsBatchUpdate),
-      webSocket.addMessageListener('portfolio_update', handlePortfolioUpdate),
-      webSocket.addMessageListener('pnl_update', handlePnLUpdate),
+      webSocket.addMessageListener('position_update', handlePositionUpdate as any),
+      webSocket.addMessageListener('position_created', handlePositionCreated as any),
+      webSocket.addMessageListener('position_removed', handlePositionRemoved as any),
+      webSocket.addMessageListener('positions_batch_update', handlePositionsBatchUpdate as any),
+      webSocket.addMessageListener('portfolio_update', handlePortfolioUpdate as any),
+      webSocket.addMessageListener('pnl_update', handlePnLUpdate as any),
     ];
 
     return () => {
@@ -343,7 +343,7 @@ export function useRealTimePositions(options: PositionsOptions) {
 
     // Chain filter
     if (activeFilters.chains?.length) {
-      filtered = filtered.filter(pos => activeFilters.chains!.includes(pos.chain));
+      filtered = filtered.filter(pos => pos.chain && activeFilters.chains!.includes(pos.chain));
     }
 
     // Protocol filter

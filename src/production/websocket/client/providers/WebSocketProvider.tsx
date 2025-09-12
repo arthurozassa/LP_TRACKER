@@ -86,8 +86,8 @@ export function WebSocketProvider({ children, options = {}, onNotification }: We
 
     // Register notification handlers
     const cleanupHandlers = [
-      webSocket.addMessageListener('notification', handleNotification),
-      webSocket.addMessageListener('alert_triggered', (message) => {
+      webSocket.addMessageListener('notification', handleNotification as any),
+      webSocket.addMessageListener('alert_triggered', ((message: any) => {
         // Convert alert to notification format for unified handling
         const notificationMessage: NotificationMessage = {
           ...message,
@@ -102,8 +102,8 @@ export function WebSocketProvider({ children, options = {}, onNotification }: We
           },
         };
         handleNotification(notificationMessage);
-      }),
-      webSocket.addMessageListener('opportunity_found', (message) => {
+      }) as any),
+      webSocket.addMessageListener('opportunity_found', ((message: any) => {
         // Convert opportunity to notification format
         const notificationMessage: NotificationMessage = {
           ...message,
@@ -118,7 +118,7 @@ export function WebSocketProvider({ children, options = {}, onNotification }: We
           },
         };
         handleNotification(notificationMessage);
-      }),
+      }) as any),
     ];
 
     return () => {
@@ -252,9 +252,9 @@ export function useNotifications() {
     };
 
     const cleanupHandlers = [
-      webSocket.addMessageListener('notification', handleNotification),
-      webSocket.addMessageListener('alert_triggered', handleNotification),
-      webSocket.addMessageListener('opportunity_found', handleNotification),
+      webSocket.addMessageListener('notification', handleNotification as any),
+      webSocket.addMessageListener('alert_triggered', handleNotification as any),
+      webSocket.addMessageListener('opportunity_found', handleNotification as any),
     ];
 
     return () => {

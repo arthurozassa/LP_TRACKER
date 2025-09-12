@@ -321,7 +321,7 @@ class QueueMonitoring {
       return metrics;
 
     } catch (error) {
-      logger.error('Failed to collect metrics', { error });
+      logger.error({ error }, 'Failed to collect metrics');
       throw error;
     }
   }
@@ -389,11 +389,11 @@ class QueueMonitoring {
 
   private getNextScheduledJobTime(): number | undefined {
     const jobs = this.scheduler.getAllJobs();
-    const enabledJobs = jobs.filter(j => j.enabled && j.nextRun);
+    const enabledJobs = jobs.filter((j: any) => j.enabled && j.nextRun);
     
     if (enabledJobs.length === 0) return undefined;
     
-    const nextJob = enabledJobs.sort((a, b) => 
+    const nextJob = enabledJobs.sort((a: any, b: any) => 
       (a.nextRun?.getTime() || 0) - (b.nextRun?.getTime() || 0)
     )[0];
     
@@ -420,10 +420,10 @@ class QueueMonitoring {
           rule.lastTriggered = Date.now();
         }
       } catch (error) {
-        logger.error('Alert rule evaluation failed', { 
+        logger.error({ 
           rule: rule.name, 
           error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        }, 'Alert rule evaluation failed');
       }
     }
   }
@@ -441,12 +441,12 @@ class QueueMonitoring {
 
     this.alerts.push(alert);
     
-    logger.warn('Alert triggered', {
+    logger.warn({
       id: alert.id,
       rule: rule.name,
       severity: rule.severity,
       message: rule.message
-    });
+    }, 'Alert triggered');
 
     // Clean up old alerts
     this.cleanupOldAlerts();
@@ -461,7 +461,9 @@ class QueueMonitoring {
       timestamp: metrics.timestamp,
       cache: {
         combined: metrics.cache.combined,
-        redis: { connected: metrics.cache.redis.connected, hitRate: metrics.cache.redis.hitRate }
+        redis: { connected: metrics.cache.redis.connected, hitRate: metrics.cache.redis.hitRate, compressionRatio: metrics.cache.redis.compressionRatio || 0 },
+        memory: metrics.cache.memory,
+        invalidation: metrics.cache.invalidation
       },
       scheduler: metrics.scheduler,
       system: {
@@ -480,7 +482,7 @@ class QueueMonitoring {
 
   addAlertRule(rule: Omit<AlertRule, 'lastTriggered'>): void {
     this.alertRules.push({ ...rule, lastTriggered: undefined });
-    logger.info('Alert rule added', { name: rule.name, severity: rule.severity });
+    logger.info({ name: rule.name, severity: rule.severity }, 'Alert rule added');
   }
 
   removeAlertRule(name: string): boolean {
@@ -489,7 +491,7 @@ class QueueMonitoring {
     
     const removed = this.alertRules.length !== initialLength;
     if (removed) {
-      logger.info('Alert rule removed', { name });
+      logger.info({ name }, 'Alert rule removed');
     }
     
     return removed;
@@ -499,7 +501,7 @@ class QueueMonitoring {
     const rule = this.alertRules.find(r => r.name === name);
     if (rule) {
       rule.enabled = true;
-      logger.info('Alert rule enabled', { name });
+      logger.info({ name }, 'Alert rule enabled');
       return true;
     }
     return false;
@@ -509,7 +511,7 @@ class QueueMonitoring {
     const rule = this.alertRules.find(r => r.name === name);
     if (rule) {
       rule.enabled = false;
-      logger.info('Alert rule disabled', { name });
+      logger.info({ name }, 'Alert rule disabled');
       return true;
     }
     return false;
@@ -537,7 +539,7 @@ class QueueMonitoring {
     if (alert && !alert.resolved) {
       alert.resolved = true;
       alert.resolvedAt = Date.now();
-      logger.info('Alert resolved', { id: alertId, rule: alert.rule });
+      logger.info({ id: alertId, rule: alert.rule }, 'Alert resolved');
       return true;
     }
     return false;
@@ -603,11 +605,11 @@ class QueueMonitoring {
   }
 
   start(): void {
-    logger.info('Starting queue monitoring', {
+    logger.info({
       metricsInterval: this.config.metricsInterval,
       alertsEnabled: this.config.alertsEnabled,
       retentionPeriod: this.config.retentionPeriod
-    });
+    }, 'Starting queue monitoring');
 
     // Collect initial metrics
     this.collectMetrics();
@@ -617,7 +619,7 @@ class QueueMonitoring {
       try {
         await this.collectMetrics();
       } catch (error) {
-        logger.error('Metrics collection failed', { error });
+        logger.error({ error }, 'Metrics collection failed');
       }
     }, this.config.metricsInterval);
 

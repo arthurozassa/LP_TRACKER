@@ -241,10 +241,10 @@ export function useJobStatus(options: JobOptions = {}) {
 
     // Register message handlers
     const cleanupHandlers = [
-      webSocket.addMessageListener('job_started', handleJobStarted),
-      webSocket.addMessageListener('job_progress', handleJobProgress),
-      webSocket.addMessageListener('job_completed', handleJobCompleted),
-      webSocket.addMessageListener('job_failed', handleJobFailed),
+      webSocket.addMessageListener('job_started', handleJobStarted as any),
+      webSocket.addMessageListener('job_progress', handleJobProgress as any),
+      webSocket.addMessageListener('job_completed', handleJobCompleted as any),
+      webSocket.addMessageListener('job_failed', handleJobFailed as any),
     ];
 
     return () => {

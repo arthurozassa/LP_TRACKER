@@ -465,7 +465,7 @@ export class WebSocketAuth {
       const now = new Date();
       const expiredAddresses: string[] = [];
 
-      for (const [address, nonceInfo] of this.walletNonces.entries()) {
+      for (const [address, nonceInfo] of Array.from(this.walletNonces.entries())) {
         if (now > nonceInfo.expires) {
           expiredAddresses.push(address);
         }

@@ -69,7 +69,7 @@ class QueueManager {
   };
 
   constructor(private config: QueueConfig) {
-    this.redis = new Redis(config.redis);
+    this.redis = new Redis(config.redis as any);
     this.processors = {
       scan: new ScanJobProcessor(),
       refresh: new RefreshJobProcessor(),
@@ -196,10 +196,10 @@ class QueueManager {
       }
     });
 
-    logger.info('Queue manager initialized', { 
+    logger.info({ 
       queueCount: this.queues.size,
       workerCount: this.workers.size 
-    });
+    }, 'Queue manager initialized');
   }
 
   private createQueue(name: string, options: any): void {
@@ -235,19 +235,19 @@ class QueueManager {
     this.workers.set(name, worker);
     this.queueEvents.set(name, queueEvents);
 
-    logger.debug('Queue created', { name, concurrency: this.config.concurrency });
+    logger.debug({ name, concurrency: this.config.concurrency }, 'Queue created');
   }
 
   private async processJob(queueName: string, job: Job): Promise<any> {
     const startTime = Date.now();
     
-    logger.info('Processing job', {
+    logger.info({
       queue: queueName,
       jobId: job.id,
       jobName: job.name,
       attempts: job.attemptsMade,
       data: this.sanitizeJobData(job.data)
-    });
+    }, 'Processing job');
 
     try {
       let result: any;
@@ -308,26 +308,26 @@ class QueueManager {
 
       const duration = Date.now() - startTime;
       
-      logger.info('Job completed successfully', {
+      logger.info({
         queue: queueName,
         jobId: job.id,
         duration,
         resultSize: JSON.stringify(result).length
-      });
+      }, 'Job completed successfully');
 
       return result;
 
     } catch (error) {
       const duration = Date.now() - startTime;
       
-      logger.error('Job failed', {
+      logger.error({
         queue: queueName,
         jobId: job.id,
         duration,
         attempts: job.attemptsMade,
         error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
-      });
+      }, 'Job failed');
 
       throw error;
     }
@@ -335,69 +335,69 @@ class QueueManager {
 
   private setupWorkerEventListeners(worker: Worker, queueName: string): void {
     worker.on('completed', (job, result) => {
-      logger.debug('Worker job completed', {
+      logger.debug({
         queue: queueName,
         jobId: job.id,
         processingTime: job.processedOn ? Date.now() - job.processedOn : 0
-      });
+      }, 'Worker job completed');
     });
 
     worker.on('failed', (job, error) => {
-      logger.error('Worker job failed', {
+      logger.error({
         queue: queueName,
         jobId: job?.id,
         error: error.message,
         attempts: job?.attemptsMade,
         maxAttempts: job?.opts.attempts
-      });
+      }, 'Worker job failed');
     });
 
     worker.on('stalled', (jobId) => {
-      logger.warn('Worker job stalled', {
+      logger.warn({
         queue: queueName,
         jobId
-      });
+      }, 'Worker job stalled');
     });
 
     worker.on('error', (error) => {
-      logger.error('Worker error', {
+      logger.error({
         queue: queueName,
         error: error.message
-      });
+      }, 'Worker error');
     });
 
     worker.on('ready', () => {
-      logger.info('Worker ready', { queue: queueName });
+      logger.info({ queue: queueName }, 'Worker ready');
     });
 
     worker.on('closing', () => {
-      logger.info('Worker closing', { queue: queueName });
+      logger.info({ queue: queueName }, 'Worker closing');
     });
   }
 
   private setupQueueEventListeners(queueEvents: QueueEvents, queueName: string): void {
     queueEvents.on('waiting', ({ jobId }) => {
-      logger.debug('Job waiting', { queue: queueName, jobId });
+      logger.debug({ queue: queueName, jobId }, 'Job waiting');
     });
 
     queueEvents.on('active', ({ jobId, prev }) => {
-      logger.debug('Job active', { queue: queueName, jobId, prev });
+      logger.debug({ queue: queueName, jobId, prev }, 'Job active');
     });
 
     queueEvents.on('progress', ({ jobId, data }) => {
-      logger.debug('Job progress', { queue: queueName, jobId, progress: data });
+      logger.debug({ queue: queueName, jobId, progress: data }, 'Job progress');
     });
 
     queueEvents.on('completed', ({ jobId, returnvalue }) => {
-      logger.debug('Job completed event', { queue: queueName, jobId });
+      logger.debug({ queue: queueName, jobId }, 'Job completed event');
     });
 
     queueEvents.on('failed', ({ jobId, failedReason }) => {
-      logger.error('Job failed event', { queue: queueName, jobId, reason: failedReason });
+      logger.error({ queue: queueName, jobId, reason: failedReason }, 'Job failed event');
     });
 
     queueEvents.on('removed', ({ jobId, prev }) => {
-      logger.debug('Job removed', { queue: queueName, jobId, prev });
+      logger.debug({ queue: queueName, jobId, prev }, 'Job removed');
     });
   }
 
@@ -432,13 +432,13 @@ class QueueManager {
 
     const job = await queue.add(jobName, data, options);
     
-    logger.info('Job added to queue', {
+    logger.info({
       queue: queueName,
       jobName,
       jobId: job.id,
       priority: options?.priority,
       delay: options?.delay
-    });
+    }, 'Job added to queue');
 
     return job;
   }
@@ -495,11 +495,11 @@ class QueueManager {
   async getAllQueueStats(): Promise<Record<string, QueueStats>> {
     const stats: Record<string, QueueStats> = {};
     
-    for (const queueName of this.queues.keys()) {
+    for (const queueName of Array.from(this.queues.keys())) {
       try {
         stats[queueName] = await this.getQueueStats(queueName);
       } catch (error) {
-        logger.error('Failed to get queue stats', { queueName, error });
+        logger.error({ queueName, error }, 'Failed to get queue stats');
       }
     }
     
@@ -513,7 +513,7 @@ class QueueManager {
     }
 
     await queue.pause();
-    logger.info('Queue paused', { queueName });
+    logger.info({ queueName }, 'Queue paused');
   }
 
   async resumeQueue(queueName: string): Promise<void> {
@@ -523,7 +523,7 @@ class QueueManager {
     }
 
     await queue.resume();
-    logger.info('Queue resumed', { queueName });
+    logger.info({ queueName }, 'Queue resumed');
   }
 
   async pauseWorker(queueName: string): Promise<void> {
@@ -533,7 +533,7 @@ class QueueManager {
     }
 
     await worker.pause();
-    logger.info('Worker paused', { queueName });
+    logger.info({ queueName }, 'Worker paused');
   }
 
   async resumeWorker(queueName: string): Promise<void> {
@@ -543,7 +543,7 @@ class QueueManager {
     }
 
     worker.resume();
-    logger.info('Worker resumed', { queueName });
+    logger.info({ queueName }, 'Worker resumed');
   }
 
   async drainQueue(queueName: string, delayed: boolean = true): Promise<void> {
@@ -553,17 +553,17 @@ class QueueManager {
     }
 
     await queue.drain(delayed);
-    logger.info('Queue drained', { queueName, delayed });
+    logger.info({ queueName, delayed }, 'Queue drained');
   }
 
-  async cleanQueue(queueName: string, grace: number = 5000, status?: string): Promise<Job[]> {
+  async cleanQueue(queueName: string, grace: number = 5000, status?: string): Promise<string[]> {
     const queue = this.queues.get(queueName);
     if (!queue) {
       throw new Error(`Queue ${queueName} not found`);
     }
 
     const cleaned = await queue.clean(grace, -1, status as any);
-    logger.info('Queue cleaned', { queueName, cleaned: cleaned.length, grace, status });
+    logger.info({ queueName, cleaned: cleaned.length, grace, status }, 'Queue cleaned');
     
     return cleaned;
   }
@@ -572,13 +572,13 @@ class QueueManager {
     const queueHealth: Record<string, boolean> = {};
     
     // Check each queue
-    for (const [name, queue] of this.queues) {
+    for (const [name, queue] of Array.from(this.queues.entries())) {
       try {
         await queue.getWaiting();
         queueHealth[name] = true;
       } catch (error) {
         queueHealth[name] = false;
-        logger.error('Queue health check failed', { queue: name, error });
+        logger.error({ queue: name, error }, 'Queue health check failed');
       }
     }
 
@@ -588,7 +588,7 @@ class QueueManager {
       await this.redis.ping();
     } catch (error) {
       redisHealthy = false;
-      logger.error('Redis health check failed', { error });
+      logger.error({ error }, 'Redis health check failed');
     }
 
     const allQueuesHealthy = Object.values(queueHealth).every(h => h);
@@ -683,5 +683,6 @@ export type {
   HistoricalPerformanceJobData
 };
 
-// Export queue and worker stats types
-export type { QueueStats, WorkerStats };
+// Export the QueueManager class
+export { QueueManager };
+

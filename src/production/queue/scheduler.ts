@@ -225,9 +225,9 @@ class JobScheduler {
       failCount: 0
     });
 
-    logger.info('Default scheduled jobs set up', { 
+    logger.info({ 
       jobCount: this.scheduledJobs.size 
-    });
+    }, 'Default scheduled jobs set up');
   }
 
   addScheduledJob(jobConfig: Omit<ScheduledJob, 'lastRun' | 'nextRun'>): void {
@@ -242,13 +242,13 @@ class JobScheduler {
       this.scheduleJob(job);
     }
 
-    logger.info('Scheduled job added', {
+    logger.info({
       name: job.name,
       schedule: job.schedule,
       queue: job.queue,
       enabled: job.enabled,
       nextRun: job.nextRun
-    });
+    }, 'Scheduled job added');
   }
 
   private scheduleJob(job: ScheduledJob): void {
@@ -261,22 +261,22 @@ class JobScheduler {
 
     this.cronJobs.set(job.name, task);
     
-    logger.debug('Cron job scheduled', {
+    logger.debug({
       name: job.name,
       schedule: job.schedule,
       timezone: this.config.timezone
-    });
+    }, 'Cron job scheduled');
   }
 
   private async executeScheduledJob(job: ScheduledJob): Promise<void> {
     const startTime = Date.now();
 
-    logger.info('Executing scheduled job', {
+    logger.info({
       name: job.name,
       queue: job.queue,
       jobName: job.jobName,
       runCount: job.runCount + 1
-    });
+    }, 'Executing scheduled job');
 
     try {
       // Dynamic data generation for some jobs
@@ -305,32 +305,32 @@ class JobScheduler {
 
       const duration = Date.now() - startTime;
 
-      logger.info('Scheduled job executed successfully', {
+      logger.info({
         name: job.name,
         duration,
         runCount: job.runCount,
         nextRun: job.nextRun
-      });
+      }, 'Scheduled job executed successfully');
 
     } catch (error) {
       job.failCount++;
       const duration = Date.now() - startTime;
 
-      logger.error('Scheduled job execution failed', {
+      logger.error({
         name: job.name,
         error: error instanceof Error ? error.message : 'Unknown error',
         duration,
         runCount: job.runCount,
         failCount: job.failCount
-      });
+      }, 'Scheduled job execution failed');
 
       // Disable job if it fails too many times
       if (job.failCount >= 5) {
         await this.disableJob(job.name);
-        logger.warn('Scheduled job disabled due to repeated failures', {
+        logger.warn({
           name: job.name,
           failCount: job.failCount
-        });
+        }, 'Scheduled job disabled due to repeated failures');
       }
     }
   }
@@ -397,7 +397,7 @@ class JobScheduler {
       // This is a simplified approach - in reality you'd calculate the next run properly
       return new Date(Date.now() + 60000); // Mock: 1 minute from now
     } catch (error) {
-      logger.error('Failed to calculate next run date', { schedule, error });
+      logger.error({ schedule, error }, 'Failed to calculate next run date');
       return new Date(Date.now() + 60000);
     }
   }
@@ -405,7 +405,7 @@ class JobScheduler {
   async enableJob(name: string): Promise<boolean> {
     const job = this.scheduledJobs.get(name);
     if (!job) {
-      logger.warn('Attempted to enable non-existent job', { name });
+      logger.warn({ name }, 'Attempted to enable non-existent job');
       return false;
     }
 
@@ -419,14 +419,14 @@ class JobScheduler {
       this.scheduleJob(job);
     }
 
-    logger.info('Scheduled job enabled', { name });
+    logger.info({ name }, 'Scheduled job enabled');
     return true;
   }
 
   async disableJob(name: string): Promise<boolean> {
     const job = this.scheduledJobs.get(name);
     if (!job) {
-      logger.warn('Attempted to disable non-existent job', { name });
+      logger.warn({ name }, 'Attempted to disable non-existent job');
       return false;
     }
 
@@ -438,11 +438,11 @@ class JobScheduler {
 
     const cronJob = this.cronJobs.get(name);
     if (cronJob) {
-      cronJob.destroy();
+      cronJob.stop();
       this.cronJobs.delete(name);
     }
 
-    logger.info('Scheduled job disabled', { name });
+    logger.info({ name }, 'Scheduled job disabled');
     return true;
   }
 
@@ -451,7 +451,7 @@ class JobScheduler {
     
     const removed = this.scheduledJobs.delete(name);
     if (removed) {
-      logger.info('Scheduled job removed', { name });
+      logger.info({ name }, 'Scheduled job removed');
     }
 
     return removed;
@@ -479,7 +479,7 @@ class JobScheduler {
       await this.enableJob(name);
     }
 
-    logger.info('Job schedule updated', { name, newSchedule, nextRun: job.nextRun });
+    logger.info({ name, newSchedule, nextRun: job.nextRun }, 'Job schedule updated');
     return true;
   }
 
@@ -490,7 +490,7 @@ class JobScheduler {
     }
 
     job.data = newData;
-    logger.info('Job data updated', { name });
+    logger.info({ name }, 'Job data updated');
     return true;
   }
 
@@ -595,11 +595,11 @@ class JobScheduler {
       return;
     }
 
-    logger.info('Starting job scheduler', { 
+    logger.info({ 
       jobCount: this.scheduledJobs.size,
       enabledJobs: this.getEnabledJobs().length,
       timezone: this.config.timezone
-    });
+    }, 'Starting job scheduler');
 
     // Start automatic mode detection
     this.startAutomaticModeDetection();
@@ -611,10 +611,10 @@ class JobScheduler {
     logger.info('Stopping job scheduler');
 
     // Stop all cron jobs
-    for (const [name, cronJob] of this.cronJobs) {
-      cronJob.destroy();
-      logger.debug('Cron job stopped', { name });
-    }
+    this.cronJobs.forEach((cronJob, name) => {
+      cronJob.stop();
+      logger.debug({ name }, 'Cron job stopped');
+    });
 
     this.cronJobs.clear();
     logger.info('Job scheduler stopped');

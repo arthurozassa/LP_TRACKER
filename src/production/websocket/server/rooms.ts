@@ -147,7 +147,7 @@ export class RoomManager {
     }
 
     // Remove all members from the room
-    for (const connectionId of room.members) {
+    for (const connectionId of Array.from(room.members)) {
       this.removeMemberFromRoom(roomId, connectionId, reason);
     }
 
@@ -232,7 +232,7 @@ export class RoomManager {
     if (!memberRooms) return;
 
     // Leave each room
-    for (const roomId of memberRooms) {
+    for (const roomId of Array.from(memberRooms)) {
       this.removeMemberFromRoom(roomId, connectionId, reason);
     }
 
@@ -297,7 +297,7 @@ export class RoomManager {
     let removed = false;
 
     // Find and remove subscription from all rooms
-    for (const room of this.rooms.values()) {
+    for (const room of Array.from(this.rooms.values())) {
       const subscription = room.subscriptions.get(subscriptionId);
       if (subscription && subscription.connectionId === connectionId) {
         room.subscriptions.delete(subscriptionId);
@@ -338,7 +338,7 @@ export class RoomManager {
     room.lastActivity = new Date();
 
     // Update subscription stats
-    for (const subscription of room.subscriptions.values()) {
+    for (const subscription of Array.from(room.subscriptions.values())) {
       subscription.messagesSent++;
       subscription.lastActivity = new Date();
     }
@@ -358,7 +358,7 @@ export class RoomManager {
   public broadcastToRoomType(roomType: RoomType, message: WebSocketMessage): number {
     let totalSent = 0;
     
-    for (const room of this.rooms.values()) {
+    for (const room of Array.from(this.rooms.values())) {
       if (room.type === roomType && room.isActive) {
         totalSent += this.broadcastToRoom(room.id, message);
       }
@@ -452,7 +452,7 @@ export class RoomManager {
     }
 
     // Count rooms by type
-    for (const room of this.rooms.values()) {
+    for (const room of Array.from(this.rooms.values())) {
       if (room.isActive) {
         stats.roomsByType[room.type]++;
       }
@@ -478,7 +478,7 @@ export class RoomManager {
     }
 
     // Clean up all rooms
-    for (const roomId of this.rooms.keys()) {
+    for (const roomId of Array.from(this.rooms.keys())) {
       this.deleteRoom(roomId, 'server_shutdown');
     }
 
@@ -545,7 +545,7 @@ export class RoomManager {
   private findSocketByConnectionId(connectionId: string): any {
     // This is a simplified version - in a real implementation,
     // you'd maintain a mapping of connection IDs to sockets
-    for (const [_, socket] of this.io.sockets.sockets) {
+    for (const [_, socket] of Array.from(this.io.sockets.sockets)) {
       if ((socket as any).connectionId === connectionId) {
         return socket;
       }
@@ -607,7 +607,7 @@ export class RoomManager {
     const now = Date.now();
     const roomsToCleanup: string[] = [];
 
-    for (const [roomId, room] of this.rooms.entries()) {
+    for (const [roomId, room] of Array.from(this.rooms.entries())) {
       if (
         room.config.autoCleanup &&
         room.members.size === 0 &&

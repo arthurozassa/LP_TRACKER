@@ -523,7 +523,7 @@ export class ServiceRegistry {
   public async healthCheck(): Promise<Record<string, any>> {
     const results: Record<string, any> = {};
     
-    for (const [name, service] of this.services) {
+    for (const [name, service] of Array.from(this.services.entries())) {
       try {
         results[name] = await service.healthCheck();
       } catch (error) {
@@ -540,7 +540,7 @@ export class ServiceRegistry {
   public getMetrics(): Record<string, ServiceMetrics> {
     const metrics: Record<string, ServiceMetrics> = {};
     
-    for (const [name, service] of this.services) {
+    for (const [name, service] of Array.from(this.services.entries())) {
       metrics[name] = service.getMetrics();
     }
 

@@ -272,8 +272,10 @@ export class QueueWebSocketIntegration {
       await this.broadcastJobCompleted(job, queueName, result);
     });
 
-    worker.on('failed', async (job: Job, error: Error) => {
-      await this.broadcastJobFailed(job, queueName, error.message);
+    worker.on('failed', async (job: Job | undefined, error: Error) => {
+      if (job) {
+        await this.broadcastJobFailed(job, queueName, error.message);
+      }
     });
   }
 
@@ -338,7 +340,7 @@ export class QueueWebSocketIntegration {
     const message = createMessage<JobCompletedMessage>('job_completed', {
       jobId: job.id!,
       result,
-      duration,
+      duration: duration || 0,
       completedAt: job.finishedOn ? new Date(job.finishedOn) : new Date(),
     }, {
       userId: websocketConfig?.userId,
@@ -486,7 +488,7 @@ export class QueueWebSocketIntegration {
     try {
       const allMetrics: Record<string, QueueMetrics> = {};
 
-      for (const [queueName, queue] of this.queues.entries()) {
+      for (const [queueName, queue] of Array.from(this.queues.entries())) {
         const waiting = await queue.getWaiting();
         const active = await queue.getActive();
         const completed = await queue.getCompleted();
@@ -505,10 +507,10 @@ export class QueueWebSocketIntegration {
       }
 
       // Broadcast queue metrics
-      const metricsMessage = createMessage('queue_metrics', {
+      const metricsMessage = createMessage('system_info' as any, {
         queues: allMetrics,
         timestamp: new Date(),
-      });
+      } as any);
 
       this.webSocketServer.broadcast(metricsMessage, 'analytics:global');
 
@@ -548,7 +550,7 @@ export class QueueWebSocketIntegration {
   public async getQueueStatus(): Promise<Record<string, QueueMetrics>> {
     const status: Record<string, QueueMetrics> = {};
 
-    for (const [queueName, queue] of this.queues.entries()) {
+    for (const [queueName, queue] of Array.from(this.queues.entries())) {
       const waiting = await queue.getWaiting();
       const active = await queue.getActive();
       const completed = await queue.getCompleted();
@@ -577,7 +579,7 @@ export class QueueWebSocketIntegration {
     }
 
     // Close queue events
-    for (const [queueName, queueEvents] of this.queueEvents.entries()) {
+    for (const [queueName, queueEvents] of Array.from(this.queueEvents.entries())) {
       queueEvents.close();
     }
 

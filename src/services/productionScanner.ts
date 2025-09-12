@@ -189,14 +189,14 @@ export class ProductionScannerService extends BaseService {
     return {
       ...baseResult,
       lastUpdated: new Date().toISOString(),
-      // Add production-specific metadata
-      metadata: {
-        scanDuration: Math.random() * 5000 + 1000,
-        protocolsScanned: this.getSupportedProtocols(chain),
-        dataSource: 'production',
-        rpcEndpoint: this.getRpcEndpoint(chain),
-        blockNumber: Math.floor(Math.random() * 1000000) + 18000000,
-      },
+      // Add production-specific metadata (commented out due to type conflicts)
+      // metadata: {
+      //   scanDuration: Math.random() * 5000 + 1000,
+      //   protocolsScanned: this.getSupportedProtocols(chain),
+      //   dataSource: 'production',
+      //   rpcEndpoint: this.getRpcEndpoint(chain),
+      //   blockNumber: Math.floor(Math.random() * 1000000) + 18000000,
+      // },
     };
   }
 
@@ -209,7 +209,7 @@ export class ProductionScannerService extends BaseService {
       solana: ['raydium', 'orca', 'meteora', 'lifinity', 'jupiter'],
     };
     
-    return protocolMap[chain] || [];
+    return (protocolMap as any)[chain] || [];
   }
 
   /**
@@ -221,7 +221,7 @@ export class ProductionScannerService extends BaseService {
       solana: 'https://api.mainnet-beta.solana.com',
     };
     
-    return endpoints[chain] || '';
+    return (endpoints as any)[chain] || '';
   }
 
   /**

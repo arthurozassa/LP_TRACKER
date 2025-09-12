@@ -236,7 +236,7 @@ export class WebSocketServer implements EventEmitter {
   public sendToUser(userId: string, message: WebSocketMessage): number {
     let sentCount = 0;
     
-    for (const connection of this.connections.values()) {
+    for (const connection of Array.from(this.connections.values())) {
       if (connection.userId === userId) {
         if (this.sendToConnection(connection.id, message)) {
           sentCount++;
@@ -250,7 +250,7 @@ export class WebSocketServer implements EventEmitter {
   public sendToWallet(walletAddress: string, message: WebSocketMessage): number {
     let sentCount = 0;
     
-    for (const connection of this.connections.values()) {
+    for (const connection of Array.from(this.connections.values())) {
       if (connection.walletAddress === walletAddress) {
         if (this.sendToConnection(connection.id, message)) {
           sentCount++;
@@ -431,7 +431,7 @@ export class WebSocketServer implements EventEmitter {
     const duration = Date.now() - connection.connectedAt.getTime();
 
     // Clean up subscriptions
-    for (const subscriptionId of connection.subscriptions) {
+    for (const subscriptionId of Array.from(connection.subscriptions)) {
       this.roomManager.removeSubscription(connection.id, subscriptionId);
     }
 
@@ -518,7 +518,7 @@ export class WebSocketServer implements EventEmitter {
     };
 
     // Send to all connected clients
-    for (const connection of this.connections.values()) {
+    for (const connection of Array.from(this.connections.values())) {
       try {
         connection.socket.emit('message', heartbeatMessage);
       } catch (error) {

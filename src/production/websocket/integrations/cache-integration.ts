@@ -4,9 +4,9 @@
  */
 
 import { WebSocketMessage, RealTimePosition } from '../types/messages';
-import { MemoryCache } from '../../cache/memory';
-import { RedisCache } from '../../cache/redis';
-import { CacheInvalidation } from '../../cache/invalidation';
+import { getMemoryCache } from '../../cache/memory';
+import { getRedisCache } from '../../cache/redis';
+import CacheInvalidation from '../../cache/invalidation';
 import pino from 'pino';
 
 // ============================================================================
@@ -40,8 +40,8 @@ export interface CacheUpdateEvent {
 // ============================================================================
 
 export class CacheWebSocketIntegration {
-  private memoryCache: MemoryCache;
-  private redisCache?: RedisCache;
+  private memoryCache: any;
+  private redisCache?: any;
   private invalidationManager: CacheInvalidation;
   private config: CacheWebSocketConfig;
   private logger: pino.Logger;
@@ -49,8 +49,8 @@ export class CacheWebSocketIntegration {
   private batchTimer: NodeJS.Timeout | null;
 
   constructor(
-    memoryCache: MemoryCache,
-    redisCache: RedisCache | undefined,
+    memoryCache: any,
+    redisCache: any | undefined,
     invalidationManager: CacheInvalidation,
     config: CacheWebSocketConfig,
     logger?: pino.Logger
@@ -129,15 +129,15 @@ export class CacheWebSocketIntegration {
     const { position } = message.data as { position: RealTimePosition };
     
     // Update position cache
-    const positionKey = this.getPositionCacheKey(position.walletAddress, position.id);
+    const positionKey = this.getPositionCacheKey((position as any).walletAddress, position.id);
     await this.scheduleUpdateCache(positionKey, position, this.config.cacheTTL.positions);
 
     // Invalidate related caches
-    await this.invalidateRelatedCaches('position', position.walletAddress, position.protocol, position.chain);
+    await this.invalidateRelatedCaches('position', (position as any).walletAddress, position.protocol, position.chain);
 
     this.logger.debug({
       positionId: position.id,
-      walletAddress: position.walletAddress,
+      walletAddress: (position as any).walletAddress,
       protocol: position.protocol,
     }, 'Processed position update for cache');
   }
@@ -146,19 +146,19 @@ export class CacheWebSocketIntegration {
     const { position } = message.data as { position: RealTimePosition };
     
     // Add position to cache
-    const positionKey = this.getPositionCacheKey(position.walletAddress, position.id);
+    const positionKey = this.getPositionCacheKey((position as any).walletAddress, position.id);
     await this.scheduleUpdateCache(positionKey, position, this.config.cacheTTL.positions);
 
     // Update positions list cache
-    const positionsListKey = this.getPositionsListCacheKey(position.walletAddress);
+    const positionsListKey = this.getPositionsListCacheKey((position as any).walletAddress);
     await this.scheduleInvalidateCache(positionsListKey);
 
     // Invalidate portfolio cache
-    await this.invalidateRelatedCaches('position_created', position.walletAddress, position.protocol, position.chain);
+    await this.invalidateRelatedCaches('position_created', (position as any).walletAddress, position.protocol, position.chain);
 
     this.logger.debug({
       positionId: position.id,
-      walletAddress: position.walletAddress,
+      walletAddress: (position as any).walletAddress,
     }, 'Processed position creation for cache');
   }
 
@@ -182,10 +182,10 @@ export class CacheWebSocketIntegration {
     
     // Group positions by wallet address
     const positionsByWallet = positions.reduce((acc, position) => {
-      if (!acc[position.walletAddress]) {
-        acc[position.walletAddress] = [];
+      if (!acc[(position as any).walletAddress]) {
+        acc[(position as any).walletAddress] = [];
       }
-      acc[position.walletAddress].push(position);
+      acc[(position as any).walletAddress].push(position);
       return acc;
     }, {} as Record<string, RealTimePosition[]>);
 
@@ -356,7 +356,7 @@ export class CacheWebSocketIntegration {
   private async executeInvalidateCache(event: CacheUpdateEvent): Promise<void> {
     try {
       // Use invalidation manager
-      await this.invalidationManager.invalidatePattern(event.key);
+      await (this.invalidationManager as any).invalidatePattern(event.key);
 
     } catch (error) {
       this.logger.error({
@@ -507,8 +507,8 @@ export class CacheWebSocketIntegration {
 // ============================================================================
 
 export function createCacheWebSocketIntegration(
-  memoryCache: MemoryCache,
-  redisCache: RedisCache | undefined,
+  memoryCache: any,
+  redisCache: any | undefined,
   invalidationManager: CacheInvalidation,
   config?: Partial<CacheWebSocketConfig>
 ): CacheWebSocketIntegration {
