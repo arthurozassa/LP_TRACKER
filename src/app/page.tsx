@@ -431,12 +431,14 @@ export default function Home() {
         
         const apiResponse = await response.json();
         console.log('Production scan response:', apiResponse);
+        console.log('Production scan data:', JSON.stringify(apiResponse.data, null, 2));
         
         if (!apiResponse.success) {
           throw new Error(apiResponse.error || 'Failed to scan wallet');
         }
         
         scanResults = apiResponse.data;
+        console.log('Final scan results:', JSON.stringify(scanResults, null, 2));
       }
       
       setScanResults(scanResults);

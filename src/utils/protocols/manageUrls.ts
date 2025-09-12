@@ -34,13 +34,30 @@ export const PROTOCOL_MANAGE_CONFIGS: Record<string, ProtocolManageConfig> = {
     urlTemplate: '#/pools/v2/{poolAddress}',
     requiresTokenAddresses: true,
   },
+  'Uniswap V2': {
+    baseUrl: 'https://app.uniswap.org',
+    supportedChains: ['ethereum'],
+    urlTemplate: '#/pools/v2/{poolAddress}',
+    requiresTokenAddresses: true,
+  },
   'uniswap-v3': {
     baseUrl: 'https://app.uniswap.org',
     supportedChains: ['ethereum'],
     urlTemplate: '#/pool/{positionId}',
     requiresPositionId: true,
   },
+  'Uniswap V3': {
+    baseUrl: 'https://app.uniswap.org',
+    supportedChains: ['ethereum'],
+    urlTemplate: '#/pool/{positionId}',
+    requiresPositionId: true,
+  },
   'sushiswap': {
+    baseUrl: 'https://app.sushi.com',
+    supportedChains: ['ethereum', 'arbitrum', 'polygon'],
+    urlTemplate: '/pools/{poolAddress}',
+  },
+  'SushiSwap': {
     baseUrl: 'https://app.sushi.com',
     supportedChains: ['ethereum', 'arbitrum', 'polygon'],
     urlTemplate: '/pools/{poolAddress}',
