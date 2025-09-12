@@ -302,7 +302,7 @@ export class EthereumProvider extends AbstractBaseProvider {
             method: requests[index].method
           });
         } catch (error) {
-          return { error: error.message };
+          return { error: error instanceof Error ? error.message : 'Unknown error' };
         }
       });
 
