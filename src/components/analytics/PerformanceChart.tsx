@@ -49,6 +49,36 @@ const TIME_RANGES: Record<TimeRange, { label: string; days: number }> = {
   'all': { label: 'All', days: 0 }
 };
 
+// Helper function to calculate proper Sharpe ratio
+const calculateSharpeRatio = (chartData: any[], totalReturn: number): number => {
+  if (!chartData || chartData.length < 2) return 0;
+  
+  // Calculate daily returns
+  const dailyReturns = [];
+  for (let i = 1; i < chartData.length; i++) {
+    const prevValue = chartData[i - 1].value;
+    const currentValue = chartData[i].value;
+    if (prevValue > 0) {
+      const dailyReturn = (currentValue - prevValue) / prevValue;
+      dailyReturns.push(dailyReturn);
+    }
+  }
+  
+  if (dailyReturns.length < 2) return 0;
+  
+  // Calculate mean and standard deviation of daily returns
+  const meanReturn = dailyReturns.reduce((sum, ret) => sum + ret, 0) / dailyReturns.length;
+  const variance = dailyReturns.reduce((sum, ret) => sum + Math.pow(ret - meanReturn, 2), 0) / dailyReturns.length;
+  const standardDeviation = Math.sqrt(variance);
+  
+  // Sharpe ratio = (mean return - risk-free rate) / standard deviation
+  // Using 0.02% daily risk-free rate (roughly 7% annually)
+  const riskFreeRate = 0.0002;
+  
+  if (standardDeviation === 0) return 0;
+  return (meanReturn - riskFreeRate) / standardDeviation;
+};
+
 const METRIC_CONFIG = {
   value: { 
     label: 'Portfolio Value', 
@@ -173,8 +203,8 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
       maxDrawdown: maxDrawdown,
       currentValue: latest.value,
       totalFees: latest.fees,
-      avgAPR: chartData.reduce((sum, d) => sum + d.apr, 0) / chartData.length,
-      sharpeRatio: totalReturn / Math.sqrt(maxDrawdown || 1), // Simplified Sharpe ratio
+      avgAPR: chartData.length > 0 ? chartData.reduce((sum, d) => sum + d.apr, 0) / chartData.length : 0,
+      sharpeRatio: calculateSharpeRatio(chartData, totalReturn), // Proper Sharpe ratio calculation
     };
   }, [chartData]);
 

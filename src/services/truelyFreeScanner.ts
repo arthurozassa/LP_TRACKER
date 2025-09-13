@@ -387,48 +387,18 @@ export class TrulyFreeScannerService extends BaseService {
         console.log(`📊 Solana account ${address} exists: ${accountExists}`);
         
         if (accountExists) {
-          // If account exists and has SOL, assume some DeFi activity
+          console.log(`⚠️ Solana account ${address} exists but real LP detection not yet implemented`);
+          console.log(`📍 Returning empty results - no fake data generation`);
+          // Return empty results - no fake data generation
+          // TODO: Implement real Solana LP position detection using program account queries
           return {
             chain: 'solana',
             walletAddress: address,
-            totalValue: 1000, // Placeholder
-            totalPositions: 1,
-            totalFeesEarned: 50,
-            avgApr: 12.5,
-            protocols: {
-              'Meteora DLMM': {
-                protocol: {
-                  id: 'meteora-dlmm',
-                  name: 'Meteora DLMM',
-                  chain: 'solana',
-                  logoUri: '',
-                  website: 'https://meteora.ag',
-                  supported: true
-                },
-                positions: [{
-                  id: `sol-detected-${address}`,
-                  protocol: 'meteora-dlmm',
-                  chain: 'solana',
-                  pool: 'SOL/USDC',
-                  liquidity: 1000,
-                  value: 1000,
-                  feesEarned: 50,
-                  apr: 12.5,
-                  inRange: true,
-                  tokens: {
-                    token0: { symbol: 'SOL', amount: 5 },
-                    token1: { symbol: 'USDC', amount: 500 }
-                  },
-                  createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-                  updatedAt: new Date().toISOString()
-                }],
-                totalValue: 1000,
-                totalPositions: 1,
-                totalFeesEarned: 50,
-                avgApr: 12.5,
-                isLoading: false
-              }
-            },
+            totalValue: 0,
+            totalPositions: 0,
+            totalFeesEarned: 0,
+            avgApr: 0,
+            protocols: {},
             lastUpdated: new Date().toISOString(),
           };
         }

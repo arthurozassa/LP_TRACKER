@@ -212,7 +212,7 @@ export default function Home() {
     return {
       totalValue: results.totalValue,
       totalFeesEarned: results.totalFeesEarned || positions.reduce((sum, p) => sum + (p.feesEarned || 0), 0),
-      avgApr: results.avgApr || positions.reduce((sum, p) => sum + (p.apr || 0), 0) / positions.length || 0,
+      avgApr: results.avgApr || (positions.length > 0 ? positions.reduce((sum, p) => sum + (p.apr || 0), 0) / positions.length : 0),
       activeProtocols,
       inRangePositions,
       outOfRangePositions: positions.length - inRangePositions,
@@ -262,7 +262,7 @@ export default function Home() {
     
     for (let i = 0; i < days; i++) {
       const date = new Date();
-      date.setDate(date.getDate() - (days - i));
+      date.setDate(date.getDate() - (days - i - 1));
       
       const volatility = 0.03; // 3% daily volatility
       const trend = i * 0.001; // Small upward trend
@@ -288,7 +288,7 @@ export default function Home() {
     
     for (let i = 0; i < days; i++) {
       const date = new Date();
-      date.setDate(date.getDate() - (days - i));
+      date.setDate(date.getDate() - (days - i - 1));
       
       // HODL follows market more closely
       const marketChange = Math.sin(i * 0.15) * 0.02 + i * 0.0005;
