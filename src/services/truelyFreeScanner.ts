@@ -382,9 +382,18 @@ export class TrulyFreeScannerService extends BaseService {
             avgApr: 12.5,
             protocols: {
               'Meteora DLMM': {
+                protocol: {
+                  id: 'meteora-dlmm',
+                  name: 'Meteora DLMM',
+                  chain: 'solana',
+                  logoUri: '',
+                  website: 'https://meteora.ag',
+                  supported: true
+                },
                 positions: [{
                   id: `sol-detected-${address}`,
-                  protocol: 'Meteora DLMM',
+                  protocol: 'meteora-dlmm',
+                  chain: 'solana',
                   pool: 'SOL/USDC',
                   liquidity: 1000,
                   value: 1000,
@@ -394,10 +403,15 @@ export class TrulyFreeScannerService extends BaseService {
                   tokens: {
                     token0: { symbol: 'SOL', amount: 5 },
                     token1: { symbol: 'USDC', amount: 500 }
-                  }
+                  },
+                  createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                  updatedAt: new Date().toISOString()
                 }],
                 totalValue: 1000,
-                totalFeesEarned: 50
+                totalPositions: 1,
+                totalFeesEarned: 50,
+                avgApr: 12.5,
+                isLoading: false
               }
             },
             lastUpdated: new Date().toISOString(),
