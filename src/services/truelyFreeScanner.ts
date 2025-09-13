@@ -1,11 +1,13 @@
 import type { ChainType, ScanResults } from '../types';
 import { ServiceResponse, BaseService } from '../production/services/base';
+import { RealLpDetector } from './realLpDetector';
 
 /**
  * Truly Free Scanner - Uses completely free APIs and direct blockchain calls
  * No API keys required at all!
  */
 export class TrulyFreeScannerService extends BaseService {
+  private realLpDetector: RealLpDetector;
   constructor() {
     super({
       name: 'TrulyFreeScanner',
@@ -16,6 +18,7 @@ export class TrulyFreeScannerService extends BaseService {
       cacheEnabled: true,
       loggingEnabled: true,
     });
+    this.realLpDetector = new RealLpDetector();
   }
 
   async scanWallet(
@@ -121,7 +124,7 @@ export class TrulyFreeScannerService extends BaseService {
   }
 
   /**
-   * Use free public Ethereum RPC to get token balances
+   * Use free public Ethereum RPC to detect REAL LP positions
    */
   private async scanEthereumRPC(address: string): Promise<any> {
     // Use public RPC endpoints (no API key needed)
@@ -138,7 +141,19 @@ export class TrulyFreeScannerService extends BaseService {
       try {
         console.log(`🔄 Trying free RPC: ${rpcUrl}`);
         
-        // Get ETH balance
+        // Try to get REAL Uniswap V3 positions first
+        const realPositions = await this.realLpDetector.getUniswapV3Positions(address, rpcUrl);
+        if (realPositions.length > 0) {
+          positions.push(...realPositions);
+          console.log(`✅ Found ${realPositions.length} REAL Uniswap V3 positions!`);
+          break; // Found real positions, no need to continue
+        }
+        
+        // Also check for other LP positions
+        const otherPositions = await this.realLpDetector.getOtherLpPositions(address, rpcUrl);
+        positions.push(...otherPositions);
+        
+        // Get ETH balance for fallback
         const ethBalanceResponse = await fetch(rpcUrl, {
           method: 'POST',
           headers: {
