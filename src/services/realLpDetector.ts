@@ -162,12 +162,14 @@ export class RealLpDetector {
         return null;
       }
       
+      console.log(`📍 Position found: liquidity=${liquidity}, token0=${token0}, token1=${token1}, fee=${fee}`);
+      
       // Convert liquidity to a reasonable scale (divide by 1e18 was too much for uint128)
       // For display purposes, we'll use a more conservative conversion
       const liquidityForDisplay = liquidity / 1e12; // More reasonable conversion
       
-      // Estimate value more conservatively
-      const estimatedValue = Math.min(liquidityForDisplay * 0.001, 50000); // Cap at $50k to avoid astronomical values
+      // Estimate value more realistically - many whale positions are worth millions
+      const estimatedValue = Math.min(liquidityForDisplay * 0.01, 10000000); // Cap at $10M for reasonable whale positions
       
       return {
         liquidity: liquidityForDisplay,

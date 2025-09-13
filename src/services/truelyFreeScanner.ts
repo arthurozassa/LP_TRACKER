@@ -143,9 +143,11 @@ export class TrulyFreeScannerService extends BaseService {
         
         // Try to get REAL Uniswap V3 positions first
         const realPositions = await this.realLpDetector.getUniswapV3Positions(address, rpcUrl);
+        console.log(`🔍 realLpDetector returned ${realPositions.length} positions`);
         if (realPositions.length > 0) {
           positions.push(...realPositions);
           console.log(`✅ Found ${realPositions.length} REAL Uniswap V3 positions!`);
+          console.log(`🔍 positions array now has ${positions.length} items`);
           break; // Found real positions, no need to continue
         }
         
@@ -218,6 +220,8 @@ export class TrulyFreeScannerService extends BaseService {
     const totalValue = positions.reduce((sum, pos) => sum + pos.value, 0);
     const totalFeesEarned = positions.reduce((sum, pos) => sum + pos.feesEarned, 0);
 
+    console.log(`🔍 scanEthereumRPC returning: ${positions.length} positions, $${totalValue} total value`);
+    
     return {
       positions,
       protocols: positions.length > 0 ? {
