@@ -386,6 +386,7 @@ export class TrulyFreeScannerService extends BaseService {
                   id: `sol-detected-${address}`,
                   protocol: 'Meteora DLMM',
                   pool: 'SOL/USDC',
+                  liquidity: 1000,
                   value: 1000,
                   feesEarned: 50,
                   apr: 12.5,
