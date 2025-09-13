@@ -132,7 +132,11 @@ export class RealLpDetector {
       });
 
       const data = await response.json();
-      if (!data.result || data.result === '0x') return null;
+      console.log(`🔍 Raw blockchain response length: ${data.result ? data.result.length : 'null'}`);
+      if (!data.result || data.result === '0x') {
+        console.log('❌ No position data returned from blockchain');
+        return null;
+      }
 
       // Proper parsing of Uniswap V3 position struct
       // The positions() function returns: (uint96 nonce, address operator, address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 liquidity, uint256 feeGrowthInside0LastX128, uint256 feeGrowthInside1LastX128, uint128 tokensOwed0, uint128 tokensOwed1)
@@ -144,29 +148,40 @@ export class RealLpDetector {
       }
       
       // Parse struct fields correctly (each field is 32 bytes / 64 hex chars)
+      // Uniswap V3 Position struct: (uint96 nonce, address operator, address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 liquidity, ...)
+      
       const nonce = parseInt(result.slice(2, 2 + 64), 16);
       const operator = '0x' + result.slice(2 + 64, 2 + 64 + 40).slice(-40);
       const token0 = '0x' + result.slice(2 + 64 * 2, 2 + 64 * 2 + 40).slice(-40);
       const token1 = '0x' + result.slice(2 + 64 * 3, 2 + 64 * 3 + 40).slice(-40);
       const fee = parseInt(result.slice(2 + 64 * 4, 2 + 64 * 5), 16);
-      const tickLower = parseInt(result.slice(2 + 64 * 5, 2 + 64 * 6), 16);
-      const tickUpper = parseInt(result.slice(2 + 64 * 6, 2 + 64 * 7), 16);
       
-      // Liquidity is uint128, so we need to handle it properly
+      // Handle signed integers for ticks (int24)
+      let tickLower = parseInt(result.slice(2 + 64 * 5, 2 + 64 * 6), 16);
+      let tickUpper = parseInt(result.slice(2 + 64 * 6, 2 + 64 * 7), 16);
+      
+      // Convert to signed if needed (int24 range: -8388608 to 8388607)
+      if (tickLower > 0x7FFFFF) tickLower -= 0x1000000;
+      if (tickUpper > 0x7FFFFF) tickUpper -= 0x1000000;
+      
+      // Liquidity is uint128 - parse properly
       const liquidityHex = result.slice(2 + 64 * 7, 2 + 64 * 8);
-      const liquidity = parseInt(liquidityHex, 16);
+      const liquidity = BigInt('0x' + liquidityHex);
+      
+      console.log(`🔍 Raw position data: liquidity hex=${liquidityHex}, parsed=${liquidity.toString()}`);
+      console.log(`🔍 Position details: token0=${token0}, token1=${token1}, fee=${fee}, tick range=${tickLower}-${tickUpper}`);
       
       // Check if position has liquidity (active position)
-      if (liquidity === 0) {
-        console.log('Position has zero liquidity, likely closed');
-        return null;
+      if (liquidity === 0n) {
+        console.log('❌ Position has zero liquidity - this position has been closed/withdrawn');
+        return null; // Properly filter out closed positions
       }
       
-      console.log(`📍 Position found: liquidity=${liquidity}, token0=${token0}, token1=${token1}, fee=${fee}`);
+      console.log(`✅ Active position found: liquidity=${liquidity.toString()}, token0=${token0}, token1=${token1}, fee=${fee}`);
       
-      // Convert liquidity to a reasonable scale (divide by 1e18 was too much for uint128)
-      // For display purposes, we'll use a more conservative conversion
-      const liquidityForDisplay = liquidity / 1e12; // More reasonable conversion
+      // Convert liquidity to a reasonable scale for display
+      // BigInt needs special handling for division
+      const liquidityForDisplay = Number(liquidity) / 1e12; // More reasonable conversion
       
       // Estimate value more realistically - many whale positions are worth millions
       const estimatedValue = Math.min(liquidityForDisplay * 0.01, 10000000); // Cap at $10M for reasonable whale positions
