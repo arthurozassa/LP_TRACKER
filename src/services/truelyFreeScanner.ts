@@ -480,10 +480,20 @@ export class TrulyFreeScannerService extends BaseService {
               avgApr: 18.0,
               protocols: {
                 [`${chain} DEX`]: {
+                  protocol: {
+                    id: chain === 'arbitrum' ? 'camelot' : chain === 'polygon' ? 'quickswap' : 'baseswap',
+                    name: chain === 'arbitrum' ? 'Camelot' : chain === 'polygon' ? 'QuickSwap' : 'BaseSwap',
+                    chain: chain as any,
+                    logoUri: '',
+                    website: chain === 'arbitrum' ? 'https://app.camelot.exchange' : chain === 'polygon' ? 'https://quickswap.exchange' : 'https://baseswap.fi',
+                    supported: true
+                  },
                   positions: [{
                     id: `${chain}-detected-${address}`,
-                    protocol: chain === 'arbitrum' ? 'Camelot' : chain === 'polygon' ? 'QuickSwap' : 'BaseSwap',
+                    protocol: chain === 'arbitrum' ? 'camelot' : chain === 'polygon' ? 'quickswap' : 'baseswap',
+                    chain: chain as any,
                     pool: 'ETH/USDC',
+                    liquidity: balance * 3000 * 0.3,
                     value: balance * 3000 * 0.3,
                     feesEarned: balance * 3000 * 0.3 * 0.05,
                     apr: 18.0,
@@ -491,10 +501,15 @@ export class TrulyFreeScannerService extends BaseService {
                     tokens: {
                       token0: { symbol: 'ETH', amount: balance * 0.15 },
                       token1: { symbol: 'USDC', amount: balance * 3000 * 0.15 }
-                    }
+                    },
+                    createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+                    updatedAt: new Date().toISOString()
                   }],
                   totalValue: balance * 3000 * 0.3,
-                  totalFeesEarned: balance * 3000 * 0.3 * 0.05
+                  totalPositions: 1,
+                  totalFeesEarned: balance * 3000 * 0.3 * 0.05,
+                  avgApr: 18.0,
+                  isLoading: false
                 }
               },
               lastUpdated: new Date().toISOString(),
