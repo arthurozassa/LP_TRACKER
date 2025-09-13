@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductionScanner } from '@/services/productionScanner';
 import { getRealProductionScanner } from '@/services/realProductionScanner';
+import { getFreeApiScanner } from '@/services/freeApiScanner';
+import { getTrulyFreeScanner } from '@/services/truelyFreeScanner';
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,16 +30,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Determine which scanner to use based on API keys
+    // Determine which scanner to use based on API keys and preferences
     const hasRealApiKeys = process.env.THE_GRAPH_API_KEY && process.env.THE_GRAPH_API_KEY !== 'your_the_graph_api_key_here';
+    const useFreeApis = process.env.USE_FREE_APIS === 'true' || !hasRealApiKeys;
+    const useTrulyFree = process.env.USE_TRULY_FREE === 'true' || (!hasRealApiKeys && useFreeApis);
     
     let scanner;
-    if (hasRealApiKeys) {
+    if (hasRealApiKeys && !useFreeApis) {
       scanner = getRealProductionScanner();
-      console.log('🔍 Using REAL production scanner with live APIs...');
+      console.log('🔍 Using REAL production scanner with PAID APIs...');
+    } else if (useTrulyFree) {
+      scanner = getTrulyFreeScanner();
+      console.log('🆓🆓 Using TRULY FREE scanner (no API keys needed)...');
+    } else if (useFreeApis) {
+      scanner = getFreeApiScanner();
+      console.log('🆓 Using FREE API scanner (requires free API keys)...');
     } else {
       scanner = getProductionScanner();
-      console.log('🎭 Using demo production scanner (no API keys configured)...');
+      console.log('🎭 Using demo production scanner (fallback)...');
     }
     
     const scanResponse = await scanner.scanWallet(address, chain as any, {
