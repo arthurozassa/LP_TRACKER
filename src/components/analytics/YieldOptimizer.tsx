@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Zap, 
   TrendingUp, 
@@ -69,20 +69,20 @@ const YieldOptimizer: React.FC<YieldOptimizerProps> = ({
   }, [positions]);
 
   // Fetch optimization data
-  const fetchOptimization = async () => {
+  const fetchOptimization = useCallback(async () => {
     if (!positions.length) return;
-    
+
     setIsLoading(true);
     try {
       const userProtocols = Array.from(new Set(positions.map(p => p.protocol.toLowerCase())));
       const chains = Array.from(new Set(positions.map(p => p.chain || 'ethereum')));
-      
+
       const optimizationData = await defiLlamaService.getYieldOptimization(
         userProtocols,
         1000000, // Min $1M TVL
         chains.map(chain => chain.charAt(0).toUpperCase() + chain.slice(1))
       );
-      
+
       setOptimization(optimizationData);
       setLastUpdated(new Date());
     } catch (error) {
@@ -93,12 +93,12 @@ const YieldOptimizer: React.FC<YieldOptimizerProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [positions]);
 
   // Auto-fetch on mount and when positions change
   useEffect(() => {
     fetchOptimization();
-  }, [positions, fetchOptimization]);
+  }, [fetchOptimization]);
 
   // Filter and sort opportunities
   const filteredOpportunities = useMemo(() => {
