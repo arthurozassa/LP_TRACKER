@@ -160,8 +160,22 @@ export function detectEnvironment(): EnvironmentDetection {
  * Get current app mode from environment
  */
 export function getCurrentMode(): AppMode {
-  const mode = process.env.NEXT_PUBLIC_APP_MODE as AppMode;
-  return mode === 'production' ? 'production' : 'demo';
+  const explicitMode = process.env.NEXT_PUBLIC_APP_MODE as AppMode;
+
+  // If explicitly set, use that
+  if (explicitMode === 'production' || explicitMode === 'demo') {
+    return explicitMode;
+  }
+
+  // Auto-detect production environment (Vercel, Netlify, etc.)
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL === '1') {
+    console.log('[LP Tracker] Auto-detected production environment - using production mode');
+    return 'production';
+  }
+
+  // Default to demo for development
+  console.log('[LP Tracker] Using demo mode (development/fallback)');
+  return 'demo';
 }
 
 /**

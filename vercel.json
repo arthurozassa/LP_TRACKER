@@ -1,0 +1,19 @@
+{
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_APP_MODE": "production",
+      "NODE_ENV": "production"
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_APP_MODE": "production",
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "regions": ["iad1"],
+  "framework": "nextjs"
+}
