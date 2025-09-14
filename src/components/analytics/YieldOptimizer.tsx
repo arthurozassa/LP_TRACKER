@@ -98,7 +98,7 @@ const YieldOptimizer: React.FC<YieldOptimizerProps> = ({
   // Auto-fetch on mount and when positions change
   useEffect(() => {
     fetchOptimization();
-  }, [positions]);
+  }, [positions, fetchOptimization]);
 
   // Filter and sort opportunities
   const filteredOpportunities = useMemo(() => {

@@ -2,25 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { FilterState } from '../components/filters/AdvancedFilters';
-
-interface Position {
-  id: string;
-  protocol: string;
-  chain: string;
-  pool: string;
-  liquidity: number;
-  value: number;
-  feesEarned: number;
-  apr: number;
-  inRange: boolean;
-  tokens: {
-    token0: { symbol: string; amount: number; address?: string };
-    token1: { symbol: string; amount: number; address?: string };
-  };
-  poolAddress: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Position } from '../types/index';
 
 const usePositionFilters = (positions: Position[]) => {
   const [filters, setFilters] = useState<FilterState>({
@@ -41,7 +23,7 @@ const usePositionFilters = (positions: Position[]) => {
   }, [positions]);
 
   const availableChains = useMemo(() => {
-    const chains = new Set(positions.map(p => p.chain));
+    const chains = new Set(positions.map(p => p.chain).filter(chain => chain !== undefined));
     return Array.from(chains).sort();
   }, [positions]);
 
@@ -80,7 +62,7 @@ const usePositionFilters = (positions: Position[]) => {
 
     // Filter by chains
     if (filters.chains.length > 0) {
-      filtered = filtered.filter(p => filters.chains.includes(p.chain));
+      filtered = filtered.filter(p => p.chain && filters.chains.includes(p.chain));
     }
 
     // Filter by status (in-range/out-of-range)
@@ -112,6 +94,7 @@ const usePositionFilters = (positions: Position[]) => {
       }
 
       filtered = filtered.filter(p => {
+        if (!p.updatedAt) return true;
         const updatedAt = new Date(p.updatedAt);
         return updatedAt >= cutoffTime;
       });

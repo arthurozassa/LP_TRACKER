@@ -188,7 +188,7 @@ const SmartAlerts: React.FC<SmartAlertsProps> = ({
     ];
     
     setAlerts(mergedAlerts);
-  }, [generateAlerts]);
+  }, [generateAlerts, alerts]);
 
   // Filter and sort alerts
   const filteredAndSortedAlerts = useMemo(() => {

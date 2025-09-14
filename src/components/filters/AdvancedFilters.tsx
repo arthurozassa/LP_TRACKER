@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Filter, X, ChevronDown, DollarSign, Target, Clock, Layers } from 'lucide-react';
+import { Filter, X, ChevronDown, DollarSign, Target, Clock, Layers, TrendingUp, Network } from 'lucide-react';
 
 export interface FilterState {
   minValue: string;
