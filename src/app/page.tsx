@@ -298,7 +298,7 @@ export default function Home() {
     }
     
     return history;
-  }, [scanResults?.totalValue, scanResults?.totalFeesEarned]);
+  }, []);
 
   const generateMockHodlHistory = useCallback(() => {
     const days = 30;
@@ -321,7 +321,7 @@ export default function Home() {
     }
     
     return history;
-  }, [scanResults?.totalValue]);
+  }, []);
 
   // Load advanced analytics data
   const loadAdvancedAnalytics = useCallback(async (results: ScanResults) => {
@@ -342,12 +342,46 @@ export default function Home() {
       
     } catch (error) {
       console.error('Error loading advanced analytics:', error);
-      // Generate mock data for development
-      setPortfolioHistory(generateMockPortfolioHistory());
-      setHodlHistory(generateMockHodlHistory());
+      // Generate mock data for development with current values
+      const baseValue = results?.totalValue || 100000;
+      const mockPortfolio = [];
+      const mockHodl = [];
+      const days = 30;
+
+      for (let i = 0; i < days; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - (days - i - 1));
+
+        // Portfolio mock data
+        const volatility = 0.03;
+        const trend = i * 0.001;
+        const randomChange = (Math.random() - 0.5) * 2 * volatility;
+        const portfolioValue = baseValue * (1 + trend + randomChange);
+
+        mockPortfolio.push({
+          timestamp: date.toISOString(),
+          value: portfolioValue,
+          fees: (results?.totalFeesEarned || 1000) * (i + 1) / days,
+          apr: 15.5 + (Math.random() - 0.5) * 10,
+          impermanentLoss: Math.random() * 5
+        });
+
+        // HODL mock data
+        const marketChange = Math.sin(i * 0.15) * 0.02 + i * 0.0005;
+        const hodlValue = baseValue * (1 + marketChange);
+
+        mockHodl.push({
+          timestamp: date.toISOString(),
+          value: hodlValue,
+          hodlValue: hodlValue
+        });
+      }
+
+      setPortfolioHistory(mockPortfolio);
+      setHodlHistory(mockHodl);
       setMarketBenchmarks([]);
     }
-  }, [generateMockPortfolioHistory, generateMockHodlHistory]);
+  }, []);
 
   const handleScan = useCallback(async (address: string, chain: ChainType) => {
     setIsLoading(true);
