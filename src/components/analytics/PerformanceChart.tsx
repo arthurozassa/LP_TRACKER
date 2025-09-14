@@ -52,31 +52,44 @@ const TIME_RANGES: Record<TimeRange, { label: string; days: number }> = {
 // Helper function to calculate proper Sharpe ratio
 const calculateSharpeRatio = (chartData: any[], totalReturn: number): number => {
   if (!chartData || chartData.length < 2) return 0;
-  
-  // Calculate daily returns
-  const dailyReturns = [];
-  for (let i = 1; i < chartData.length; i++) {
-    const prevValue = chartData[i - 1].value;
-    const currentValue = chartData[i].value;
-    if (prevValue > 0) {
-      const dailyReturn = (currentValue - prevValue) / prevValue;
-      dailyReturns.push(dailyReturn);
+
+  try {
+    // Calculate daily returns with validation
+    const dailyReturns: number[] = [];
+    for (let i = 1; i < chartData.length; i++) {
+      const prevValue = chartData[i - 1]?.value;
+      const currentValue = chartData[i]?.value;
+
+      if (prevValue && currentValue && prevValue > 0 && !isNaN(prevValue) && !isNaN(currentValue)) {
+        const dailyReturn = (currentValue - prevValue) / prevValue;
+        if (!isNaN(dailyReturn) && isFinite(dailyReturn)) {
+          dailyReturns.push(dailyReturn);
+        }
+      }
     }
+
+    if (dailyReturns.length < 2) return 0;
+
+    // Calculate mean and standard deviation of daily returns
+    const meanReturn = dailyReturns.reduce((sum, ret) => sum + ret, 0) / dailyReturns.length;
+    if (!isFinite(meanReturn)) return 0;
+
+    const variance = dailyReturns.reduce((sum, ret) => sum + Math.pow(ret - meanReturn, 2), 0) / dailyReturns.length;
+    if (!isFinite(variance) || variance < 0) return 0;
+
+    const standardDeviation = Math.sqrt(variance);
+    if (standardDeviation === 0 || !isFinite(standardDeviation)) return 0;
+
+    // Sharpe ratio = (mean return - risk-free rate) / standard deviation
+    // Using 0.02% daily risk-free rate (roughly 7% annually)
+    const riskFreeRate = 0.0002;
+    const sharpeRatio = (meanReturn - riskFreeRate) / standardDeviation;
+
+    return isFinite(sharpeRatio) ? sharpeRatio : 0;
+  } catch (error) {
+    console.error('Error calculating Sharpe ratio:', error);
+    return 0;
   }
-  
-  if (dailyReturns.length < 2) return 0;
-  
-  // Calculate mean and standard deviation of daily returns
-  const meanReturn = dailyReturns.reduce((sum, ret) => sum + ret, 0) / dailyReturns.length;
-  const variance = dailyReturns.reduce((sum, ret) => sum + Math.pow(ret - meanReturn, 2), 0) / dailyReturns.length;
-  const standardDeviation = Math.sqrt(variance);
-  
-  // Sharpe ratio = (mean return - risk-free rate) / standard deviation
-  // Using 0.02% daily risk-free rate (roughly 7% annually)
-  const riskFreeRate = 0.0002;
-  
-  if (standardDeviation === 0) return 0;
-  return (meanReturn - riskFreeRate) / standardDeviation;
 };
 
 const METRIC_CONFIG = {
@@ -131,81 +144,137 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('value');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Debounced timeRange to prevent rapid filter changes
+  const [debouncedTimeRange, setDebouncedTimeRange] = useState<TimeRange>('30d');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedTimeRange(timeRange);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [timeRange]);
+
   // Filter data based on selected time range
   const filteredData = useMemo(() => {
-    if (!portfolioData.length) return [];
-    
-    const range = TIME_RANGES[timeRange];
-    if (range.days === 0) return portfolioData;
-    
-    const cutoffDate = new Date(Date.now() - range.days * 24 * 60 * 60 * 1000);
-    return portfolioData.filter(point => 
-      new Date(point.timestamp) >= cutoffDate
-    );
-  }, [portfolioData, timeRange]);
+    if (!portfolioData || !Array.isArray(portfolioData) || portfolioData.length === 0) {
+      return [];
+    }
+
+    try {
+      const range = TIME_RANGES[debouncedTimeRange];
+      if (!range) return portfolioData;
+
+      if (range.days === 0) return portfolioData;
+
+      const cutoffDate = new Date(Date.now() - range.days * 24 * 60 * 60 * 1000);
+
+      return portfolioData.filter(point => {
+        if (!point || !point.timestamp) return false;
+        const pointDate = new Date(point.timestamp);
+        return !isNaN(pointDate.getTime()) && pointDate >= cutoffDate;
+      });
+    } catch (error) {
+      console.error('Error filtering portfolio data:', error);
+      return [];
+    }
+  }, [portfolioData, debouncedTimeRange]);
+
+  // Memoize external data to prevent infinite loops
+  const stableHodlData = useMemo(() => {
+    return hodlData && Array.isArray(hodlData) ? hodlData : [];
+  }, [hodlData]);
+
+  const stableBenchmarkData = useMemo(() => {
+    return benchmarkData || {};
+  }, [benchmarkData]);
 
   // Prepare chart data with all metrics
   const chartData = useMemo(() => {
     if (!filteredData.length) return [];
-    
+
     const initialValue = filteredData[0]?.value || 0;
-    
+
     return filteredData.map((point, index) => {
       const roi = initialValue > 0 ? ((point.value - initialValue) / initialValue) * 100 : 0;
-      const hodlPoint = hodlData?.[index];
-      const hodlROI = hodlPoint && initialValue > 0 ? ((hodlPoint.value - initialValue) / initialValue) * 100 : 0;
-      
+
+      // Safely access hodlData with bounds checking
+      const hodlPoint = stableHodlData[index] || null;
+      const hodlROI = hodlPoint && hodlPoint.value && initialValue > 0
+        ? ((hodlPoint.value - initialValue) / initialValue) * 100
+        : 0;
+
+      // Safely access benchmarkData with bounds checking
+      const ethPoint = stableBenchmarkData?.eth?.[index];
+      const btcPoint = stableBenchmarkData?.btc?.[index];
+      const solPoint = stableBenchmarkData?.sol?.[index];
+
       return {
         timestamp: point.timestamp,
         date: new Date(point.timestamp).toLocaleDateString(),
         time: new Date(point.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        
+
         // Portfolio metrics
-        value: point.value,
+        value: point.value || 0,
         roi: roi,
         apr: point.apr || 0,
         fees: point.fees || 0,
         impermanentLoss: point.impermanentLoss || 0,
-        
+
         // HODL comparison
         hodlValue: hodlPoint?.value || 0,
         hodlROI: hodlROI,
         outperformance: roi - hodlROI,
-        
+
         // Benchmarks (if available)
-        ethPrice: benchmarkData?.eth?.[index]?.value || 0,
-        btcPrice: benchmarkData?.btc?.[index]?.value || 0,
-        solPrice: benchmarkData?.sol?.[index]?.value || 0,
+        ethPrice: ethPoint?.value || 0,
+        btcPrice: btcPoint?.value || 0,
+        solPrice: solPoint?.value || 0,
       };
     });
-  }, [filteredData, hodlData, benchmarkData]);
+  }, [filteredData, stableHodlData, stableBenchmarkData]);
 
   // Calculate performance summary
   const performanceMetrics = useMemo(() => {
-    if (!chartData.length) return null;
-    
-    const latest = chartData[chartData.length - 1];
-    const first = chartData[0];
-    
-    const totalReturn = latest.roi;
-    const hodlReturn = latest.hodlROI;
-    const outperformance = latest.outperformance;
-    
-    const maxValue = Math.max(...chartData.map(d => d.value));
-    const maxROI = Math.max(...chartData.map(d => d.roi));
-    const minROI = Math.min(...chartData.map(d => d.roi));
-    const maxDrawdown = maxROI - minROI;
-    
-    return {
-      totalReturn: totalReturn,
-      hodlReturn: hodlReturn,
-      outperformance: outperformance,
-      maxDrawdown: maxDrawdown,
-      currentValue: latest.value,
-      totalFees: latest.fees,
-      avgAPR: chartData.length > 0 ? chartData.reduce((sum, d) => sum + d.apr, 0) / chartData.length : 0,
-      sharpeRatio: calculateSharpeRatio(chartData, totalReturn), // Proper Sharpe ratio calculation
-    };
+    if (!chartData || chartData.length === 0) return null;
+
+    try {
+      const latest = chartData[chartData.length - 1];
+      const first = chartData[0];
+
+      if (!latest || !first) return null;
+
+      const totalReturn = isNaN(latest.roi) ? 0 : latest.roi;
+      const hodlReturn = isNaN(latest.hodlROI) ? 0 : latest.hodlROI;
+      const outperformance = isNaN(latest.outperformance) ? 0 : latest.outperformance;
+
+      // Safe array operations with validation
+      const values = chartData.map(d => d.value || 0).filter(v => !isNaN(v));
+      const rois = chartData.map(d => d.roi || 0).filter(r => !isNaN(r));
+
+      const maxValue = values.length > 0 ? Math.max(...values) : 0;
+      const maxROI = rois.length > 0 ? Math.max(...rois) : 0;
+      const minROI = rois.length > 0 ? Math.min(...rois) : 0;
+      const maxDrawdown = maxROI - minROI;
+
+      // Safe APR calculation
+      const validAprs = chartData.map(d => d.apr || 0).filter(apr => !isNaN(apr));
+      const avgAPR = validAprs.length > 0 ? validAprs.reduce((sum, d) => sum + d, 0) / validAprs.length : 0;
+
+      return {
+        totalReturn: totalReturn,
+        hodlReturn: hodlReturn,
+        outperformance: outperformance,
+        maxDrawdown: maxDrawdown,
+        currentValue: latest.value || 0,
+        totalFees: latest.fees || 0,
+        avgAPR: avgAPR,
+        sharpeRatio: calculateSharpeRatio(chartData, totalReturn) || 0,
+      };
+    } catch (error) {
+      console.error('Error calculating performance metrics:', error);
+      return null;
+    }
   }, [chartData]);
 
   // Custom tooltip component
@@ -410,7 +479,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
                   fill="url(#portfolioGradient)"
                   name="LP Strategy"
                 />
-                {showComparison && hodlData && (
+                {showComparison && stableHodlData.length > 0 && (
                   <Area
                     type="monotone"
                     dataKey={selectedMetric === 'value' ? 'hodlValue' : 'hodlROI'}
@@ -446,7 +515,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
                   dot={false}
                   name="LP Strategy"
                 />
-                {showComparison && hodlData && (
+                {showComparison && stableHodlData.length > 0 && (
                   <Line
                     type="monotone"
                     dataKey={selectedMetric === 'value' ? 'hodlValue' : 'hodlROI'}
