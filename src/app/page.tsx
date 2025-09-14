@@ -12,6 +12,9 @@ import {
   YieldOptimizer, 
   SmartAlerts 
 } from '../components/analytics';
+import AdvancedFilters from '../components/filters/AdvancedFilters';
+import QuickFilters from '../components/filters/QuickFilters';
+import usePositionFilters from '../hooks/usePositionFilters';
 import { ScanResults, ChainType, LoadingState, DashboardMetrics, ProtocolDistribution } from '../types';
 import { getMockDataByAddress } from '../demo';
 import { historicalDataService } from '../services/historicalData';
@@ -202,6 +205,22 @@ export default function Home() {
   const [hodlHistory, setHodlHistory] = useState<any[]>([]);
   const [marketBenchmarks, setMarketBenchmarks] = useState<any[]>([]);
   const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
+
+  // Get all positions for filtering
+  const allPositions = scanResults 
+    ? Object.values(scanResults.protocols).flatMap(p => p.positions || [])
+    : [];
+
+  // Use position filters hook
+  const {
+    filters,
+    setFilters: setPositionFilters,
+    filteredPositions,
+    availableProtocols,
+    availableChains,
+    filterStats,
+    quickFilters
+  } = usePositionFilters(allPositions);
 
   const calculateMetrics = (results: ScanResults): DashboardMetrics => {
     const positions = Object.values(results.protocols).flatMap(p => p.positions || []);
@@ -462,7 +481,6 @@ export default function Home() {
 
   const metrics = scanResults ? calculateMetrics(scanResults) : null;
   const protocolDistribution = scanResults ? getProtocolDistribution(scanResults) : [];
-  const allPositions = scanResults ? Object.values(scanResults.protocols).flatMap(p => p.positions || []) : [];
 
   return (
     <main className="min-h-screen bg-gray-900">
@@ -526,6 +544,54 @@ export default function Home() {
               <MetricsCards metrics={metrics} loading={isLoading} />
             )}
 
+            {/* Advanced Filters */}
+            {allPositions.length > 0 && (
+              <div className="space-y-6">
+                {/* Quick Filters */}
+                <QuickFilters
+                  onHighValue={quickFilters.showHighValue}
+                  onInRangeOnly={quickFilters.showInRangeOnly}
+                  onHighYield={quickFilters.showHighYield}
+                  onRecent={quickFilters.showRecent}
+                  onWhalePositions={quickFilters.showWhalePositions}
+                  onReset={quickFilters.reset}
+                  activeFiltersCount={Object.values(filters).filter(v => 
+                    Array.isArray(v) ? v.length > 0 : v && v !== 'all'
+                  ).length}
+                />
+
+                {/* Advanced Filters */}
+                <AdvancedFilters
+                  filters={filters}
+                  onFiltersChange={setPositionFilters}
+                  availableProtocols={availableProtocols}
+                  availableChains={availableChains}
+                />
+
+                {/* Filter Results Summary */}
+                {filteredPositions.length !== allPositions.length && (
+                  <div className="tt-card p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-blue-800 dark:text-blue-200 font-medium">
+                          Filtered Results
+                        </span>
+                      </div>
+                      <div className="text-sm text-blue-600 dark:text-blue-300">
+                        {filteredPositions.length} of {allPositions.length} positions shown
+                        {filterStats.totalValue > 0 && (
+                          <span className="ml-2">
+                            • ${filterStats.totalValue.toLocaleString()} total value
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Protocol Distribution */}
             {Object.keys(scanResults.protocols).length > 0 && (
               <div className="tt-card p-6">
@@ -579,13 +645,13 @@ export default function Home() {
                     <HodlComparison 
                       portfolioHistory={portfolioHistory}
                       hodlHistory={hodlHistory}
-                      positions={allPositions}
+                      positions={filteredPositions}
                     />
                   </div>
                   <div className="tt-card p-6">
                     <RiskMetrics 
                       portfolioHistory={portfolioHistory}
-                      positions={allPositions}
+                      positions={filteredPositions}
                     />
                   </div>
                 </div>
@@ -594,13 +660,13 @@ export default function Home() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <div className="tt-card p-6">
                     <YieldOptimizer 
-                      positions={allPositions}
+                      positions={filteredPositions}
                       currentPortfolioValue={scanResults.totalValue}
                     />
                   </div>
                   <div className="tt-card p-6">
                     <SmartAlerts 
-                      positions={allPositions}
+                      positions={filteredPositions}
                       portfolioHistory={portfolioHistory}
                     />
                   </div>
@@ -611,11 +677,21 @@ export default function Home() {
             {/* Positions List */}
             {allPositions.length > 0 && (
               <div className="tt-card p-6">
-                <h2 className="tt-heading-2 mb-6">
-                  All Positions ({allPositions.length})
+                <h2 className="tt-heading-2 mb-6 flex items-center justify-between">
+                  <span>
+                    Positions ({filteredPositions.length}
+                    {filteredPositions.length !== allPositions.length && (
+                      <span className="text-gray-500 dark:text-gray-400">/{allPositions.length}</span>
+                    )})
+                  </span>
+                  {filteredPositions.length > 0 && filterStats.totalValue > 0 && (
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Total: ${filterStats.totalValue.toLocaleString()}
+                    </span>
+                  )}
                 </h2>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                  {allPositions.map((position) => (
+                  {filteredPositions.map((position) => (
                     <PositionCard 
                       key={position.id} 
                       position={position}
@@ -623,6 +699,19 @@ export default function Home() {
                     />
                   ))}
                 </div>
+                {filteredPositions.length === 0 && allPositions.length > 0 && (
+                  <div className="text-center py-8">
+                    <div className="text-gray-500 dark:text-gray-400 text-lg">
+                      No positions match the current filters
+                    </div>
+                    <button
+                      onClick={quickFilters.reset}
+                      className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Clear Filters
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

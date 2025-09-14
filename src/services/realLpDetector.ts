@@ -172,7 +172,7 @@ export class RealLpDetector {
       console.log(`🔍 Position details: token0=${token0}, token1=${token1}, fee=${fee}, tick range=${tickLower}-${tickUpper}`);
       
       // Check if position has liquidity (active position)
-      if (liquidity === 0n) {
+      if (liquidity === BigInt(0)) {
         console.log('❌ Position has zero liquidity - this position has been closed/withdrawn');
         return null; // Properly filter out closed positions
       }
