@@ -229,22 +229,92 @@ export class TrulyFreeScannerService extends BaseService {
       const demoTotalValue = positions.reduce((sum, pos) => sum + pos.value, 0);
       const demoTotalFees = positions.reduce((sum, pos) => sum + pos.feesEarned, 0);
 
+      const uniswapV3Positions = positions.filter(p => p.protocol === 'uniswap-v3');
+      const sushiswapPositions = positions.filter(p => p.protocol === 'sushiswap');
+      const curvePositions = positions.filter(p => p.protocol === 'curve');
+      const balancerPositions = positions.filter(p => p.protocol === 'balancer');
+
+      const protocols: Record<string, any> = {};
+
+      if (uniswapV3Positions.length > 0) {
+        protocols['uniswap-v3'] = {
+          protocol: {
+            id: 'uniswap-v3',
+            name: 'Uniswap V3',
+            chain: 'ethereum',
+            logoUri: '',
+            website: 'https://app.uniswap.org/',
+            supported: true
+          },
+          positions: uniswapV3Positions,
+          totalValue: uniswapV3Positions.reduce((sum, pos) => sum + pos.value, 0),
+          totalPositions: uniswapV3Positions.length,
+          totalFeesEarned: uniswapV3Positions.reduce((sum, pos) => sum + pos.feesEarned, 0),
+          avgApr: 15.5,
+          isLoading: false
+        };
+      }
+
+      if (sushiswapPositions.length > 0) {
+        protocols['sushiswap'] = {
+          protocol: {
+            id: 'sushiswap',
+            name: 'SushiSwap',
+            chain: 'ethereum',
+            logoUri: '',
+            website: 'https://www.sushi.com/',
+            supported: true
+          },
+          positions: sushiswapPositions,
+          totalValue: sushiswapPositions.reduce((sum, pos) => sum + pos.value, 0),
+          totalPositions: sushiswapPositions.length,
+          totalFeesEarned: sushiswapPositions.reduce((sum, pos) => sum + pos.feesEarned, 0),
+          avgApr: 12.8,
+          isLoading: false
+        };
+      }
+
+      if (curvePositions.length > 0) {
+        protocols['curve'] = {
+          protocol: {
+            id: 'curve',
+            name: 'Curve Finance',
+            chain: 'ethereum',
+            logoUri: '',
+            website: 'https://curve.fi/',
+            supported: true
+          },
+          positions: curvePositions,
+          totalValue: curvePositions.reduce((sum, pos) => sum + pos.value, 0),
+          totalPositions: curvePositions.length,
+          totalFeesEarned: curvePositions.reduce((sum, pos) => sum + pos.feesEarned, 0),
+          avgApr: 10.2,
+          isLoading: false
+        };
+      }
+
+      if (balancerPositions.length > 0) {
+        protocols['balancer'] = {
+          protocol: {
+            id: 'balancer',
+            name: 'Balancer',
+            chain: 'ethereum',
+            logoUri: '',
+            website: 'https://balancer.fi/',
+            supported: true
+          },
+          positions: balancerPositions,
+          totalValue: balancerPositions.reduce((sum, pos) => sum + pos.value, 0),
+          totalPositions: balancerPositions.length,
+          totalFeesEarned: balancerPositions.reduce((sum, pos) => sum + pos.feesEarned, 0),
+          avgApr: 8.7,
+          isLoading: false
+        };
+      }
+
       return {
         positions,
-        protocols: {
-          'Uniswap V3': {
-            positions: positions.filter(p => p.protocol === 'uniswap-v3'),
-            totalValue: positions.filter(p => p.protocol === 'uniswap-v3').reduce((sum, pos) => sum + pos.value, 0),
-            totalFeesEarned: positions.filter(p => p.protocol === 'uniswap-v3').reduce((sum, pos) => sum + pos.feesEarned, 0),
-            avgApr: 15.5
-          },
-          'SushiSwap': {
-            positions: positions.filter(p => p.protocol === 'sushiswap'),
-            totalValue: positions.filter(p => p.protocol === 'sushiswap').reduce((sum, pos) => sum + pos.value, 0),
-            totalFeesEarned: positions.filter(p => p.protocol === 'sushiswap').reduce((sum, pos) => sum + pos.feesEarned, 0),
-            avgApr: 12.8
-          }
-        },
+        protocols,
         totalPositions: positions.length,
         totalValue: demoTotalValue,
         totalFeesEarned: demoTotalFees
@@ -254,11 +324,21 @@ export class TrulyFreeScannerService extends BaseService {
     return {
       positions,
       protocols: positions.length > 0 ? {
-        'Uniswap V3': {
+        'uniswap-v3': {
+          protocol: {
+            id: 'uniswap-v3',
+            name: 'Uniswap V3',
+            chain: 'ethereum',
+            logoUri: '',
+            website: 'https://app.uniswap.org/',
+            supported: true
+          },
           positions,
           totalValue,
+          totalPositions: positions.length,
           totalFeesEarned,
-          avgApr: 15.5
+          avgApr: 15.5,
+          isLoading: false
         }
       } : {},
       totalPositions: positions.length,
