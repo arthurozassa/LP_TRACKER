@@ -32,16 +32,16 @@ export async function GET(request: NextRequest) {
 
     // Determine which scanner to use based on API keys and preferences
     const hasRealApiKeys = process.env.THE_GRAPH_API_KEY && process.env.THE_GRAPH_API_KEY !== 'your_the_graph_api_key_here';
-    const useFreeApis = process.env.USE_FREE_APIS === 'true' || !hasRealApiKeys;
-    const useTrulyFree = process.env.USE_TRULY_FREE === 'true' || (!hasRealApiKeys && useFreeApis);
-    
+    const useFreeApis = process.env.USE_FREE_APIS === 'true';
+    const useTrulyFree = process.env.USE_TRULY_FREE === 'true';
+
     let scanner;
-    if (hasRealApiKeys && !useFreeApis) {
+    if (useTrulyFree) {
+      scanner = getTrulyFreeScanner();
+      console.log('🆓🆓 Using TRULY FREE scanner with The Graph API...');
+    } else if (hasRealApiKeys && !useFreeApis && !useTrulyFree) {
       scanner = getRealProductionScanner();
       console.log('🔍 Using REAL production scanner with PAID APIs...');
-    } else if (useTrulyFree) {
-      scanner = getTrulyFreeScanner();
-      console.log('🆓🆓 Using TRULY FREE scanner (no API keys needed)...');
     } else if (useFreeApis) {
       scanner = getFreeApiScanner();
       console.log('🆓 Using FREE API scanner (requires free API keys)...');

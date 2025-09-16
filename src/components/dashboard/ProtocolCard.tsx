@@ -70,6 +70,13 @@ export const ProtocolCard: React.FC<ProtocolCardProps> = ({
   isExpanded = false,
 }) => {
   const { protocol, positions, totalValue, totalPositions, totalFeesEarned, avgApr, isLoading } = protocolData;
+
+  // Check if positions contain demo/generated data
+  const isDemoData = positions.some(position =>
+    position.id?.includes('demo-') ||
+    position.id?.includes('generated-') ||
+    position.createdAt && new Date(position.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000) // Very recent positions might be demo
+  );
   
   // Get protocol emoji and color
   const emoji = PROTOCOL_EMOJIS[protocol.id] || '🔗';
@@ -123,13 +130,24 @@ export const ProtocolCard: React.FC<ProtocolCardProps> = ({
             </div>
           </div>
           
-          {/* Active indicator */}
-          {totalPositions > 0 && (
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-xs font-medium tt-status-positive">Active</span>
-            </div>
-          )}
+          {/* Status indicators */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Demo data indicator */}
+            {isDemoData && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
+                <div className="h-1.5 w-1.5 rounded-full bg-amber-400"></div>
+                <span className="text-xs font-medium text-amber-300">Demo</span>
+              </div>
+            )}
+
+            {/* Active indicator */}
+            {totalPositions > 0 && !isDemoData && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 border border-green-500/30">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
+                <span className="text-xs font-medium tt-status-positive">Real</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Metrics Grid */}

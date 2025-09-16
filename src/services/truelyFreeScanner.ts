@@ -141,19 +141,16 @@ export class TrulyFreeScannerService extends BaseService {
       try {
         console.log(`🔄 Trying free RPC: ${rpcUrl}`);
         
-        // Try to get REAL Uniswap V3 positions first
-        const realPositions = await this.realLpDetector.getUniswapV3Positions(address, rpcUrl);
-        console.log(`🔍 realLpDetector returned ${realPositions.length} positions`);
-        if (realPositions.length > 0) {
-          positions.push(...realPositions);
-          console.log(`✅ Found ${realPositions.length} REAL Uniswap V3 positions!`);
+        // Try to get ALL REAL LP positions across all chains and protocols
+        const allRealPositions = await this.realLpDetector.getAllRealPositions(address);
+        console.log(`🔍 realLpDetector returned ${allRealPositions.length} positions across all chains`);
+
+        if (allRealPositions.length > 0) {
+          positions.push(...allRealPositions);
+          console.log(`✅ Found ${allRealPositions.length} REAL LP positions!`);
           console.log(`🔍 positions array now has ${positions.length} items`);
-          break; // Found real positions, no need to continue
+          break; // Found real positions, no need to continue with other RPCs
         }
-        
-        // Also check for other LP positions
-        const otherPositions = await this.realLpDetector.getOtherLpPositions(address, rpcUrl);
-        positions.push(...otherPositions);
         
         // Get ETH balance for fallback
         const ethBalanceResponse = await fetch(rpcUrl, {
@@ -225,6 +222,7 @@ export class TrulyFreeScannerService extends BaseService {
     // If no real positions found, generate realistic demo positions for valid addresses
     if (positions.length === 0 && this.isValidAddress(address)) {
       console.log(`🎭 No real positions found for ${address}, generating realistic demo data...`);
+      console.log(`ℹ️  Note: This wallet may have LP positions we cannot detect with free APIs`);
       positions = this.generateRealisticDemoPositions(address);
       const demoTotalValue = positions.reduce((sum, pos) => sum + pos.value, 0);
       const demoTotalFees = positions.reduce((sum, pos) => sum + pos.feesEarned, 0);
@@ -321,26 +319,17 @@ export class TrulyFreeScannerService extends BaseService {
       };
     }
 
+    // When we have real positions, group them by protocol correctly
+    const protocols: Record<string, any> = {};
+    if (positions.length > 0) {
+      // Use the realLpDetector's grouping method for proper protocol classification
+      const groupedProtocols = this.realLpDetector.groupPositionsByProtocol(positions);
+      Object.assign(protocols, groupedProtocols);
+    }
+
     return {
       positions,
-      protocols: positions.length > 0 ? {
-        'uniswap-v3': {
-          protocol: {
-            id: 'uniswap-v3',
-            name: 'Uniswap V3',
-            chain: 'ethereum',
-            logoUri: '',
-            website: 'https://app.uniswap.org/',
-            supported: true
-          },
-          positions,
-          totalValue,
-          totalPositions: positions.length,
-          totalFeesEarned,
-          avgApr: 15.5,
-          isLoading: false
-        }
-      } : {},
+      protocols,
       totalPositions: positions.length,
       totalValue,
       totalFeesEarned
@@ -379,7 +368,7 @@ export class TrulyFreeScannerService extends BaseService {
       const apr = 8 + (positionSeed % 25); // 8-33% APR
 
       positions.push({
-        id: `${protocol}-${i}-${address.slice(-6)}`,
+        id: `demo-${protocol}-${i}-${address.slice(-6)}`,
         protocol,
         chain: 'ethereum',
         pool: pair,
